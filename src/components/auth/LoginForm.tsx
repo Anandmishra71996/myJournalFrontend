@@ -85,9 +85,7 @@ export default function LoginForm({ onSignupClick }: LoginFormProps) {
       const user = useAuthStore.getState().user;
       if (user?.isProfileCompleted === false) {
         router.push('/profile');
-      } else {
-        router.push('/dashboard');
-      }
+      } 
     } catch (error: any) {
       toast.error(error.message || 'An error occurred. Please try again.');
       console.error('Login error:', error);

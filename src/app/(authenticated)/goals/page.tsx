@@ -87,6 +87,7 @@ export default function GoalsPage() {
     const canCreateGoal = (type: string) => {
         if (!stats) return true;
         const typeStats = stats[type as keyof GoalStats];
+        if (!typeStats) return true;
         const maxForType = MAX_GOALS[type as keyof typeof MAX_GOALS];
         return typeStats.active < maxForType;
     };

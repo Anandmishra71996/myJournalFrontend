@@ -98,12 +98,8 @@ export default function SignupForm({ onLoginClick }: SignupFormProps) {
         onLoginClick();
       }
 
-      const user = useAuthStore.getState().user;
-      if (user?.isProfileCompleted === false) {
         router.push('/profile');
-      } else {
-        router.push('/dashboard');
-      }
+      
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Registration failed');
     } finally {
