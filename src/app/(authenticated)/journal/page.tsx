@@ -1,0 +1,276 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { journalService } from '@/services/journal.service';
+import DayView from '@/components/journal/DayView';
+import WeeklyView from '@/components/journal/WeeklyView';
+import MonthlyView from '@/components/journal/MonthlyView';
+
+type ViewType = 'day' | 'weekly' | 'monthly';
+
+export default function JournalPage() {
+  const [viewType, setViewType] = useState<ViewType>('day');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [journalId, setJournalId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [journalData, setJournalData] = useState({
+    whatHappened: '',
+    wins: [''],
+    challenges: [''],
+    gratitude: [''],
+    lessonsLearned: '',
+    moodScore: 5,
+    energyLevel: 5,
+  });
+
+  const [planData, setPlanData] = useState({
+    tasks: [{ title: '', priority: 'medium' as 'high' | 'medium' | 'low' }],
+    intentions: [''],
+    focusAreas: [''],
+  });
+
+  useEffect(() => {
+    if (viewType === 'day') {
+      loadJournalByDate(selectedDate);
+    }
+  }, [selectedDate, viewType]);
+
+  const loadJournalByDate = async (date: Date) => {
+    setLoading(true);
+    try {
+      const response = await journalService.getJournalByDate(date);
+      if (response.success && response.data) {
+        const journal = response.data;
+        setJournalId(journal._id);
+        setJournalData({
+          whatHappened: journal.content?.whatHappened || '',
+          wins: journal.content?.wins?.length ? journal.content.wins : [''],
+          challenges: journal.content?.challenges?.length ? journal.content.challenges : [''],
+          gratitude: journal.content?.gratitude?.length ? journal.content.gratitude : [''],
+          lessonsLearned: journal.content?.lessonsLearned || '',
+          moodScore: journal.mood?.score || 5,
+          energyLevel: journal.mood?.energy || 5,
+        });
+        setPlanData({
+          tasks: journal.plan?.tasks?.length ? journal.plan.tasks : [{ title: '', priority: 'medium' }],
+          intentions: journal.plan?.intentions?.length ? journal.plan.intentions : [''],
+          focusAreas: journal.plan?.focusAreas?.length ? journal.plan.focusAreas : [''],
+        });
+      } else {
+        // Reset form for new entry
+        setJournalId(null);
+        setJournalData({
+          whatHappened: '',
+          wins: [''],
+          challenges: [''],
+          gratitude: [''],
+          lessonsLearned: '',
+          moodScore: 5,
+          energyLevel: 5,
+        });
+        setPlanData({
+          tasks: [{ title: '', priority: 'medium' }],
+          intentions: [''],
+          focusAreas: [''],
+        });
+      }
+    } catch (error) {
+      console.error('Error loading journal:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveJournal = async (isComplete = false) => {
+    setSaving(true);
+    try {
+      const data = {
+        date: selectedDate,
+        content: {
+          whatHappened: journalData.whatHappened,
+          wins: journalData.wins.filter(w => w.trim()),
+          challenges: journalData.challenges.filter(c => c.trim()),
+          gratitude: journalData.gratitude.filter(g => g.trim()),
+          lessonsLearned: journalData.lessonsLearned,
+        },
+        mood: {
+          score: journalData.moodScore,
+          energy: journalData.energyLevel,
+        },
+        plan: {
+          tasks: planData.tasks.filter(t => t.title.trim()),
+          intentions: planData.intentions.filter(i => i.trim()),
+          focusAreas: planData.focusAreas.filter(f => f.trim()),
+        },
+      };
+
+      let response;
+      if (journalId) {
+        response = await journalService.updateJournal(journalId, data);
+      } else {
+        response = await journalService.createJournal(data);
+        if (response.success && response.data) {
+          setJournalId(response.data._id);
+        }
+      }
+
+      if (response.success) {
+        alert(isComplete ? 'Journal saved successfully!' : 'Draft saved!');
+      }
+    } catch (error: any) {
+      console.error('Error saving journal:', error);
+      alert(error.response?.data?.error || 'Failed to save journal');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const changeDate = (days: number) => {
+    const newDate = new Date(selectedDate);
+    if (viewType === 'day') {
+      newDate.setDate(newDate.getDate() + days);
+    } else if (viewType === 'weekly') {
+      newDate.setDate(newDate.getDate() + (days * 7));
+    } else if (viewType === 'monthly') {
+      newDate.setMonth(newDate.getMonth() + days);
+    }
+    setSelectedDate(newDate);
+  };
+
+  const getDateDisplay = () => {
+    if (viewType === 'day') {
+      return formatDate(selectedDate);
+    } else if (viewType === 'weekly') {
+      const weekStart = new Date(selectedDate);
+      const day = weekStart.getDay();
+      weekStart.setDate(weekStart.getDate() - day);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    } else {
+      return selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+  };
+
+  const addArrayItem = (field: string, isJournal = true) => {
+    if (isJournal) {
+      setJournalData(prev => ({
+        ...prev,
+        [field]: [...(prev[field as keyof typeof prev] as string[]), '']
+      }));
+    } else {
+      setPlanData(prev => ({
+        ...prev,
+        [field]: [...(prev[field as keyof typeof prev] as any[]), field === 'tasks' ? { title: '', priority: 'medium' } : '']
+      }));
+    }
+  };
+
+  const updateArrayItem = (field: string, index: number, value: any, isJournal = true) => {
+    if (isJournal) {
+      setJournalData(prev => ({
+        ...prev,
+        [field]: (prev[field as keyof typeof prev] as string[]).map((item, i) => i === index ? value : item)
+      }));
+    } else {
+      setPlanData(prev => ({
+        ...prev,
+        [field]: (prev[field as keyof typeof prev] as any[]).map((item, i) => i === index ? value : item)
+      }));
+    }
+  };
+
+  if (loading && viewType === 'day') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-text-secondary">Loading journal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+      {/* Header with Date Navigation */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10 w-full">
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 py-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              My Journal
+            </h1>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              {/* View Type Selector */}
+              <select
+                value={viewType}
+                onChange={(e) => setViewType(e.target.value as ViewType)}
+                className="flex-1 min-w-[120px] px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white font-medium text-sm"
+              >
+                <option value="day">📅 Day View</option>
+                <option value="weekly">📊 Weekly View</option>
+                <option value="monthly">📆 Monthly View</option>
+              </select>
+              <button
+                onClick={() => changeDate(-1)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={viewType === 'day' ? 'Previous day' : viewType === 'weekly' ? 'Previous week' : 'Previous month'}
+              >
+                <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+              </button>
+              <div className="text-center min-w-[120px] flex-1">
+                <p className="text-xs sm:text-sm text-text-secondary font-medium truncate">
+                  {getDateDisplay()}
+                </p>
+              </div>
+              <button
+                onClick={() => changeDate(1)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={viewType === 'day' ? 'Next day' : viewType === 'weekly' ? 'Next week' : 'Next month'}
+              >
+                <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+              </button>
+              <button
+                onClick={() => setSelectedDate(new Date())}
+                className="px-3 py-2 text-xs sm:text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              >
+                Today
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-4 py-6">
+        {viewType === 'day' && (
+          <DayView
+            journalData={journalData}
+            planData={planData}
+            saving={saving}
+            setJournalData={setJournalData}
+            setPlanData={setPlanData}
+            saveJournal={saveJournal}
+            addArrayItem={addArrayItem}
+            updateArrayItem={updateArrayItem}
+          />
+        )}
+
+        {viewType === 'weekly' && <WeeklyView selectedDate={selectedDate} />}
+
+        {viewType === 'monthly' && <MonthlyView selectedDate={selectedDate} />}
+      </main>
+    </div>
+  );
+}
