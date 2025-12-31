@@ -26,12 +26,12 @@ export default function CreateGoalPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
             <div className="max-w-3xl mx-auto">
                 <div className="mb-8">
                     <button
                         onClick={() => router.back()}
-                        className="text-indigo-600 hover:text-indigo-700 font-medium mb-4 flex items-center gap-2"
+                        className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium mb-4 flex items-center gap-2"
                     >
                         <svg
                             className="w-5 h-5"
@@ -48,16 +48,16 @@ export default function CreateGoalPage() {
                         </svg>
                         Back to Goals
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                         Create New Goal
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-400">
                         Set a clear goal and define how you'll track it through
                         journaling
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
                     <GoalForm
                         onSubmit={handleSubmit}
                         submitLabel="Create Goal"

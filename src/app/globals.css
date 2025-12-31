@@ -74,21 +74,47 @@
 }
 
 /* Dark Theme */
-[data-theme="dark"] {
+.dark {
+  /* Primary Colors - Lighter for dark mode */
   --color-primary: #818CF8;
   --color-primary-light: #A5B4FC;
   --color-primary-dark: #6366F1;
   
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-surface-elevated: #334155;
+  /* Secondary Colors */
+  --color-secondary: #34D399;
+  --color-secondary-light: #6EE7B7;
+  --color-secondary-dark: #10B981;
   
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #CBD5E1;
-  --color-text-tertiary: #94A3B8;
+  /* Accent Colors */
+  --color-accent: #FBBF24;
+  --color-accent-light: #FCD34D;
   
-  --color-border: #334155;
-  --color-divider: #1E293B;
+  /* Neutral Colors - Inverted */
+  --color-background: #111827;
+  --color-surface: #1F2937;
+  --color-surface-elevated: #374151;
+  
+  /* Text Colors - Inverted */
+  --color-text-primary: #F9FAFB;
+  --color-text-secondary: #D1D5DB;
+  --color-text-tertiary: #9CA3AF;
+  
+  /* Border & Divider */
+  --color-border: #374151;
+  --color-divider: #1F2937;
+  
+  /* Status Colors - Adjusted for dark mode */
+  --color-success: #34D399;
+  --color-error: #F87171;
+  --color-warning: #FBBF24;
+  --color-info: #60A5FA;
+  
+  /* Mood Colors - Adjusted */
+  --mood-excellent: #34D399;
+  --mood-good: #6EE7B7;
+  --mood-neutral: #FCD34D;
+  --mood-low: #FDBA74;
+  --mood-difficult: #F87171;
 }
 
 /* Ocean Theme */
@@ -138,6 +164,58 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-tertiary);
+}
+
+/* ===== FORM ELEMENTS DARK MODE ===== */
+
+/* Input fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+textarea,
+select {
+  @apply dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  @apply dark:ring-indigo-500 dark:border-indigo-500;
+}
+
+/* Disabled state */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  @apply dark:bg-gray-900 dark:text-gray-600 dark:cursor-not-allowed;
+}
+
+/* Labels */
+label {
+  @apply dark:text-gray-300;
+}
+
+/* Checkbox and radio */
+input[type="checkbox"],
+input[type="radio"] {
+  @apply dark:bg-gray-800 dark:border-gray-600;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  @apply dark:bg-indigo-600 dark:border-indigo-600;
 }
 
 /* ===== UTILITY CLASSES ===== */

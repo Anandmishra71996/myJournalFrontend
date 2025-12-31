@@ -102,11 +102,11 @@ export default function GoalsPage() {
         return (
             <div
                 key={goal._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
             >
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                             {goal.title}
                         </h3>
                         <div className="flex gap-2 flex-wrap">
@@ -128,19 +128,19 @@ export default function GoalsPage() {
                 </div>
 
                 {goal.why && (
-                    <p className="text-sm text-gray-600 mb-4">{goal.why}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{goal.why}</p>
                 )}
 
                 {goal.trackingMethods.length > 0 && (
                     <div className="mb-3">
-                        <p className="text-xs font-medium text-gray-500 mb-1">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                             Tracking via:
                         </p>
                         <div className="flex flex-wrap gap-1">
                             {goal.trackingMethods.map((method) => (
                                 <span
                                     key={method}
-                                    className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded"
+                                    className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
                                 >
                                     {method}
                                 </span>
@@ -211,8 +211,8 @@ export default function GoalsPage() {
             <div key={type} className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-900">{label}</h2>
-                        <p className="text-sm text-gray-500">
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{label}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             {activeCount} of {maxForType} active goals
                         </p>
                     </div>
@@ -226,11 +226,11 @@ export default function GoalsPage() {
                 </div>
 
                 {typeGoals.length === 0 ? (
-                    <div className="bg-gray-50 rounded-xl p-8 text-center">
-                        <p className="text-gray-500 mb-2">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 text-center">
+                        <p className="text-gray-500 dark:text-gray-400 mb-2">
                             No {label.toLowerCase()} yet
                         </p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-400 dark:text-gray-500">
                             Create your first {label.toLowerCase()} to get started
                         </p>
                     </div>
@@ -245,19 +245,19 @@ export default function GoalsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 p-8">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-8"></div>
                         <div className="space-y-8">
                             {[1, 2, 3].map((i) => (
                                 <div key={i}>
-                                    <div className="h-6 bg-gray-200 rounded w-1/6 mb-4"></div>
+                                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/6 mb-4"></div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {[1, 2].map((j) => (
                                             <div
                                                 key={j}
-                                                className="h-48 bg-gray-200 rounded-xl"
+                                                className="h-48 bg-gray-200 dark:bg-gray-700 rounded-xl"
                                             ></div>
                                         ))}
                                     </div>
@@ -271,11 +271,11 @@ export default function GoalsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">My Goals</h1>
-                    <p className="text-gray-600">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">My Goals</h1>
+                    <p className="text-gray-600 dark:text-gray-400">
                         Track your weekly, monthly, and yearly goals
                     </p>
                 </div>
