@@ -106,9 +106,9 @@ export default function GoalForm({
         field: 'trackingMethods' | 'journalSignals',
         value: string
     ) => {
-        const currentArray = formData[field];
+        const currentArray:any = formData[field];
         const newArray = currentArray.includes(value)
-            ? currentArray.filter((item) => item !== value)
+            ? currentArray.filter((item:any) => item !== value)
             : [...currentArray, value];
 
         setFormData({ ...formData, [field]: newArray });
