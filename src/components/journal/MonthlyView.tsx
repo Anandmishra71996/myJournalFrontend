@@ -152,8 +152,8 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        <p className="mt-4 text-text-secondary">Loading monthly view...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400 mx-auto"></div>
+        <p className="mt-4 text-gray-600 dark:text-gray-400">Loading monthly view...</p>
       </div>
     );
   }
@@ -161,32 +161,32 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
   return (
     <div className="space-y-6 pb-8">
       {/* Month Summary */}
-      <section className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-text-primary mb-2">📅 {getMonthName()}</h2>
-          <p className="text-text-secondary">Your monthly journal overview</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">📅 {getMonthName()}</h2>
+          <p className="text-gray-600 dark:text-gray-400">Your monthly journal overview</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4">
-            <p className="text-sm text-indigo-700 font-medium">Completion Rate</p>
-            <p className="text-3xl font-bold text-indigo-900">{getCompletionRate()}%</p>
-            <p className="text-xs text-indigo-600 mt-1">{monthSummary.totalEntries} days logged</p>
+          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4">
+            <p className="text-sm text-indigo-700 dark:text-indigo-400 font-medium">Completion Rate</p>
+            <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-300">{getCompletionRate()}%</p>
+            <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">{monthSummary.totalEntries} days logged</p>
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4">
-            <p className="text-sm text-yellow-700 font-medium">Avg Mood</p>
-            <p className="text-3xl font-bold text-yellow-900">{monthSummary.avgMood}/10</p>
-            <p className="text-xs text-yellow-600 mt-1">This month</p>
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 rounded-xl p-4">
+            <p className="text-sm text-yellow-700 dark:text-yellow-400 font-medium">Avg Mood</p>
+            <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-300">{monthSummary.avgMood}/10</p>
+            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">This month</p>
           </div>
-          <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-4">
-            <p className="text-sm text-pink-700 font-medium">Avg Energy</p>
-            <p className="text-3xl font-bold text-pink-900">{monthSummary.avgEnergy}/10</p>
-            <p className="text-xs text-pink-600 mt-1">This month</p>
+          <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl p-4">
+            <p className="text-sm text-pink-700 dark:text-pink-400 font-medium">Avg Energy</p>
+            <p className="text-3xl font-bold text-pink-900 dark:text-pink-300">{monthSummary.avgEnergy}/10</p>
+            <p className="text-xs text-pink-600 dark:text-pink-400 mt-1">This month</p>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
-            <p className="text-sm text-green-700 font-medium">Best Day</p>
-            <p className="text-2xl font-bold text-green-900">{monthSummary.bestDay.date || 'N/A'}</p>
-            <p className="text-xs text-green-600 mt-1">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4">
+            <p className="text-sm text-green-700 dark:text-green-400 font-medium">Best Day</p>
+            <p className="text-2xl font-bold text-green-900 dark:text-green-300">{monthSummary.bestDay.date || 'N/A'}</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
               {monthSummary.bestDay.score > 0 ? `Mood: ${monthSummary.bestDay.score}/10` : 'No data'}
             </p>
           </div>
@@ -194,13 +194,13 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
       </section>
 
       {/* Calendar View */}
-      <section className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-text-primary mb-6">📊 Calendar Heatmap</h2>
+      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">📊 Calendar Heatmap</h2>
         
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 gap-2 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center text-xs font-semibold text-text-secondary py-2">
+            <div key={day} className="text-center text-xs font-semibold text-gray-600 dark:text-gray-400 py-2">
               {day}
             </div>
           ))}
@@ -216,7 +216,7 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
                   ? 'bg-transparent'
                   : entry.hasEntry
                   ? `${getMoodColor(entry.moodScore)} hover:shadow-md cursor-pointer`
-                  : 'bg-gray-100 border border-gray-200 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
               title={
                 entry.hasEntry && entry.moodScore
@@ -229,7 +229,7 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
               {entry.day > 0 && (
                 <span
                   className={`text-sm font-semibold ${
-                    entry.hasEntry ? 'text-white' : 'text-gray-600'
+                    entry.hasEntry ? 'text-white' : 'text-gray-600 dark:text-gray-300'
                   }`}
                 >
                   {entry.day}
@@ -241,51 +241,51 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
 
         {/* Legend */}
         <div className="mt-6 flex items-center justify-center gap-4 text-sm">
-          <span className="text-text-secondary">Mood:</span>
+          <span className="text-gray-600 dark:text-gray-400">Mood:</span>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-gray-100 border border-gray-200"></div>
-            <span className="text-xs text-text-tertiary">No entry</span>
+            <div className="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600"></div>
+            <span className="text-xs text-gray-500 dark:text-gray-500">No entry</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-400"></div>
-            <span className="text-xs text-text-tertiary">Low</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500">Low</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-yellow-400"></div>
-            <span className="text-xs text-text-tertiary">Fair</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500">Fair</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-blue-400"></div>
-            <span className="text-xs text-text-tertiary">Good</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500">Good</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-400"></div>
-            <span className="text-xs text-text-tertiary">Excellent</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500">Excellent</span>
           </div>
         </div>
       </section>
 
       {/* Monthly Insights */}
       {monthSummary.totalEntries > 0 && (
-        <section className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-          <h2 className="text-2xl font-bold text-text-primary mb-4">💡 Monthly Insights</h2>
-          <div className="space-y-3 text-text-secondary">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">💡 Monthly Insights</h2>
+          <div className="space-y-3 text-gray-600 dark:text-gray-400">
             <p>
-              • You've journaled <span className="font-semibold text-indigo-600">{monthSummary.totalEntries} days</span> this month
+              • You've journaled <span className="font-semibold text-indigo-600 dark:text-indigo-400">{monthSummary.totalEntries} days</span> this month
             </p>
             <p>
-              • Your average mood was <span className="font-semibold text-yellow-600">{monthSummary.avgMood}/10</span>
+              • Your average mood was <span className="font-semibold text-yellow-600 dark:text-yellow-400">{monthSummary.avgMood}/10</span>
             </p>
             <p>
-              • Your average energy level was <span className="font-semibold text-pink-600">{monthSummary.avgEnergy}/10</span>
+              • Your average energy level was <span className="font-semibold text-pink-600 dark:text-pink-400">{monthSummary.avgEnergy}/10</span>
             </p>
             {getCompletionRate() >= 80 && (
-              <p className="text-green-600 font-semibold">
+              <p className="text-green-600 dark:text-green-400 font-semibold">
                 🎉 Awesome! You're maintaining a consistent journaling habit!
               </p>
             )}
             {getCompletionRate() < 50 && (
-              <p className="text-orange-600 font-semibold">
+              <p className="text-orange-600 dark:text-orange-400 font-semibold">
                 💪 Try to journal more consistently to build a better habit!
               </p>
             )}

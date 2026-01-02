@@ -14,7 +14,14 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, refreshProfile } = useAuthStore();
+
+  // Refresh profile on mount if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshProfile();
+    }
+  }, [isAuthenticated, refreshProfile]);
 
   useEffect(() => {
     if (!isAuthenticated) {

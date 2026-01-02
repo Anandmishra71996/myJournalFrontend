@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import {
   validateSignupForm,
   getPasswordStrength,
@@ -28,6 +29,8 @@ export default function SignupForm({ onLoginClick }: SignupFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { register } = useAuthStore();
   const router = useRouter();
@@ -184,21 +187,35 @@ export default function SignupForm({ onLoginClick }: SignupFormProps) {
           <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
             Password
           </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            onBlur={() => handleBlur('password')}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all bg-gray-50 focus:bg-white ${
-              errors.password && touched.password
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-gray-200 focus:border-indigo-500'
-            }`}
-            placeholder="••••••••"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={() => handleBlur('password')}
+              className={`w-full px-4 py-3 pr-12 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all bg-gray-50 focus:bg-white ${
+                errors.password && touched.password
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-gray-200 focus:border-indigo-500'
+              }`}
+              placeholder="••••••••"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
 
           {/* Password Strength Indicator */}
           {formData.password && (
@@ -230,21 +247,35 @@ export default function SignupForm({ onLoginClick }: SignupFormProps) {
           <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
             Confirm Password
           </label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            onBlur={() => handleBlur('confirmPassword')}
-            className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all bg-gray-50 focus:bg-white ${
-              errors.confirmPassword && touched.confirmPassword
-                ? 'border-red-500 focus:border-red-500'
-                : 'border-gray-200 focus:border-indigo-500'
-            }`}
-            placeholder="••••••••"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              onBlur={() => handleBlur('confirmPassword')}
+              className={`w-full px-4 py-3 pr-12 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all bg-gray-50 focus:bg-white ${
+                errors.confirmPassword && touched.confirmPassword
+                  ? 'border-red-500 focus:border-red-500'
+                  : 'border-gray-200 focus:border-indigo-500'
+              }`}
+              placeholder="••••••••"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? (
+                <EyeSlashIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
           {errors.confirmPassword && touched.confirmPassword && (
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}

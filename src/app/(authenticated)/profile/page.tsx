@@ -1,10 +1,15 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import ProfileForm from '@/components/profile/ProfileForm';
 
 export default function ProfilePage() {
-    const { user } = useAuthStore();
+    const { user, refreshProfile } = useAuthStore();
+
+    useEffect(() => {
+        refreshProfile();
+    }, [refreshProfile]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">

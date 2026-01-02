@@ -18,6 +18,7 @@ interface AuthState {
     register: (email: string, password: string, name: string) => Promise<void>;
     logout: () => void;
     setUser: (user: User) => void;
+    refreshProfile: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -54,6 +55,16 @@ export const useAuthStore = create<AuthState>()(
 
             setUser: (user: User) => {
                 set({ user });
+            },
+
+            refreshProfile: async () => {
+                try {
+                    const response = await api.get('/users/profile');
+                    const user = response.data.data;
+                    set({ user });
+                } catch (error) {
+                    console.error('Failed to refresh profile:', error);
+                }
             },
         }),
         {
