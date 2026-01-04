@@ -20,6 +20,7 @@ interface DayViewProps {
   journalData: JournalData;
   planData: PlanData;
   saving: boolean;
+  journalId: string | null;
   setJournalData: React.Dispatch<React.SetStateAction<JournalData>>;
   setPlanData: React.Dispatch<React.SetStateAction<PlanData>>;
   saveJournal: (isComplete: boolean) => Promise<void>;
@@ -31,6 +32,7 @@ export default function DayView({
   journalData,
   planData,
   saving,
+  journalId,
   setJournalData,
   setPlanData,
   saveJournal,
@@ -281,14 +283,14 @@ export default function DayView({
           disabled={saving}
           className="w-full xs:w-auto px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'Saving...' : 'Save Draft'}
+          {saving ? 'Saving...' : journalId ? 'Update Draft' : 'Save Draft'}
         </button>
         <button 
           onClick={() => saveJournal(true)}
           disabled={saving}
           className="w-full xs:w-auto px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {saving ? 'Saving...' : 'Save & Complete'}
+          {saving ? 'Saving...' : journalId ? 'Update & Complete' : 'Save & Complete'}
         </button>
       </div>
     </>

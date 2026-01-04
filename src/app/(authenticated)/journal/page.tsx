@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { journalService } from '@/services/journal.service';
+import { toastService } from '@/services/toast.service';
 import DayView from '@/components/journal/DayView';
 import WeeklyView from '@/components/journal/WeeklyView';
 import MonthlyView from '@/components/journal/MonthlyView';
@@ -117,11 +118,13 @@ export default function JournalPage() {
       }
 
       if (response.success) {
-        alert(isComplete ? 'Journal saved successfully!' : 'Draft saved!');
+        const message = isComplete ? 'Journal saved successfully!' : 'Draft saved!';
+        toastService.success(message);
       }
     } catch (error: any) {
       console.error('Error saving journal:', error);
-      alert(error.response?.data?.error || 'Failed to save journal');
+      const errorMessage = error.response?.data?.error || 'Failed to save journal';
+      toastService.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -150,17 +153,25 @@ export default function JournalPage() {
 
   const getDateDisplay = () => {
     if (viewType === 'day') {
-      return formatDate(selectedDate);
+      const date = selectedDate;
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
     } else if (viewType === 'weekly') {
       const weekStart = new Date(selectedDate);
-      const day = weekStart.getDay();
-      weekStart.setDate(weekStart.getDate() - day);
+      const dayOfWeek = weekStart.getDay();
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
       return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     } else {
       return selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
+  };
+
+  const getFullDateDisplay = () => {
+    return formatDate(selectedDate);
   };
 
   const addArrayItem = (field: string, isJournal = true) => {
@@ -230,7 +241,7 @@ export default function JournalPage() {
                 <ChevronLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
               <div className="text-center min-w-[120px] flex-1">
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium truncate">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium" title={viewType === 'day' ? getFullDateDisplay() : undefined}>
                   {getDateDisplay()}
                 </p>
               </div>
@@ -259,6 +270,7 @@ export default function JournalPage() {
             journalData={journalData}
             planData={planData}
             saving={saving}
+            journalId={journalId}
             setJournalData={setJournalData}
             setPlanData={setPlanData}
             saveJournal={saveJournal}

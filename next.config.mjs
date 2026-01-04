@@ -14,6 +14,9 @@ const pwaConfig = withPWA({
   disable: false,
   register: true,
   skipWaiting: true,
+  clientsClaim: true,
+  scope: "/",
+  sw: "sw.js",
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,
@@ -22,6 +25,7 @@ const pwaConfig = withPWA({
         cacheName: "offlineCache",
         expiration: {
           maxEntries: 200,
+          maxAgeSeconds: 24 * 60 * 60, // 24 hours
         },
       },
     },
