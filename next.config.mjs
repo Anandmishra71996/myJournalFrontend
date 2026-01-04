@@ -17,6 +17,7 @@ const pwaConfig = withPWA({
   clientsClaim: true,
   scope: "/",
   sw: "sw.js",
+  customWorkerDir: "worker",
   runtimeCaching: [
     {
       urlPattern: /^https?.*/,

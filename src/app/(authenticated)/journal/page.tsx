@@ -7,6 +7,7 @@ import { toastService } from '@/services/toast.service';
 import DayView from '@/components/journal/DayView';
 import WeeklyView from '@/components/journal/WeeklyView';
 import MonthlyView from '@/components/journal/MonthlyView';
+import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 
 type ViewType = 'day' | 'weekly' | 'monthly';
 
@@ -16,6 +17,7 @@ export default function JournalPage() {
   const [journalId, setJournalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [journalData, setJournalData] = useState({
     whatHappened: '',
     wins: [''],
@@ -114,6 +116,17 @@ export default function JournalPage() {
         response = await journalService.createJournal(data);
         if (response.success && response.data) {
           setJournalId(response.data._id);
+          
+          // Check if this is the user's first journal entry
+          const hasSeenPrompt = localStorage.getItem('pushNotificationPromptDismissed');
+          const isFirstJournal = !hasSeenPrompt;
+          
+          if (isFirstJournal && isComplete) {
+            // Show push notification prompt after a short delay
+            setTimeout(() => {
+              setShowPushPrompt(true);
+            }, 1000);
+          }
         }
       }
 
@@ -283,6 +296,11 @@ export default function JournalPage() {
 
         {viewType === 'monthly' && <MonthlyView selectedDate={selectedDate} />}
       </main>
+
+      {/* Push Notification Prompt */}
+      {showPushPrompt && (
+        <PushNotificationPrompt onClose={() => setShowPushPrompt(false)} />
+      )}
     </div>
   );
 }

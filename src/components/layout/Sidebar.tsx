@@ -21,7 +21,7 @@ interface SidebarProps {
 export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
 
   const navigation = [
     { name: 'Journal', href: '/journal', icon: BookOpenIcon },
@@ -91,6 +91,9 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
           <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3" />
           Logout
         </button>
+        {user?.email && (
+          <p className='text-xs  text-gray-500 dark:text-gray-400 px-4' style={{marginTop:'-10px',marginLeft:'15px'}}>({user.email})</p>
+        )}
       </div>
     </div>
   );

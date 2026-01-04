@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Sidebar from './Sidebar';
+import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
   const { user, isAuthenticated, refreshProfile } = useAuthStore();
 
   // Refresh profile on mount if authenticated
@@ -37,11 +39,49 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     }
   }, [user, router, pathname]);
 
+  // Check if we should show push notification prompt after profile is loaded
+  useEffect(() => {
+    const checkPushNotificationPrompt = () => {
+      // Only proceed if user is authenticated and profile is completed
+      if (!isAuthenticated || !user || user.isProfileCompleted !== true) {
+        return;
+      }
+
+      // Check if browser supports notifications
+      if (typeof window === 'undefined' || !('Notification' in window)) {
+        return;
+      }
+
+      // Check if user has already responded to the prompt
+      const hasSeenPrompt = localStorage.getItem('pushNotificationPromptDismissed');
+      if (hasSeenPrompt) {
+        return;
+      }
+
+      // Check if permission is already granted or denied
+      if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+        return;
+      }
+
+      // Show the prompt after a short delay
+      setTimeout(() => {
+        setShowPushPrompt(true);
+      }, 1500);
+    };
+
+    checkPushNotificationPrompt();
+  }, [user, isAuthenticated]);
+
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [router]);
 
+
+      {/* Push Notification Prompt */}
+      {showPushPrompt && (
+        <PushNotificationPrompt onClose={() => setShowPushPrompt(false)} />
+      )}
   if (!isAuthenticated) {
     return null;
   }

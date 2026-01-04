@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import ProfileForm from '@/components/profile/ProfileForm';
+import PushNotificationSettings from '@/components/PushNotificationSettings';
 
 export default function ProfilePage() {
     const { user, refreshProfile } = useAuthStore();
@@ -65,6 +66,18 @@ export default function ProfilePage() {
                     </div>
 
                     <ProfileForm />
+                </section>
+
+                {/* Push Notification Settings */}
+                <section className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Notifications</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Manage your push notification preferences
+                        </p>
+                    </div>
+
+                    <PushNotificationSettings />
                 </section>
 
                 {/* Info Section */}
