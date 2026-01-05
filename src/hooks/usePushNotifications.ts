@@ -32,6 +32,13 @@ export function usePushNotifications() {
                 'PushManager' in window &&
                 'Notification' in window;
 
+            console.log('Push notification support check:', {
+                serviceWorker: 'serviceWorker' in navigator,
+                pushManager: 'PushManager' in window,
+                notification: 'Notification' in window,
+                isSupported,
+            });
+
             setState((prev) => ({
                 ...prev,
                 isSupported,
@@ -39,12 +46,25 @@ export function usePushNotifications() {
             }));
 
             if (isSupported) {
-                // Fetch VAPID public key
+                // Fetch VAPID public key with retry
                 try {
+                    console.log('Fetching VAPID public key...');
                     const response = await api.get('/push/public-key');
-                    setVapidPublicKey(response.data.data.publicKey);
+                    const publicKey = response.data.data.publicKey;
+                    console.log('VAPID public key received:', publicKey ? `${publicKey.substring(0, 20)}...` : 'null');
+                    setVapidPublicKey(publicKey);
                 } catch (error) {
                     console.error('Failed to fetch VAPID public key:', error);
+                    // Retry after 2 seconds
+                    setTimeout(async () => {
+                        try {
+                            const response = await api.get('/push/public-key');
+                            setVapidPublicKey(response.data.data.publicKey);
+                            console.log('VAPID public key fetched on retry');
+                        } catch (retryError) {
+                            console.error('Failed to fetch VAPID public key on retry:', retryError);
+                        }
+                    }, 2000);
                 }
 
                 // Check if already subscribed
@@ -105,8 +125,30 @@ export function usePushNotifications() {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         try {
+            // Wait for service worker to be ready FIRST (critical for push to work)
+            console.log('Waiting for service worker...');
+            const registration = await navigator.serviceWorker.ready;
+            console.log('Service worker ready:', {
+                active: registration.active?.state,
+                installing: registration.installing?.state,
+                waiting: registration.waiting?.state,
+                scope: registration.scope,
+            });
+
+            // Verify service worker is actually active
+            if (!registration.active) {
+                throw new Error('Service worker is not active. Please refresh the page.');
+            }
+
+            // Verify push manager is available
+            if (!registration.pushManager) {
+                throw new Error('Push manager not available in service worker');
+            }
+
             // Request notification permission
+            console.log('Requesting notification permission...');
             const permission = await Notification.requestPermission();
+            console.log('Notification permission:', permission);
 
             if (permission !== 'granted') {
                 setState((prev) => ({
@@ -118,27 +160,41 @@ export function usePushNotifications() {
                 return false;
             }
 
-            // Get service worker registration
-            const registration = await navigator.serviceWorker.ready;
-
             // Check if already subscribed
             let subscription = await registration.pushManager.getSubscription();
+            console.log('Existing subscription:', subscription);
 
-            if (!subscription) {
-                // Subscribe to push notifications
-                const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-                subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: applicationServerKey as BufferSource,
-                });
+            if (subscription) {
+                console.log('Already subscribed, unsubscribing first...');
+                await subscription.unsubscribe();
+                subscription = null;
             }
+
+            // Convert VAPID key to Uint8Array
+            const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+            console.log('VAPID key converted, length:', applicationServerKey.length);
+
+            // Subscribe to push notifications with explicit options
+            console.log('Subscribing to push manager...');
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: applicationServerKey as BufferSource,
+            });
+            console.log('Subscription created:', subscription);
 
             // Send subscription to backend
             const subscriptionData = subscription.toJSON();
+            console.log('Sending subscription to backend:', {
+                endpoint: subscriptionData.endpoint,
+                hasKeys: !!subscriptionData.keys,
+            });
+
             await api.post('/push/subscribe', {
                 endpoint: subscriptionData.endpoint,
                 keys: subscriptionData.keys,
             });
+
+            console.log('Subscription saved to backend successfully');
 
             setState((prev) => ({
                 ...prev,
@@ -150,6 +206,9 @@ export function usePushNotifications() {
             return true;
         } catch (error: any) {
             console.error('Error subscribing to push notifications:', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
 
             let errorMessage = 'Failed to subscribe to push notifications';
 
@@ -157,6 +216,10 @@ export function usePushNotifications() {
                 errorMessage = 'Notification permission was denied';
             } else if (error.name === 'NotSupportedError') {
                 errorMessage = 'Push notifications are not supported';
+            } else if (error.name === 'AbortError') {
+                errorMessage = 'Subscription was aborted. Please try again.';
+            } else if (error.message) {
+                errorMessage = `Error: ${error.message}`;
             }
 
             setState((prev) => ({

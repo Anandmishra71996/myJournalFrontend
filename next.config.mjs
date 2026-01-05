@@ -7,6 +7,11 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  env: {
+    // Make API URL available in service worker
+    NEXT_PUBLIC_API_URL:
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
+  },
 };
 
 const pwaConfig = withPWA({

@@ -86,6 +86,11 @@ self.addEventListener("notificationclose", (event) => {
   // You can track notification dismissals here if needed
 });
 
+// Backend API URL - injected at build time from environment variable
+// On Vercel, set NEXT_PUBLIC_API_URL in environment variables
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+
 // Handle push subscription changes
 self.addEventListener("pushsubscriptionchange", (event) => {
   console.log("Push subscription changed:", event);
@@ -100,7 +105,7 @@ self.addEventListener("pushsubscriptionchange", (event) => {
       })
       .then((newSubscription) => {
         // Send the new subscription to your backend
-        return fetch("/api/push/subscribe", {
+        return fetch(`${API_BASE_URL}/push/subscribe`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
