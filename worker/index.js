@@ -3,10 +3,7 @@
 
 // Listen for push events
 self.addEventListener("push", (event) => {
-  console.log("Push notification received:", event);
-
   if (!event.data) {
-    console.warn("Push event has no data");
     return;
   }
 
@@ -46,14 +43,12 @@ self.addEventListener("push", (event) => {
 
     event.waitUntil(self.registration.showNotification(title, options));
   } catch (error) {
-    console.error("Error handling push event:", error);
+    // Silent fail
   }
 });
 
 // Listen for notification click events
 self.addEventListener("notificationclick", (event) => {
-  console.log("Notification clicked:", event);
-
   event.notification.close();
 
   const urlToOpen = event.notification.data?.url || "/";
@@ -80,10 +75,9 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// Listen for notification close events (optional)
+// Listen for notification close events
 self.addEventListener("notificationclose", (event) => {
-  console.log("Notification closed:", event);
-  // You can track notification dismissals here if needed
+  // Track notification dismissals if needed
 });
 
 // Backend API URL - injected at build time from environment variable
@@ -93,8 +87,6 @@ const API_BASE_URL =
 
 // Handle push subscription changes
 self.addEventListener("pushsubscriptionchange", (event) => {
-  console.log("Push subscription changed:", event);
-
   event.waitUntil(
     // Try to resubscribe
     self.registration.pushManager
@@ -114,7 +106,7 @@ self.addEventListener("pushsubscriptionchange", (event) => {
         });
       })
       .catch((error) => {
-        console.error("Failed to resubscribe:", error);
+        // Silent fail
       })
   );
 });

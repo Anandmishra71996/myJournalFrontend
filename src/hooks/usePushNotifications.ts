@@ -32,13 +32,6 @@ export function usePushNotifications() {
                 'PushManager' in window &&
                 'Notification' in window;
 
-            console.log('Push notification support check:', {
-                serviceWorker: 'serviceWorker' in navigator,
-                pushManager: 'PushManager' in window,
-                notification: 'Notification' in window,
-                isSupported,
-            });
-
             setState((prev) => ({
                 ...prev,
                 isSupported,
@@ -48,21 +41,17 @@ export function usePushNotifications() {
             if (isSupported) {
                 // Fetch VAPID public key with retry
                 try {
-                    console.log('Fetching VAPID public key...');
                     const response = await api.get('/push/public-key');
                     const publicKey = response.data.data.publicKey;
-                    console.log('VAPID public key received:', publicKey ? `${publicKey.substring(0, 20)}...` : 'null');
                     setVapidPublicKey(publicKey);
                 } catch (error) {
-                    console.error('Failed to fetch VAPID public key:', error);
                     // Retry after 2 seconds
                     setTimeout(async () => {
                         try {
                             const response = await api.get('/push/public-key');
                             setVapidPublicKey(response.data.data.publicKey);
-                            console.log('VAPID public key fetched on retry');
                         } catch (retryError) {
-                            console.error('Failed to fetch VAPID public key on retry:', retryError);
+                            // Silent fail on retry
                         }
                     }, 2000);
                 }
@@ -82,7 +71,6 @@ export function usePushNotifications() {
             const registration = await navigator.serviceWorker.getRegistration('/');
 
             if (!registration) {
-                console.warn('No service worker registration found');
                 setState((prev) => ({
                     ...prev,
                     isSubscribed: false,
@@ -90,15 +78,8 @@ export function usePushNotifications() {
                 return;
             }
 
-            console.log('Service worker registration found:', {
-                active: registration.active?.state,
-                waiting: registration.waiting?.state,
-                installing: registration.installing?.state,
-            });
-
             // If SW is waiting, try to activate it
             if (registration.waiting) {
-                console.log('Service worker is waiting, attempting to activate...');
                 registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             }
 
@@ -110,14 +91,13 @@ export function usePushNotifications() {
                     isSubscribed: !!subscription,
                 }));
             } else {
-                console.warn('Service worker is not active yet');
                 setState((prev) => ({
                     ...prev,
                     isSubscribed: false,
                 }));
             }
         } catch (error) {
-            console.error('Error checking subscription:', error);
+            // Silent fail
         }
     }, []);
 
@@ -157,9 +137,6 @@ export function usePushNotifications() {
 
         try {
             // Wait for service worker to be ready with timeout
-            console.log('Waiting for service worker...');
-
-            // Create a timeout promise
             const timeoutPromise = new Promise<never>((_, reject) => {
                 setTimeout(() => {
                     reject(new Error('Service worker registration timeout. The service worker is not becoming active.'));
@@ -172,13 +149,6 @@ export function usePushNotifications() {
                 timeoutPromise
             ]);
 
-            console.log('Service worker ready:', {
-                active: registration.active?.state,
-                installing: registration.installing?.state,
-                waiting: registration.waiting?.state,
-                scope: registration.scope,
-            });
-
             // Verify service worker is actually active
             if (!registration.active) {
                 throw new Error('Service worker is not active. Please refresh the page and try again.');
@@ -190,9 +160,7 @@ export function usePushNotifications() {
             }
 
             // Request notification permission
-            console.log('Requesting notification permission...');
             const permission = await Notification.requestPermission();
-            console.log('Notification permission:', permission);
 
             if (permission !== 'granted') {
                 setState((prev) => ({
@@ -206,39 +174,28 @@ export function usePushNotifications() {
 
             // Check if already subscribed
             let subscription = await registration.pushManager.getSubscription();
-            console.log('Existing subscription:', subscription);
 
             if (subscription) {
-                console.log('Already subscribed, unsubscribing first...');
                 await subscription.unsubscribe();
                 subscription = null;
             }
 
             // Convert VAPID key to Uint8Array
             const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-            console.log('VAPID key converted, length:', applicationServerKey.length);
 
             // Subscribe to push notifications with explicit options
-            console.log('Subscribing to push manager...');
             subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: applicationServerKey as BufferSource,
             });
-            console.log('Subscription created:', subscription);
 
             // Send subscription to backend
             const subscriptionData = subscription.toJSON();
-            console.log('Sending subscription to backend:', {
-                endpoint: subscriptionData.endpoint,
-                hasKeys: !!subscriptionData.keys,
-            });
 
             await api.post('/push/subscribe', {
                 endpoint: subscriptionData.endpoint,
                 keys: subscriptionData.keys,
             });
-
-            console.log('Subscription saved to backend successfully');
 
             setState((prev) => ({
                 ...prev,
@@ -249,11 +206,6 @@ export function usePushNotifications() {
 
             return true;
         } catch (error: any) {
-            console.error('Error subscribing to push notifications:', error);
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
-
             let errorMessage = 'Failed to subscribe to push notifications';
 
             if (error.name === 'NotAllowedError') {
@@ -306,7 +258,6 @@ export function usePushNotifications() {
 
             return true;
         } catch (error) {
-            console.error('Error unsubscribing from push notifications:', error);
             setState((prev) => ({
                 ...prev,
                 isLoading: false,
@@ -326,7 +277,6 @@ export function usePushNotifications() {
             });
             return true;
         } catch (error) {
-            console.error('Error sending test notification:', error);
             setState((prev) => ({
                 ...prev,
                 error: 'Failed to send test notification',
