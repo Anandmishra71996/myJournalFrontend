@@ -1,5 +1,5 @@
 // Custom Service Worker code for Push Notifications
-// This file extends the auto-generated service worker from next-pwa
+// This file is automatically merged with Workbox by @ducanh2912/next-pwa
 
 // Listen for push events
 self.addEventListener("push", (event) => {

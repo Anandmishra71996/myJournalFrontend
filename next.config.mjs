@@ -1,4 +1,4 @@
-import withPWA from "next-pwa";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -14,28 +14,18 @@ const nextConfig = {
   },
 };
 
-const pwaConfig = withPWA({
+const withPWA = withPWAInit({
   dest: "public",
   disable: false,
   register: true,
   skipWaiting: true,
-  clientsClaim: true,
-  scope: "/",
-  sw: "sw.js",
-  customWorkerDir: "worker",
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offlineCache",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60, // 24 hours
-        },
-      },
-    },
-  ],
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: true,
+  workboxOptions: {
+    disableDevLogs: true,
+  },
 });
 
-export default pwaConfig(nextConfig);
+export default withPWA(nextConfig);

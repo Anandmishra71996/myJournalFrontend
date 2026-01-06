@@ -78,13 +78,44 @@ export function usePushNotifications() {
     // Check if user is already subscribed
     const checkSubscription = useCallback(async () => {
         try {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
+            // First check if service worker is even registered
+            const registration = await navigator.serviceWorker.getRegistration('/');
 
-            setState((prev) => ({
-                ...prev,
-                isSubscribed: !!subscription,
-            }));
+            if (!registration) {
+                console.warn('No service worker registration found');
+                setState((prev) => ({
+                    ...prev,
+                    isSubscribed: false,
+                }));
+                return;
+            }
+
+            console.log('Service worker registration found:', {
+                active: registration.active?.state,
+                waiting: registration.waiting?.state,
+                installing: registration.installing?.state,
+            });
+
+            // If SW is waiting, try to activate it
+            if (registration.waiting) {
+                console.log('Service worker is waiting, attempting to activate...');
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+
+            // Check subscription only if SW is active
+            if (registration.active) {
+                const subscription = await registration.pushManager.getSubscription();
+                setState((prev) => ({
+                    ...prev,
+                    isSubscribed: !!subscription,
+                }));
+            } else {
+                console.warn('Service worker is not active yet');
+                setState((prev) => ({
+                    ...prev,
+                    isSubscribed: false,
+                }));
+            }
         } catch (error) {
             console.error('Error checking subscription:', error);
         }
@@ -125,9 +156,22 @@ export function usePushNotifications() {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         try {
-            // Wait for service worker to be ready FIRST (critical for push to work)
+            // Wait for service worker to be ready with timeout
             console.log('Waiting for service worker...');
-            const registration = await navigator.serviceWorker.ready;
+
+            // Create a timeout promise
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error('Service worker registration timeout. The service worker is not becoming active.'));
+                }, 10000); // 10 second timeout
+            });
+
+            // Race between service worker ready and timeout
+            const registration = await Promise.race([
+                navigator.serviceWorker.ready,
+                timeoutPromise
+            ]);
+
             console.log('Service worker ready:', {
                 active: registration.active?.state,
                 installing: registration.installing?.state,
@@ -137,7 +181,7 @@ export function usePushNotifications() {
 
             // Verify service worker is actually active
             if (!registration.active) {
-                throw new Error('Service worker is not active. Please refresh the page.');
+                throw new Error('Service worker is not active. Please refresh the page and try again.');
             }
 
             // Verify push manager is available
