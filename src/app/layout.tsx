@@ -5,7 +5,6 @@ import { Toaster } from "sonner";
 import InstallButton from "@/components/InstallButton";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import PWARegister from "@/components/PWARegister";
-import PWADebug from "@/components/PWADebug";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,7 +58,6 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <PWARegister />
-          <PWADebug />
           {children}
           <InstallButton />
           <Toaster position="top-right" richColors />
