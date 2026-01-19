@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import { Bars3Icon } from '@heroicons/react/24/outline';
-import Sidebar from './Sidebar';
-import PushNotificationPrompt from '@/components/PushNotificationPrompt';
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import Sidebar from "./Sidebar";
+import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -27,15 +27,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/');
+      router.push("/");
     }
   }, [isAuthenticated, router]);
 
   // Redirect to profile if not completed (except if already on profile page)
   useEffect(() => {
     console.log("Checking profile completion:", user);
-    if (user && user.isProfileCompleted === false && pathname !== '/profile') {
-      router.push('/profile');
+    if (user && user.isProfileCompleted === false && pathname !== "/profile") {
+      router.push("/profile");
     }
   }, [user, router, pathname]);
 
@@ -48,18 +48,23 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       }
 
       // Check if browser supports notifications
-      if (typeof window === 'undefined' || !('Notification' in window)) {
+      if (typeof window === "undefined" || !("Notification" in window)) {
         return;
       }
 
       // Check if user has already responded to the prompt
-      const hasSeenPrompt = localStorage.getItem('pushNotificationPromptDismissed');
+      const hasSeenPrompt = localStorage.getItem(
+        "pushNotificationPromptDismissed"
+      );
       if (hasSeenPrompt) {
         return;
       }
 
       // Check if permission is already granted or denied
-      if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+      if (
+        Notification.permission === "granted" ||
+        Notification.permission === "denied"
+      ) {
         return;
       }
 
@@ -77,11 +82,6 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     setIsMobileMenuOpen(false);
   }, [router]);
 
-
-      {/* Push Notification Prompt */}
-      {showPushPrompt && (
-        <PushNotificationPrompt onClose={() => setShowPushPrompt(false)} />
-      )}
   if (!isAuthenticated) {
     return null;
   }
@@ -106,14 +106,19 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       )}
 
       {/* Sidebar */}
-      <Sidebar 
-        isMobileMenuOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+      <Sidebar
+        isMobileMenuOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto w-full">
         {children}
+
+        {/* Push Notification Prompt */}
+        {showPushPrompt && (
+          <PushNotificationPrompt onClose={() => setShowPushPrompt(false)} />
+        )}
       </main>
     </div>
   );
