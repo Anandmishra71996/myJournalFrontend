@@ -1,10 +1,10 @@
 /**
- * Get the Monday of the week for a given date
+ * Get the Sunday of the week for a given date
  */
 export function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day; // If Sunday (0), go back 6 days, else go to Monday
+    const diff = -day; // Get Sunday (0)
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
     return d;

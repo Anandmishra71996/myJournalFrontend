@@ -10,7 +10,8 @@ import {
   UserCircleIcon, 
   ArrowRightOnRectangleIcon,
   XMarkIcon,
-  SparklesIcon
+  SparklesIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
 
   const navigation = [
     { name: 'Journal', href: '/journal', icon: BookOpenIcon },
+    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
     { name: 'Goals', href: '/goals', icon: ChartBarIcon },
     { name: 'Insights', href: '/insights', icon: SparklesIcon },
     { name: 'Profile', href: '/profile', icon: UserCircleIcon },

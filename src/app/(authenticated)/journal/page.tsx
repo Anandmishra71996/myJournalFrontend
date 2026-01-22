@@ -20,18 +20,8 @@ export default function JournalPage() {
   const [showPushPrompt, setShowPushPrompt] = useState(false);
   const [journalData, setJournalData] = useState({
     whatHappened: '',
-    wins: [''],
-    challenges: [''],
-    gratitude: [''],
-    lessonsLearned: '',
     moodScore: 5,
-    energyLevel: 5,
-  });
-
-  const [planData, setPlanData] = useState({
-    tasks: [{ title: '', priority: 'medium' as 'high' | 'medium' | 'low' }],
-    intentions: [''],
-    focusAreas: [''],
+    keyHighlights: '',
   });
 
   useEffect(() => {
@@ -49,34 +39,16 @@ export default function JournalPage() {
         setJournalId(journal._id);
         setJournalData({
           whatHappened: journal.content?.whatHappened || '',
-          wins: journal.content?.wins?.length ? journal.content.wins : [''],
-          challenges: journal.content?.challenges?.length ? journal.content.challenges : [''],
-          gratitude: journal.content?.gratitude?.length ? journal.content.gratitude : [''],
-          lessonsLearned: journal.content?.lessonsLearned || '',
           moodScore: journal.mood?.score || 5,
-          energyLevel: journal.mood?.energy || 5,
-        });
-        setPlanData({
-          tasks: journal.plan?.tasks?.length ? journal.plan.tasks : [{ title: '', priority: 'medium' }],
-          intentions: journal.plan?.intentions?.length ? journal.plan.intentions : [''],
-          focusAreas: journal.plan?.focusAreas?.length ? journal.plan.focusAreas : [''],
+          keyHighlights: journal.content?.keyHighlights || '',
         });
       } else {
         // Reset form for new entry
         setJournalId(null);
         setJournalData({
           whatHappened: '',
-          wins: [''],
-          challenges: [''],
-          gratitude: [''],
-          lessonsLearned: '',
           moodScore: 5,
-          energyLevel: 5,
-        });
-        setPlanData({
-          tasks: [{ title: '', priority: 'medium' }],
-          intentions: [''],
-          focusAreas: [''],
+          keyHighlights: '',
         });
       }
     } catch (error) {
@@ -93,19 +65,10 @@ export default function JournalPage() {
         date: selectedDate,
         content: {
           whatHappened: journalData.whatHappened,
-          wins: journalData.wins.filter(w => w.trim()),
-          challenges: journalData.challenges.filter(c => c.trim()),
-          gratitude: journalData.gratitude.filter(g => g.trim()),
-          lessonsLearned: journalData.lessonsLearned,
+          keyHighlights: journalData.keyHighlights,
         },
         mood: {
           score: journalData.moodScore,
-          energy: journalData.energyLevel,
-        },
-        plan: {
-          tasks: planData.tasks.filter(t => t.title.trim()),
-          intentions: planData.intentions.filter(i => i.trim()),
-          focusAreas: planData.focusAreas.filter(f => f.trim()),
         },
       };
 
@@ -187,34 +150,6 @@ export default function JournalPage() {
     return formatDate(selectedDate);
   };
 
-  const addArrayItem = (field: string, isJournal = true) => {
-    if (isJournal) {
-      setJournalData(prev => ({
-        ...prev,
-        [field]: [...(prev[field as keyof typeof prev] as string[]), '']
-      }));
-    } else {
-      setPlanData(prev => ({
-        ...prev,
-        [field]: [...(prev[field as keyof typeof prev] as any[]), field === 'tasks' ? { title: '', priority: 'medium' } : '']
-      }));
-    }
-  };
-
-  const updateArrayItem = (field: string, index: number, value: any, isJournal = true) => {
-    if (isJournal) {
-      setJournalData(prev => ({
-        ...prev,
-        [field]: (prev[field as keyof typeof prev] as string[]).map((item, i) => i === index ? value : item)
-      }));
-    } else {
-      setPlanData(prev => ({
-        ...prev,
-        [field]: (prev[field as keyof typeof prev] as any[]).map((item, i) => i === index ? value : item)
-      }));
-    }
-  };
-
   if (loading && viewType === 'day') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
@@ -232,7 +167,7 @@ export default function JournalPage() {
       <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 w-full">
         <div className="max-w-5xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl text-center font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               My Journal
             </h1>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -281,14 +216,10 @@ export default function JournalPage() {
         {viewType === 'day' && (
           <DayView
             journalData={journalData}
-            planData={planData}
             saving={saving}
             journalId={journalId}
             setJournalData={setJournalData}
-            setPlanData={setPlanData}
             saveJournal={saveJournal}
-            addArrayItem={addArrayItem}
-            updateArrayItem={updateArrayItem}
           />
         )}
 

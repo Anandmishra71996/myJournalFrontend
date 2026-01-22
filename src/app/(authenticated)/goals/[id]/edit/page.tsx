@@ -50,7 +50,7 @@ export default function EditGoalPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
                 <div className="max-w-3xl mx-auto">
                     <div className="animate-pulse">
                         <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
@@ -73,7 +73,7 @@ export default function EditGoalPage() {
 
     if (!goal) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center py-16">
                         <p className="text-gray-500 dark:text-gray-400">Goal not found</p>
@@ -90,7 +90,7 @@ export default function EditGoalPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
             <div className="max-w-3xl mx-auto">
                 <div className="mb-8">
                     <button
@@ -112,7 +112,7 @@ export default function EditGoalPage() {
                         </svg>
                         Back to Goals
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
                         Edit Goal
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400">
