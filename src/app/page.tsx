@@ -106,10 +106,10 @@ export default function Home() {
                 }`}
               >
                 <blockquote className="text-center">
-                  <p className="text-2xl md:text-4xl font-serif text-text-primary mb-8 leading-relaxed">
+                  <p className="text-2xl md:text-4xl font-serif text-gray-900 mb-8 leading-relaxed">
                     "{quotes[currentQuote].text}"
                   </p>
-                  <cite className="text-lg md:text-xl text-text-secondary font-medium not-italic">
+                  <cite className="text-lg md:text-xl text-gray-600 font-medium not-italic">
                     — {quotes[currentQuote].author}
                   </cite>
                 </blockquote>
@@ -122,7 +122,7 @@ export default function Home() {
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                   aria-label="Previous quote"
                 >
-                  <ChevronLeftIcon className="w-6 h-6 text-text-secondary" />
+                  <ChevronLeftIcon className="w-6 h-6 text-gray-500" />
                 </button>
 
                 {/* Dots Indicator */}
@@ -146,7 +146,7 @@ export default function Home() {
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                   aria-label="Next quote"
                 >
-                  <ChevronRightIcon className="w-6 h-6 text-text-secondary" />
+                  <ChevronRightIcon className="w-6 h-6 text-gray-500" />
                 </button>
               </div>
             </div>
@@ -154,10 +154,10 @@ export default function Home() {
 
           {/* CTA Section */}
           <div className="mt-16 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
               Begin Your Journey
             </h2>
-            <p className="text-lg md:text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Document your thoughts, track your growth, and discover insights with our AI-powered journaling companion.
             </p>
             <Link
@@ -174,7 +174,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="p-6 text-center text-text-secondary">
+      <footer className="p-6 text-center text-gray-600">
         <p>© 2025 Journal. Reflect, Grow, Thrive.</p>
       </footer>
     </main>
