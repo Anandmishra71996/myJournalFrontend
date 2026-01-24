@@ -68,12 +68,18 @@ export interface GoalFormData {
     trackingMethods: TrackingMethod[];
     journalSignals: JournalSignal[];
     successDefinition?: string;
+    isRepetitive?: boolean;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface Goal extends GoalFormData {
     _id: string;
     userId: string;
     status: GoalStatus;
+    isRepetitive: boolean;
+    startDate?: string;
+    endDate?: string;
     createdAt: string;
     updatedAt: string;
 }

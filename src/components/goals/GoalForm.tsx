@@ -30,6 +30,9 @@ export default function GoalForm({
         trackingMethods: initialData?.trackingMethods || [],
         journalSignals: initialData?.journalSignals || [],
         successDefinition: initialData?.successDefinition || '',
+        isRepetitive: initialData?.isRepetitive !== undefined ? initialData.isRepetitive : true,
+        startDate: initialData?.startDate || '',
+        endDate: initialData?.endDate || '',
     });
 
     const [loading, setLoading] = useState(false);
@@ -63,6 +66,18 @@ export default function GoalForm({
         if (formData.journalSignals.length > 3) {
             newErrors.journalSignals =
                 'You can select a maximum of 3 journal signals';
+        }
+
+        if (!formData.isRepetitive) {
+            if (!formData.startDate) {
+                newErrors.startDate = 'Start date is required for non-repetitive goals';
+            }
+            if (!formData.endDate) {
+                newErrors.endDate = 'End date is required for non-repetitive goals';
+            }
+            if (formData.startDate && formData.endDate && formData.startDate >= formData.endDate) {
+                newErrors.endDate = 'End date must be after start date';
+            }
         }
 
         setErrors(newErrors);
@@ -323,6 +338,66 @@ export default function GoalForm({
                     Help yourself visualize the outcome
                 </p>
             </div>
+
+            {/* Repetitive Checkbox */}
+            <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={formData.isRepetitive}
+                        onChange={(e) =>
+                            setFormData({ ...formData, isRepetitive: e.target.checked })
+                        }
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                        This is a repetitive goal
+                    </span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1 ml-6">
+                    Uncheck if this goal has specific start and end dates
+                </p>
+            </div>
+
+            {/* Date Boundary Fields */}
+            {!formData.isRepetitive && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Start Date *
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.startDate}
+                            onChange={(e) =>
+                                setFormData({ ...formData, startDate: e.target.value })
+                            }
+                            onBlur={() => handleBlur('startDate')}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        {touched.startDate && errors.startDate && (
+                            <p className="text-sm text-red-600 mt-1">{errors.startDate}</p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            End Date *
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.endDate}
+                            onChange={(e) =>
+                                setFormData({ ...formData, endDate: e.target.value })
+                            }
+                            onBlur={() => handleBlur('endDate')}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        {touched.endDate && errors.endDate && (
+                            <p className="text-sm text-red-600 mt-1">{errors.endDate}</p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Submit Button */}
             <div className="flex gap-4 pt-4">

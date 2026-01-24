@@ -9,6 +9,8 @@ import {
     MAX_GOALS,
     GoalStats,
 } from '@/constants/goal.constants';
+import { Sparkles } from 'lucide-react';
+import GoalGeneratorChat from '@/components/goals/GoalGeneratorChat';
 
 export default function GoalsPage() {
     const router = useRouter();
@@ -16,6 +18,7 @@ export default function GoalsPage() {
     const [stats, setStats] = useState<GoalStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [showChatDrawer, setShowChatDrawer] = useState(false);
 
     useEffect(() => {
         fetchGoals();
@@ -129,6 +132,15 @@ export default function GoalsPage() {
 
                 {goal.why && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{goal.why}</p>
+                )}
+
+                {/* Date Boundary Display */}
+                {!goal.isRepetitive && goal.startDate && goal.endDate && (
+                    <div className="mb-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Applies from {new Date(goal.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to {new Date(goal.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                    </div>
                 )}
 
                 {goal.trackingMethods.length > 0 && (
@@ -275,13 +287,46 @@ export default function GoalsPage() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-center mb-2">My Goals</h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-center">
+                    <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
                         Track your weekly, monthly, and yearly goals
                     </p>
+                    
+                    {/* Generate Goals with AI Button */}
+                    <div className="flex justify-center">
+                        <button
+                            onClick={() => setShowChatDrawer(true)}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+                        >
+                            <Sparkles className="w-5 h-5" />
+                            Generate Goals with AI
+                        </button>
+                    </div>
                 </div>
 
                 {GOAL_TYPES_OPTIONS.map((type) =>
                     renderGoalSection(type.value, type.label)
+                )}
+
+                {/* Chat Drawer for Goal Generation */}
+                {showChatDrawer && (
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end">
+                        {/* Backdrop */}
+                        <div 
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowChatDrawer(false)}
+                        />
+                        
+                        {/* Drawer */}
+                        <div className="relative w-full sm:w-[500px] h-[80vh] sm:h-[90vh] bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-l-3xl sm:rounded-r-none shadow-2xl overflow-hidden">
+                            <GoalGeneratorChat 
+                                onClose={() => setShowChatDrawer(false)}
+                                onGoalsCreated={() => {
+                                    fetchGoals();
+                                    fetchStats();
+                                }}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
