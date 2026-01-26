@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main circle background -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad1)"/>
+  
+  <!-- Book/Journal icon -->
+  <g transform="translate(256, 256)">
+    <!-- Book pages -->
+    <rect x="-90" y="-100" width="180" height="200" rx="8" fill="#ffffff" opacity="0.95"/>
+    
+    <!-- Book spine/binding -->
+    <rect x="-95" y="-100" width="10" height="200" rx="2" fill="#e0e7ff"/>
+    
+    <!-- Bookmark ribbon -->
+    <path d="M 0 -100 L 0 120 L 20 100 L 40 120 L 40 -100 Z" fill="#fbbf24" opacity="0.9"/>
+    
+    <!-- Writing lines on page -->
+    <line x1="-60" y1="-60" x2="60" y2="-60" stroke="#4f46e5" stroke-width="3" opacity="0.3"/>
+    <line x1="-60" y1="-30" x2="60" y2="-30" stroke="#4f46e5" stroke-width="3" opacity="0.3"/>
+    <line x1="-60" y1="0" x2="60" y2="0" stroke="#4f46e5" stroke-width="3" opacity="0.3"/>
+    <line x1="-60" y1="30" x2="40" y2="30" stroke="#4f46e5" stroke-width="3" opacity="0.3"/>
+    <line x1="-60" y1="60" x2="50" y2="60" stroke="#4f46e5" stroke-width="3" opacity="0.3"/>
+    
+    <!-- Pen icon -->
+    <g transform="translate(65, 75) rotate(-45)">
+      <rect x="-6" y="-35" width="12" height="40" rx="2" fill="#1e293b"/>
+      <polygon points="0,5 -6,-35 6,-35" fill="#475569"/>
+      <circle cx="0" cy="-38" r="3" fill="#cbd5e1"/>
+      <polygon points="-8,10 0,20 8,10" fill="#fbbf24"/>
+    </g>
+  </g>
+</svg>

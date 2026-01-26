@@ -1,97 +1,149 @@
 'use client';
 
-interface JournalData {
-  whatHappened: string;
-  moodScore: number;
-  keyHighlights: string;
-}
+import DynamicField from './DynamicField';
+import type { JournalTemplate } from '@/types/journalTemplate.types';
 
 interface DayViewProps {
-  journalData: JournalData;
   saving: boolean;
   journalId: string | null;
-  setJournalData: React.Dispatch<React.SetStateAction<JournalData>>;
   saveJournal: (isComplete: boolean) => Promise<void>;
+  selectedTemplate: JournalTemplate | null;
+  customFieldValues: { [fieldId: string]: any };
+  setCustomFieldValues: React.Dispatch<React.SetStateAction<{ [fieldId: string]: any }>>;
+  reflection: string;
+  setReflection: React.Dispatch<React.SetStateAction<string>>;
+  lastSyncTime?: Date | null;
+  isSyncing?: boolean;
+  onManualSync?: () => void;
 }
 
 export default function DayView({
-  journalData,
   saving,
   journalId,
-  setJournalData,
   saveJournal,
+  selectedTemplate,
+  customFieldValues,
+  setCustomFieldValues,
+  reflection,
+  setReflection,
+  lastSyncTime,
+  isSyncing = false,
+  onManualSync,
 }: DayViewProps) {
+  const handleCustomFieldChange = (fieldId: string, value: any) => {
+    setCustomFieldValues(prev => ({
+      ...prev,
+      [fieldId]: value,
+    }));
+  };
+
+  // Format last sync time
+  const getLastSyncText = () => {
+    if (!lastSyncTime) return 'Not synced';
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - lastSyncTime.getTime()) / 1000);
+    
+    if (diff < 10) return 'Just now';
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return lastSyncTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Get sorted template fields
+  const templateFields = selectedTemplate?.fields?.sort((a, b) => a.order - b.order) || [];
+
   return (
     <>
       {/* Today's Reflection Section */}
       <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">📝 Today's Reflection</h2>
-          <p className="text-gray-600 dark:text-gray-400">Capture your thoughts, feelings, and moments from today</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {selectedTemplate?.icon || '📝'} {selectedTemplate?.name || "Today's Journal"}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            {selectedTemplate?.description || 'Select a template to begin journaling'}
+          </p>
         </div>
 
         <div className="space-y-6">
-          {/* What Happened Today */}
+          {/* Free-flow reflection field - always shown */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              What happened today?
-            </label>
+            {/* <label htmlFor="reflection" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              What happened today? ✨
+            </label> */}
             <textarea
-              value={journalData.whatHappened}
-              onChange={(e) => setJournalData(prev => ({ ...prev, whatHappened: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-400 focus:border-transparent resize-none transition-all"
-              rows={4}
-              placeholder="Share your day's story, key events, and experiences..."
+              id="reflection"
+              value={reflection}
+              onChange={(e) => setReflection(e.target.value)}
+              placeholder="Write freely about your day, thoughts, feelings, or anything on your mind..."
+              rows={6}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors resize-none"
             />
           </div>
 
-          {/* Mood Score */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              How was your mood today? {journalData.moodScore}/10
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={journalData.moodScore}
-              onChange={(e) => setJournalData(prev => ({ ...prev, moodScore: parseInt(e.target.value) }))}
-              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-400"
-            />
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <span>Not great</span>
-              <span>Excellent</span>
+          {/* Template-specific fields */}
+          {templateFields.length > 0 ? (
+            <>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                  Template Questions
+                </h3>
+              </div>
+              {templateFields.map((field) => (
+                <DynamicField
+                  key={field.id}
+                  field={field}
+                  value={customFieldValues[field.id]}
+                  onChange={handleCustomFieldChange}
+                />
+              ))}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4">
+                <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                No Template Selected
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                You can still journal in the free-flow section above, or select a template for additional structured questions.
+              </p>
             </div>
-          </div>
-
-          {/* Key Highlights - Important Notes */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              ⭐ Key Highlights & Important Notes
-            </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              Anything you want to highlight, remember, or that stands out from today
-            </p>
-            <textarea
-              value={journalData.keyHighlights}
-              onChange={(e) => setJournalData(prev => ({ ...prev, keyHighlights: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-400 focus:border-transparent resize-none transition-all"
-              rows={3}
-              placeholder="E.g., Had a great conversation with Sarah, completed the project, learned something new about myself..."
-            />
-          </div>
+          )}
         </div>
       </section>
 
       {/* Save Button */}
-      <div className="flex flex-col xs:flex-row justify-end gap-3 pb-8 mt-6 xs:mt-8">
-        {/* <button 
-          onClick={() => saveJournal(false)}
-          disabled={saving}
-          className="w-full xs:w-auto px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? 'Saving...' : journalId ? 'Update Draft' : 'Save Draft'}
-        </button> */}
+      <div className="flex flex-col xs:flex-row justify-between items-center gap-3 pb-8 mt-6 xs:mt-8">
+        {/* Sync Status */}
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          {isSyncing ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-transparent"></div>
+              <span>Syncing...</span>
+            </>
+          ) : (
+            <>
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span>{getLastSyncText()}</span>
+              {onManualSync && (
+                <button
+                  onClick={onManualSync}
+                  disabled={isSyncing}
+                  className="ml-2 text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50"
+                  title="Sync now"
+                >
+                  Sync now
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Save Button */}
         <button 
           onClick={() => saveJournal(true)}
           disabled={saving}

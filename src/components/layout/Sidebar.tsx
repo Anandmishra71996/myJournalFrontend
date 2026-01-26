@@ -11,7 +11,8 @@ import {
   ArrowRightOnRectangleIcon,
   XMarkIcon,
   SparklesIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -26,6 +27,7 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
 
   const navigation = [
     { name: 'Journal', href: '/journal', icon: BookOpenIcon },
+    { name: 'Templates', href: '/templates', icon: DocumentTextIcon },
     { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
     { name: 'Goals', href: '/goals', icon: ChartBarIcon },
     { name: 'Insights', href: '/insights', icon: SparklesIcon },
@@ -48,11 +50,14 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
       `}
     >
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Journaling App
-          </h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Track your journey</p>
+        <div className="flex items-center gap-3">
+          <img src="/logo.svg" alt="Journal Logo" className="w-10 h-10" />
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Journal
+            </h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Track your journey</p>
+          </div>
         </div>
         <button
           onClick={onClose}

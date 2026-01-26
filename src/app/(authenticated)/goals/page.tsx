@@ -286,7 +286,10 @@ export default function GoalsPage() {
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent text-center mb-2">My Goals</h1>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <img src="/logo.svg" alt="Journal Logo" className="w-10 h-10" />
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">My Goals</h1>
+                    </div>
                     <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
                         Track your weekly, monthly, and yearly goals
                     </p>

@@ -45,8 +45,27 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
         scrollToBottom();
     }, [messages, editingGoals]);
 
-    // Auto-initialize with prompt
+    // Auto-initialize with prompt and restore draft if exists
     useEffect(() => {
+        // Check if user is returning from full edit
+        const draftStr = localStorage.getItem('aiGoalDraft');
+        if (draftStr) {
+            try {
+                const draft = JSON.parse(draftStr);
+                if (draft.allGoals && Array.isArray(draft.allGoals)) {
+                    // Restore all goals
+                    setEditingGoals(draft.allGoals);
+                    setMessages([{
+                        role: 'assistant',
+                        content: "Welcome back! I've restored your AI-generated goals. You can continue editing them below or ask me to generate new ones.",
+                    }]);
+                    return;
+                }
+            } catch (error) {
+                console.error('Failed to parse AI draft:', error);
+            }
+        }
+
         const initPrompt = "I'll help you generate personalized goals based on your interests and journal history. What area would you like to focus on? (e.g., exams, career growth, health & fitness, learning new skills)";
         
         setMessages([{
@@ -286,11 +305,20 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
     };
 
     const handleEditFullDetails = (goalIndex: number) => {
-        // Save goals first to backend as draft, then redirect
-        toast.info('Full edit mode - redirecting to goal form...');
-        // For now, just open in new tab with pre-filled data
-        // You could store in localStorage or session
-        router.push(`/goals/create?type=${editingGoals[goalIndex].type}`);
+        const goalToEdit = editingGoals[goalIndex];
+        
+        // Store the goal data in localStorage
+        localStorage.setItem('aiGoalDraft', JSON.stringify({
+            ...goalToEdit,
+            fromAI: true,
+            allGoals: editingGoals, // Save all goals in case user wants to come back
+            editingIndex: goalIndex,
+        }));
+        
+        toast.info('Opening full editor...');
+        
+        // Navigate to create page with AI mode flag
+        router.push(`/goals/create?type=${goalToEdit.type}&mode=ai-edit`);
     };
 
     return (

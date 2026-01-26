@@ -2,25 +2,9 @@ import api from '@/lib/api';
 
 export interface JournalData {
     date: Date;
-    content: {
-        whatHappened?: string;
-        wins?: string[];
-        challenges?: string[];
-        gratitude?: string[];
-        lessonsLearned?: string;
-    };
-    mood: {
-        score?: number;
-        energy?: number;
-    };
-    plan?: {
-        tasks?: Array<{
-            title: string;
-            priority: 'high' | 'medium' | 'low';
-        }>;
-        intentions?: string[];
-        focusAreas?: string[];
-    };
+    reflection?: string;
+    templateId?: string;
+    customFieldValues?: { [fieldId: string]: any };
 }
 
 export const journalService = {

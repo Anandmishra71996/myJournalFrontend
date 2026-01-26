@@ -106,9 +106,12 @@ export default function InsightsPage() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl text-center font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                        Weekly Insights
-                    </h1>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <img src="/logo.svg" alt="Journal Logo" className="w-10 h-10" />
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            Weekly Insights
+                        </h1>
+                    </div>
                     <p className="text-gray-600 dark:text-gray-400 text-center">
                         AI-powered reflections on your journaling patterns and goal progress
                     </p>
