@@ -7,16 +7,8 @@ export interface Message {
     createdAt?: string;
 }
 
-export interface ToolCallData {
-    toolCallId: string;
-    toolName: string;
-    displayMessage: string;
-    conversationId: string;
-}
-
 export interface StreamCallbacks {
     onChunk?: (chunk: string) => void;
-    onToolCall?: (toolCall: ToolCallData) => void;
 }
 
 export interface Conversation {
@@ -56,14 +48,13 @@ class ChatService {
     }
 
     /**
-     * Stream a message response with optional tool support
+     * Stream a message response
      */
     async streamMessage(
         message: string,
         conversationId?: string,
         systemPrompt?: string,
-        callbacks?: StreamCallbacks,
-        enableTools: boolean = false
+        callbacks?: StreamCallbacks
     ): Promise<string> {
         try {
             const response = await fetch(
@@ -78,7 +69,6 @@ class ChatService {
                         message,
                         conversationId,
                         systemPrompt,
-                        enableTools,
                     }),
                 }
             );
@@ -108,20 +98,7 @@ class ChatService {
                         try {
                             const parsed = JSON.parse(data);
 
-                            // Handle different message types
                             if (parsed.type === 'content' && parsed.content) {
-                                fullResponse += parsed.content;
-                                callbacks?.onChunk?.(parsed.content);
-                            } else if (parsed.type === 'tool_call') {
-                                // Tool call detected, trigger confirmation flow
-                                callbacks?.onToolCall?.({
-                                    toolCallId: parsed.toolCallId,
-                                    toolName: parsed.toolName,
-                                    displayMessage: parsed.displayMessage,
-                                    conversationId: parsed.conversationId,
-                                });
-                            } else if (parsed.content) {
-                                // Backward compatibility with old format
                                 fullResponse += parsed.content;
                                 callbacks?.onChunk?.(parsed.content);
                             }
@@ -239,40 +216,6 @@ class ChatService {
         } catch (error: any) {
             console.error('Failed to fetch goals:', error);
             return [];
-        }
-    }
-
-    /**
-     * Confirm or reject tool execution
-     */
-    async confirmToolExecution(
-        toolCallId: string,
-        confirmed: boolean
-    ): Promise<{ success: boolean; message: string; data?: any }> {
-        try {
-            const response = await api.post('/chat/tools/confirm', {
-                toolCallId,
-                confirmed,
-            });
-            return response.data;
-        } catch (error: any) {
-            throw new Error(
-                error.response?.data?.error || 'Failed to confirm tool execution'
-            );
-        }
-    }
-
-    /**
-     * Get pending tool call details
-     */
-    async getPendingToolCall(toolCallId: string): Promise<any> {
-        try {
-            const response = await api.get(`/chat/tools/${toolCallId}`);
-            return response.data.data;
-        } catch (error: any) {
-            throw new Error(
-                error.response?.data?.error || 'Failed to fetch tool call'
-            );
         }
     }
 

@@ -37,12 +37,14 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
   const getWeekDates = (date: Date) => {
     const week: Date[] = [];
     const current = new Date(date);
-    const day = current.getDay();
-    const diff = current.getDate() - day; // Start from Sunday
+    const day = current.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diff = day === 0 ? -6 : 1 - day; // If Sunday, go back 6 days; otherwise go to Monday
+    current.setDate(current.getDate() + diff);
     
     for (let i = 0; i < 7; i++) {
-      const weekDate = new Date(current.setDate(diff + i));
-      week.push(new Date(weekDate));
+      const weekDate = new Date(current);
+      weekDate.setDate(current.getDate() + i);
+      week.push(weekDate);
     }
     return week;
   };

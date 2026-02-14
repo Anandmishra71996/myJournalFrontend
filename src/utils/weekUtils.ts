@@ -1,22 +1,22 @@
 /**
- * Get the Sunday of the week for a given date
+ * Get the Monday of the week for a given date
  */
 export function getWeekStart(date: Date): Date {
     const d = new Date(date);
-    const day = d.getDay();
-    const diff = -day; // Get Sunday (0)
+    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diff = day === 0 ? -6 : 1 - day; // If Sunday, go back 6 days; otherwise go to Monday
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
     return d;
 }
 
 /**
- * Get the Sunday of the week for a given date
+ * Get the Sunday (end of week) for a given date
  */
 export function getWeekEnd(date: Date): Date {
     const weekStart = getWeekStart(date);
     const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setDate(weekStart.getDate() + 6); // Monday + 6 days = Sunday
     weekEnd.setHours(23, 59, 59, 999);
     return weekEnd;
 }
@@ -43,7 +43,7 @@ export function getCurrentWeek(): { weekStart: string; weekEnd: string } {
 }
 
 /**
- * Get previous week's Monday
+ * Get previous week's Monday (start date)
  */
 export function getPreviousWeek(weekStartStr: string): string {
     const date = new Date(weekStartStr);
@@ -52,7 +52,7 @@ export function getPreviousWeek(weekStartStr: string): string {
 }
 
 /**
- * Get next week's Monday
+ * Get next week's Monday (start date)
  */
 export function getNextWeek(weekStartStr: string): string {
     const date = new Date(weekStartStr);

@@ -12,7 +12,7 @@ import {
   XMarkIcon as XIcon,
 } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import chatService, { Message, Conversation, ToolCallData } from '@/services/chat.service';
+import chatService, { Message, Conversation } from '@/services/chat.service';
 import ChatHistoryModal from './ChatHistoryModal';
 
 interface ChatComponentProps {
@@ -29,9 +29,6 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [streaming, setStreaming] = useState(false);
-  const [pendingToolCall, setPendingToolCall] = useState<ToolCallData | null>(null);
-  const [toolExecuting, setToolExecuting] = useState(false);
-  const [enableAgentTools, setEnableAgentTools] = useState(true); // Enable by default
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when new messages arrive
@@ -79,7 +76,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
     setStreaming(true);
 
     try {
-      // Stream the response with agent tools enabled
+      // Stream the response
       let assistantContent = '';
 
       await chatService.streamMessage(
@@ -94,10 +91,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
               const lastMessage = newMessages[newMessages.length - 1];
 
               // If last message is from assistant, update it
-              if (
-                lastMessage &&
-                lastMessage.role === 'assistant'
-              ) {
+              if (lastMessage && lastMessage.role === 'assistant') {
                 lastMessage.content = assistantContent;
               } else {
                 // Add new assistant message
@@ -110,17 +104,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
               return newMessages;
             });
           },
-          onToolCall: (toolCall) => {
-            // Show confirmation dialog for tool execution
-            setPendingToolCall(toolCall);
-            
-            // Update conversation ID if new
-            if (toolCall.conversationId && !currentConversationId) {
-              setCurrentConversationId(toolCall.conversationId);
-            }
-          },
-        },
-        enableAgentTools // Pass the agent tools flag
+        }
       );
 
       // If we got a response, set the conversation ID for future messages
@@ -134,61 +118,6 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
     } finally {
       setLoading(false);
       setStreaming(false);
-    }
-  };
-
-  const handleConfirmTool = async (confirmed: boolean) => {
-    if (!pendingToolCall) return;
-
-    setToolExecuting(true);
-
-    try {
-      const result = await chatService.confirmToolExecution(
-        pendingToolCall.toolCallId,
-        confirmed
-      );
-
-      if (confirmed && result.success) {
-        // Add success message to chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: result.message,
-          },
-        ]);
-        toast.success(result.message);
-      } else if (!confirmed) {
-        // Add cancellation message
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: 'Action cancelled.',
-          },
-        ]);
-      } else if (!result.success) {
-        toast.error(result.message || 'Failed to execute action');
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: `⚠️ ${result.message}`,
-          },
-        ]);
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to execute action');
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: '⚠️ Failed to execute action. Please try again.',
-        },
-      ]);
-    } finally {
-      setPendingToolCall(null);
-      setToolExecuting(false);
     }
   };
 
@@ -317,74 +246,18 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
       {/* Input Area */}
       <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 sm:py-4">
         <div className="max-w-4xl mx-auto w-full space-y-2 sm:space-y-3">
-          {/* Tool Confirmation Dialog */}
-          {pendingToolCall && (
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-xl p-4 space-y-3 animate-in slide-in-from-bottom duration-300">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                    <SparklesIcon className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                    Action Detected
-                  </h4>
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <div
-                      className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{
-                        __html: pendingToolCall.displayMessage
-                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\n/g, '<br />'),
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-indigo-200 dark:border-indigo-700">
-                <button
-                  onClick={() => handleConfirmTool(false)}
-                  disabled={toolExecuting}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <XIcon className="w-4 h-4" />
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleConfirmTool(true)}
-                  disabled={toolExecuting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {toolExecuting ? (
-                    <>
-                      <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                      Executing...
-                    </>
-                  ) : (
-                    <>
-                      <CheckIcon className="w-4 h-4" />
-                      Confirm
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
           <form onSubmit={handleSendMessage} className="flex gap-2 sm:gap-3">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              disabled={loading || toolExecuting}
+              disabled={loading}
               placeholder="Type your message..."
               className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={loading || !input.trim() || toolExecuting}
+              disabled={loading || !input.trim()}
               className="px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0"
             >
               {loading ? (
@@ -395,22 +268,9 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
             </button>
           </form>
 
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              💡 Your chats are saved and use your journals & goals for context
-            </p>
-            <button
-              onClick={() => setEnableAgentTools(!enableAgentTools)}
-              className={`text-xs px-2 py-1 rounded transition-colors ${
-                enableAgentTools
-                  ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}
-              title="Toggle AI Actions (create journal entries and goals from chat)"
-            >
-              {enableAgentTools ? '✨ AI Actions ON' : '⚙️ AI Actions OFF'}
-            </button>
-          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            💡 Your chats are saved and use your journals & goals for context
+          </p>
         </div>
       </div>
 

@@ -36,12 +36,14 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    // Adjust: Monday = 0, Tuesday = 1, ..., Sunday = 6
+    const adjustedStartDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
 
     const days: MonthEntry[] = [];
 
     // Add empty days for previous month
-    for (let i = 0; i < startingDayOfWeek; i++) {
+    for (let i = 0; i < adjustedStartDay; i++) {
       days.push({
         date: new Date(0),
         day: 0,
@@ -199,7 +201,7 @@ export default function MonthlyView({ selectedDate }: MonthlyViewProps) {
         
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 gap-2 mb-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
             <div key={day} className="text-center text-xs font-semibold text-gray-600 dark:text-gray-400 py-2">
               {day}
             </div>

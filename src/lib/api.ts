@@ -38,13 +38,21 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response) {
+            const requestUrl = error.config?.url || '';
+
             // Handle specific error codes
             switch (error.response.status) {
                 case 401:
-                    // Unauthorized - could redirect to login
+                    // Skip 401 handling for login and signup endpoints
+                    // Let the form handle these errors directly
+                    if (requestUrl.includes('/login') || requestUrl.includes('/register')) {
+                        break;
+                    }
+
+                    // For other 401 errors (expired token, etc.), clear auth and redirect
                     localStorage.removeItem('auth-storage');
                     if (typeof window !== 'undefined') {
-                        window.location.href = '/';
+                        window.location.href = '/login';
                     }
                     break;
                 case 403:

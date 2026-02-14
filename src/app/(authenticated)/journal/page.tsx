@@ -85,9 +85,12 @@ export default function JournalPage() {
         setCustomFieldValues(journal.customFieldValues || {});
         // Load reflection
         setReflection(journal.reflection || '');
-        // Set template if journal has one
+        // Set template if journal has one (handle both populated and non-populated)
         if (journal.templateId) {
-          setSelectedTemplateId(journal.templateId);
+          const templateId = typeof journal.templateId === 'string' 
+            ? journal.templateId 
+            : journal.templateId._id;
+          setSelectedTemplateId(templateId);
         }
       } else {
         // Reset form for new entry
@@ -234,10 +237,11 @@ export default function JournalPage() {
       return `${day}/${month}/${year}`;
     } else if (viewType === 'weekly') {
       const weekStart = new Date(selectedDate);
-      const dayOfWeek = weekStart.getDay();
-      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      const dayOfWeek = weekStart.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days; otherwise go to Monday
+      weekStart.setDate(weekStart.getDate() + diff);
       const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
+      weekEnd.setDate(weekEnd.getDate() + 6); // Monday + 6 days = Sunday
       return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     } else {
       return selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });

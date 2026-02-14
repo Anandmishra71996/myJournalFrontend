@@ -1,11 +1,5 @@
 import api from '@/lib/api';
-
-export interface JournalData {
-    date: Date;
-    reflection?: string;
-    templateId?: string;
-    customFieldValues?: { [fieldId: string]: any };
-}
+import { Journal, JournalData } from '@/types/journal.types';
 
 export const journalService = {
     createJournal: async (data: JournalData) => {

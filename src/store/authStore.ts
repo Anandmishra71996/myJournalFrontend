@@ -16,6 +16,8 @@ interface AuthState {
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, name: string) => Promise<void>;
+    googleAuth: (googleId: string, email: string, name: string, avatar?: string) => Promise<void>;
+    facebookAuth: (facebookId: string, email: string, name: string, avatar?: string) => Promise<void>;
     logout: () => void;
     setUser: (user: User) => void;
     refreshProfile: () => Promise<void>;
@@ -29,23 +31,71 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
 
             login: async (email: string, password: string) => {
-                const response = await api.post('/users/login', { email, password });
-                const { user, token } = response.data.data;
+                try {
+                    const response = await api.post('/users/login', { email, password });
+                    const { user, token } = response.data.data;
 
-                set({ user, token, isAuthenticated: true });
-                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    set({ user, token, isAuthenticated: true });
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                } catch (error: any) {
+                    // Re-throw the error with a user-friendly message
+                    const errorMessage = error.response?.data?.error || error.message || 'Login failed';
+                    throw new Error(errorMessage);
+                }
             },
 
             register: async (email: string, password: string, name: string) => {
-                const response = await api.post('/users/register', {
-                    email,
-                    password,
-                    name,
-                });
-                const { user, token } = response.data.data;
+                try {
+                    const response = await api.post('/users/register', {
+                        email,
+                        password,
+                        name,
+                    });
+                    const { user, token } = response.data.data;
 
-                set({ user, token, isAuthenticated: true });
-                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    set({ user, token, isAuthenticated: true });
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                } catch (error: any) {
+                    // Re-throw the error with a user-friendly message
+                    const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+                    throw new Error(errorMessage);
+                }
+            },
+
+            googleAuth: async (googleId: string, email: string, name: string, avatar?: string) => {
+                try {
+                    const response = await api.post('/users/auth/google', {
+                        googleId,
+                        email,
+                        name,
+                        avatar,
+                    });
+                    const { user, token } = response.data.data;
+
+                    set({ user, token, isAuthenticated: true });
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                } catch (error: any) {
+                    const errorMessage = error.response?.data?.error || error.message || 'Google authentication failed';
+                    throw new Error(errorMessage);
+                }
+            },
+
+            facebookAuth: async (facebookId: string, email: string, name: string, avatar?: string) => {
+                try {
+                    const response = await api.post('/users/auth/facebook', {
+                        facebookId,
+                        email,
+                        name,
+                        avatar,
+                    });
+                    const { user, token } = response.data.data;
+
+                    set({ user, token, isAuthenticated: true });
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                } catch (error: any) {
+                    const errorMessage = error.response?.data?.error || error.message || 'Facebook authentication failed';
+                    throw new Error(errorMessage);
+                }
             },
 
             logout: () => {

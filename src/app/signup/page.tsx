@@ -13,6 +13,7 @@ import {
   getPasswordStrengthLabel,
   getPasswordStrengthWidth,
 } from "@/validations";
+import { GoogleButton, FacebookButton } from "@/components/auth/OAuthButtons";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { register } = useAuthStore();
+  const { register, googleAuth, facebookAuth } = useAuthStore();
   const router = useRouter();
 
   const validateField = (field: string, value: string) => {
@@ -88,6 +89,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const validation = validateSignupForm(formData);
     if (!validation.success) {
@@ -113,10 +115,43 @@ export default function SignupPage() {
       toast.success("Account created successfully!");
       router.push("/profile");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Registration failed");
+      // Stay on page and show error - don't redirect
+      toast.error(error.message || "Registration failed");
+      console.error("Signup error:", error);
+      // Keep the form data so user can retry
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (googleId: string, email: string, name: string, avatar?: string) => {
+    setLoading(true);
+    try {
+      await googleAuth(googleId, email, name, avatar);
+      toast.success("Account created successfully!");
+      router.push("/profile");
+    } catch (error: any) {
+      toast.error(error.message || "Google authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookSuccess = async (facebookId: string, email: string, name: string, avatar?: string) => {
+    setLoading(true);
+    try {
+      await facebookAuth(facebookId, email, name, avatar);
+      toast.success("Account created successfully!");
+      router.push("/profile");
+    } catch (error: any) {
+      toast.error(error.message || "Facebook authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOAuthError = (error: string) => {
+    toast.error(error);
   };
 
   const isFormValid =
@@ -342,6 +377,30 @@ export default function SignupPage() {
               {loading ? "Creating Account..." : "Sign Up"}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or sign up with</span>
+            </div>
+          </div>
+
+          {/* OAuth Buttons */}
+          <div className="space-y-3">
+            <GoogleButton 
+              onSuccess={handleGoogleSuccess} 
+              onError={handleOAuthError}
+              text="signup"
+            />
+            <FacebookButton 
+              onSuccess={handleFacebookSuccess} 
+              onError={handleOAuthError}
+              text="Sign up with Facebook"
+            />
+          </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-center text-gray-600 text-sm">
