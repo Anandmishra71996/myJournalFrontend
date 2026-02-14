@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Send, X, Check, Pencil } from 'lucide-react';
-import chatService, { Message, ToolCallData } from '@/services/chat.service';
+import chatService, { Message } from '@/services/chat.service';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
@@ -30,7 +30,7 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
     const [loading, setLoading] = useState(false);
     const [conversationId, setConversationId] = useState<string>();
     const [streaming, setStreaming] = useState(false);
-    const [pendingToolCall, setPendingToolCall] = useState<ToolCallData | null>(null);
+    const [pendingToolCall, setPendingToolCall] = useState<any>(null);
     const [toolExecuting, setToolExecuting] = useState(false);
     const [editingGoals, setEditingGoals] = useState<EditableGoal[]>([]);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -132,29 +132,7 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
                             return newMessages;
                         });
                     },
-                    onToolCall: (toolCall) => {
-                        setPendingToolCall(toolCall);
-                        
-                        // If it's a generate_goals_preview tool, fetch and parse the goals
-                        if (toolCall.toolName === 'generate_goals_preview') {
-                            (async () => {
-                                try {
-                                    const toolCallDetails = await chatService.getPendingToolCall(toolCall.toolCallId);
-                                    if (toolCallDetails && toolCallDetails.params && toolCallDetails.params.goalsPreview) {
-                                        setEditingGoals(toolCallDetails.params.goalsPreview);
-                                    }
-                                } catch (error) {
-                                    console.error('Failed to fetch tool call details:', error);
-                                }
-                            })();
-                        }
-                        
-                        if (toolCall.conversationId && !conversationId) {
-                            setConversationId(toolCall.conversationId);
-                        }
-                    },
-                },
-                true // Enable agent tools
+                }
             );
         } catch (error: any) {
             toast.error(error.message || 'Failed to send message');
@@ -242,8 +220,6 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
         if (!pendingToolCall) return;
 
         try {
-            await chatService.confirmToolExecution(pendingToolCall.toolCallId, false);
-            
             setMessages((prev) => [
                 ...prev,
                 {
@@ -265,31 +241,26 @@ export default function GoalGeneratorChat({ onClose, onGoalsCreated }: GoalGener
         setToolExecuting(true);
 
         try {
-            const result = await chatService.confirmToolExecution(pendingToolCall.toolCallId, true);
+            // Tool execution is handled by the agent automatically
+            toast.success('Goal created successfully!');
+            
+            // Add success message to chat
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: 'assistant',
+                    content: '✅ Goal created successfully!',
+                },
+            ]);
 
-            if (result.success) {
-                toast.success(result.message || 'Goal created successfully!');
-                
-                // Add success message to chat
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        role: 'assistant',
-                        content: `✅ ${result.message}`,
-                    },
-                ]);
+            // Clear pending state
+            setPendingToolCall(null);
 
-                // Clear pending state
-                setPendingToolCall(null);
-
-                // Notify parent and close after short delay
-                setTimeout(() => {
-                    onGoalsCreated?.();
-                    onClose();
-                }, 1500);
-            } else {
-                throw new Error(result.message || 'Failed to create goal');
-            }
+            // Notify parent and close after short delay
+            setTimeout(() => {
+                onGoalsCreated?.();
+                onClose();
+            }, 1500);
         } catch (error: any) {
             toast.error(error.message || 'Failed to create goal');
             setMessages((prev) => [
