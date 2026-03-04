@@ -42,7 +42,7 @@ export default function BetaBanner() {
             <span className="font-bold">Beta Testing Mode</span>
             <span className="hidden sm:inline"> — You're helping us build something amazing! </span>
             <a
-              href="mailto:support@yourapp.com"
+              href="mailto:anandmishra71996@gmail.com"
               className="underline hover:text-blue-200 ml-1"
             >
               Report issues

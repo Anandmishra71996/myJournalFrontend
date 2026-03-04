@@ -48,7 +48,12 @@ api.interceptors.response.use(
                         const onPublicPage = publicPaths.some((p) =>
                             window.location.pathname.startsWith(p)
                         );
-                        if (!onPublicPage) {
+
+                        const onOAuthCallbackPage =
+                            window.location.pathname === '/auth/google/callback' ||
+                            window.location.pathname === '/auth/facebook/callback';
+
+                        if (!onPublicPage && !onOAuthCallbackPage) {
                             window.location.href = '/login';
                         }
                     }
