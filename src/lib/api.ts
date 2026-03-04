@@ -1,5 +1,25 @@
 import axios from 'axios';
 
+const CLIENT_AUTH_COOKIE = 'aigoalreflect_session_client';
+
+const getCookieValue = (name: string): string | null => {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${escapedName}=([^;]+)`));
+    if (!match) {
+        return null;
+    }
+
+    try {
+        return decodeURIComponent(match[1]);
+    } catch {
+        return match[1];
+    }
+};
+
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
     timeout: 30000,
@@ -12,8 +32,13 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Cookies are automatically sent with requests when withCredentials is true
-        // No need to manually add Authorization header
+        // TODO: Temporary fallback for production issue. Remove Authorization header path
+        // once cookie-only auth is stable end-to-end.
+        const token = getCookieValue(CLIENT_AUTH_COOKIE);
+        if (token) {
+            config.headers?.set('Authorization', `Bearer ${token}`);
+        }
+
         return config;
     },
     (error) => {
