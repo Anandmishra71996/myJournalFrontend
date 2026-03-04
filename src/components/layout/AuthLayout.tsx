@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Sidebar from "./Sidebar";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
+import BetaBanner from "@/components/BetaBanner";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -16,20 +17,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
-  const { user, isAuthenticated, refreshProfile } = useAuthStore();
+  const [isChecking, setIsChecking] = useState(true);
+  const { user, isAuthenticated } = useAuthStore();
 
-  // Refresh profile on mount if authenticated
+  // AuthProvider (root layout) already ran checkAuth on app mount and populated
+  // the store. No need to call it again here — just react to what's in the store.
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshProfile();
-    }
-  }, [isAuthenticated, refreshProfile]);
+    setIsChecking(false);
+  }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isChecking && !isAuthenticated) {
       router.push("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isChecking, isAuthenticated, router]);
 
   // Redirect to profile if not completed (except if already on profile page)
   useEffect(() => {
@@ -82,6 +83,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     setIsMobileMenuOpen(false);
   }, [router]);
 
+  // Show loading indicator while verifying authentication
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return null;
   }
@@ -110,6 +120,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         isMobileMenuOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
       />
+
+      {/* Beta Banner */}
+      <BetaBanner />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto w-full">

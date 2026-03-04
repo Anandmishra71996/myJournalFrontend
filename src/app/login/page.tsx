@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { validateLoginForm } from "@/validations";
 import { GoogleButton, FacebookButton } from "@/components/auth/OAuthButtons";
+import api from "@/lib/api";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ export default function LoginPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, googleAuth, facebookAuth } = useAuthStore();
+  const { login } = useAuthStore();
   const router = useRouter();
 
   const validateField = (field: string, value: string) => {
@@ -75,12 +76,27 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
+      // Call API directly to check for requiresApproval response
+      const response = await api.post('/auth/login', { 
+        email: formData.email, 
+        password: formData.password 
+      });
+
+      // Check if user requires beta approval
+      if (response.data.requiresApproval) {
+        const { user } = response.data.data;
+        toast.info("Your account is pending approval");
+        router.push(`/preview?email=${encodeURIComponent(user.email)}`);
+        return;
+      }
+
+      // Normal login flow - update auth store
+      const { user } = response.data.data;
+      useAuthStore.setState({ user, isAuthenticated: true });
 
       toast.success("Welcome back!");
 
       // Redirect based on profile completion
-      const user = useAuthStore.getState().user;
       if (user?.isProfileCompleted === false) {
         router.push("/profile");
       } else {
@@ -88,54 +104,13 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       // Stay on page and show error - don't redirect
-      toast.error(error.message || "An error occurred. Please try again.");
+      const errorMessage = error.response?.data?.error || error.message || "An error occurred. Please try again.";
+      toast.error(errorMessage);
       console.error("Login error:", error);
       // Keep the form data so user can retry
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSuccess = async (googleId: string, email: string, name: string, avatar?: string) => {
-    setLoading(true);
-    try {
-      await googleAuth(googleId, email, name, avatar);
-      toast.success("Welcome back!");
-
-      const user = useAuthStore.getState().user;
-      if (user?.isProfileCompleted === false) {
-        router.push("/profile");
-      } else {
-        router.push("/journal");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Google authentication failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFacebookSuccess = async (facebookId: string, email: string, name: string, avatar?: string) => {
-    setLoading(true);
-    try {
-      await facebookAuth(facebookId, email, name, avatar);
-      toast.success("Welcome back!");
-
-      const user = useAuthStore.getState().user;
-      if (user?.isProfileCompleted === false) {
-        router.push("/profile");
-      } else {
-        router.push("/journal");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Facebook authentication failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOAuthError = (error: string) => {
-    toast.error(error);
   };
 
   return (
@@ -284,16 +259,8 @@ export default function LoginPage() {
 
           {/* OAuth Buttons */}
           <div className="space-y-3">
-            <GoogleButton 
-              onSuccess={handleGoogleSuccess} 
-              onError={handleOAuthError}
-              text="signin"
-            />
-            <FacebookButton 
-              onSuccess={handleFacebookSuccess} 
-              onError={handleOAuthError}
-              text="Sign in with Facebook"
-            />
+            <GoogleButton text="Sign in with Google" />
+            <FacebookButton text="Sign in with Facebook" />
           </div>
 
           <div className="mt-6 text-center">

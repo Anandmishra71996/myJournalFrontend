@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await api.post("/users/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email });
       toast.success("OTP sent to your email");
       setStep("otp");
       setTimeLeft(120);
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await api.post("/users/verify-otp", { email, otp });
+      await api.post("/auth/verify-otp", { email, otp });
       toast.success("OTP verified");
       setStep("reset");
       setTimerActive(false);
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      await api.post("/users/reset-password", {
+      await api.post("/auth/reset-password", {
         email,
         otp,
         newPassword,
@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
   const handleResendOTP = async () => {
     setLoading(true);
     try {
-      await api.post("/users/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email });
       toast.success("New OTP sent to your email");
       setTimeLeft(120);
       setTimerActive(true);

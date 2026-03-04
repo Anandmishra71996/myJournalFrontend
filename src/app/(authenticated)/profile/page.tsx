@@ -6,11 +6,12 @@ import ProfileForm from '@/components/profile/ProfileForm';
 import PushNotificationSettings from '@/components/PushNotificationSettings';
 
 export default function ProfilePage() {
-    const { user, refreshProfile } = useAuthStore();
+    const { user } = useAuthStore();
 
     useEffect(() => {
-        refreshProfile();
-    }, [refreshProfile]);
+        // Refresh profile once on mount to pick up any server-side changes.
+        useAuthStore.getState().refreshProfile();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">

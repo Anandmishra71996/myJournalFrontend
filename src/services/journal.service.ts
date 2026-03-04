@@ -7,10 +7,15 @@ export const journalService = {
         return response.data;
     },
 
-    getJournalByDate: async (date: Date) => {
-        const response = await api.get('/journals/by-date', {
-            params: { date: date.toISOString() },
-        });
+    getJournalByDate: async (date: Date, templateId?: string) => {
+        const params: any = { date: date.toISOString() };
+
+        // Include templateId in query if provided (including empty string for no template)
+        if (templateId !== undefined) {
+            params.templateId = templateId;
+        }
+
+        const response = await api.get('/journals/by-date', { params });
         return response.data;
     },
 

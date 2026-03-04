@@ -63,8 +63,8 @@ class ChatService {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${this.getToken()}`,
                     },
+                    credentials: 'include', // Send httpOnly cookies
                     body: JSON.stringify({
                         message,
                         conversationId,
@@ -220,21 +220,10 @@ class ChatService {
     }
 
     /**
-     * Helper to get token from localStorage
+     * Note: Authentication now uses httpOnly cookies
+     * Tokens are automatically sent with all API requests via credentials
+     * No need to manually retrieve or attach tokens
      */
-    private getToken(): string {
-        if (typeof window === 'undefined') return '';
-        try {
-            const authStorage = localStorage.getItem('auth-storage');
-            if (authStorage) {
-                const { state } = JSON.parse(authStorage);
-                return state?.token || '';
-            }
-        } catch (error) {
-            console.error('Error getting token:', error);
-        }
-        return '';
-    }
 }
 
 export default new ChatService();

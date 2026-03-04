@@ -6,24 +6,14 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // Send cookies with requests (for httpOnly cookies)
 });
 
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        // Get token from Zustand persist storage
-        const authStorage = localStorage.getItem('auth-storage');
-        if (authStorage) {
-            try {
-                const { state } = JSON.parse(authStorage);
-                const token = state?.token;
-                if (token) {
-                    config.headers.Authorization = `Bearer ${token}`;
-                }
-            } catch (error) {
-                console.error('Error parsing auth storage:', error);
-            }
-        }
+        // Cookies are automatically sent with requests when withCredentials is true
+        // No need to manually add Authorization header
         return config;
     },
     (error) => {
@@ -43,16 +33,24 @@ api.interceptors.response.use(
             // Handle specific error codes
             switch (error.response.status) {
                 case 401:
-                    // Skip 401 handling for login and signup endpoints
-                    // Let the form handle these errors directly
+                    // Skip 401 handling for auth endpoints — let the form handle these directly
                     if (requestUrl.includes('/login') || requestUrl.includes('/register')) {
                         break;
                     }
 
-                    // For other 401 errors (expired token, etc.), clear auth and redirect
-                    localStorage.removeItem('auth-storage');
+                    // Don't redirect if the browser is already on a public page.
+                    // This prevents an infinite reload loop: AuthProvider calls
+                    // /users/profile on every mount (including on /login), which
+                    // returns 401 for unauthenticated users, which would otherwise
+                    // trigger window.location.href = '/login' → full reload → repeat.
                     if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
+                        const publicPaths = ['/login', '/signup', '/forgot-password', '/preview', '/auth/'];
+                        const onPublicPage = publicPaths.some((p) =>
+                            window.location.pathname.startsWith(p)
+                        );
+                        if (!onPublicPage) {
+                            window.location.href = '/login';
+                        }
                     }
                     break;
                 case 403:

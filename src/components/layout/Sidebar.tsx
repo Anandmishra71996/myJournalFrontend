@@ -24,11 +24,12 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
+  const isLocalEnv = process.env.NEXT_PUBLIC_NODE_ENV === 'local';
 
   const navigation = [
     { name: 'Journal', href: '/journal', icon: BookOpenIcon },
     { name: 'Templates', href: '/templates', icon: DocumentTextIcon },
-    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
+    ...(isLocalEnv ? [{ name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon }] : []),
     { name: 'Goals', href: '/goals', icon: ChartBarIcon },
     { name: 'Insights', href: '/insights', icon: SparklesIcon },
     { name: 'Profile', href: '/profile', icon: UserCircleIcon },

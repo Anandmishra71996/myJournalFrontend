@@ -1,165 +1,120 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-declare global {
-  interface Window {
-    google?: any;
-    FB?: any;
-  }
-}
+import { useState } from 'react';
+import {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  generateState,
+  storePKCEParams,
+  buildGoogleAuthUrl,
+  buildFacebookAuthUrl,
+} from '@/utils/pkce';
 
 interface GoogleButtonProps {
-  onSuccess: (googleId: string, email: string, name: string, avatar?: string) => void;
-  onError: (error: string) => void;
-  text?: 'signin' | 'signup';
+  text?: string;
 }
 
-export function GoogleButton({ onSuccess, onError, text = 'signin' }: GoogleButtonProps) {
-  const [isLoading, setIsLoading] = useState(true);
+export function GoogleButton({ text = 'Continue with Google' }: GoogleButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const redirectUri = typeof window !== 'undefined' 
+    ? `${window.location.origin}/auth/google/callback`
+    : '';
 
-  useEffect(() => {
+  const handleGoogleLogin = async () => {
     if (!clientId) {
       console.error('Google Client ID not configured');
-      setIsLoading(false);
       return;
     }
 
-    // Load Google Sign-In script
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleCredentialResponse,
-        });
-
-        window.google.accounts.id.renderButton(
-          document.getElementById('google-signin-button'),
-          {
-            theme: 'outline',
-            size: 'large',
-            width: '100%',
-            text: text === 'signin' ? 'signin_with' : 'signup_with',
-            shape: 'rectangular',
-          }
-        );
-        setIsLoading(false);
-      }
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, [clientId]);
-
-  const handleCredentialResponse = (response: any) => {
     try {
-      // Decode JWT token to get user info
-      const userObject = JSON.parse(atob(response.credential.split('.')[1]));
-      
-      onSuccess(
-        userObject.sub,
-        userObject.email,
-        userObject.name,
-        userObject.picture
-      );
+      setIsLoading(true);
+
+      // Generate PKCE parameters
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = generateState();
+
+      // Store PKCE parameters in session storage
+      storePKCEParams(codeVerifier, state);
+
+      // Build authorization URL and redirect
+      const authUrl = buildGoogleAuthUrl(clientId, redirectUri, codeChallenge, state);
+      window.location.href = authUrl;
     } catch (error) {
-      onError('Failed to authenticate with Google');
+      console.error('Error initiating Google OAuth:', error);
+      setIsLoading(false);
     }
   };
 
   if (!clientId) {
+    console.error('Google Client ID not configured');
     return null;
   }
 
   return (
-    <div className="w-full">
+    <button
+      type="button"
+      onClick={handleGoogleLogin}
+      disabled={isLoading}
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       {isLoading ? (
-        <div className="w-full h-[40px] bg-gray-100 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+        <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
       ) : (
-        <div id="google-signin-button" className="w-full"></div>
+        <>
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span>{text}</span>
+        </>
       )}
-    </div>
+    </button>
   );
 }
 
 interface FacebookButtonProps {
-  onSuccess: (facebookId: string, email: string, name: string, avatar?: string) => void;
-  onError: (error: string) => void;
   text?: string;
 }
 
-export function FacebookButton({ onSuccess, onError, text }: FacebookButtonProps) {
-  const [isLoading, setIsLoading] = useState(true);
+export function FacebookButton({ text = 'Continue with Facebook' }: FacebookButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-
-  useEffect(() => {
-    if (!appId) {
-      console.error('Facebook App ID not configured');
-      setIsLoading(false);
-      return;
-    }
-
-    // Load Facebook SDK
-    const script = document.createElement('script');
-    script.src = 'https://connect.facebook.net/en_US/sdk.js';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (window.FB) {
-        window.FB.init({
-          appId: appId,
-          cookie: true,
-          xfbml: true,
-          version: 'v18.0',
-        });
-        setIsLoading(false);
-      }
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, [appId]);
+  const redirectUri = typeof window !== 'undefined'
+    ? `${window.location.origin}/auth/facebook/callback`
+    : '';
 
   const handleFacebookLogin = () => {
-    if (!window.FB) {
-      onError('Facebook SDK not loaded');
+    if (!appId) {
+      console.error('Facebook App ID not configured');
       return;
     }
 
-    window.FB.login(
-      (response: any) => {
-        if (response.authResponse) {
-          // Get user info
-          window.FB.api('/me', { fields: 'id,name,email,picture' }, (userInfo: any) => {
-            if (userInfo.email) {
-              onSuccess(
-                userInfo.id,
-                userInfo.email,
-                userInfo.name,
-                userInfo.picture?.data?.url
-              );
-            } else {
-              onError('Email permission is required');
-            }
-          });
-        } else {
-          onError('Facebook login cancelled');
-        }
-      },
-      { scope: 'public_profile,email' }
-    );
+    try {
+      setIsLoading(true);
+
+      // Generate state for CSRF protection
+      const state = generateState();
+
+      // Store state in session storage (Facebook doesn't require PKCE)
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('oauth_state', state);
+      }
+
+      // Build authorization URL and redirect
+      const authUrl = buildFacebookAuthUrl(appId, redirectUri, state);
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error('Error initiating Facebook OAuth:', error);
+      setIsLoading(false);
+    }
   };
 
   if (!appId) {
+    console.error('Facebook App ID not configured');
     return null;
   }
 
@@ -177,7 +132,7 @@ export function FacebookButton({ onSuccess, onError, text }: FacebookButtonProps
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
-          <span>{text || 'Continue with Facebook'}</span>
+          <span>{text}</span>
         </>
       )}
     </button>

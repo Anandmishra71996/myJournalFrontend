@@ -27,18 +27,22 @@ export default function JournalPage() {
   const [reflection, setReflection] = useState<string>('');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [templatesLoaded, setTemplatesLoaded] = useState(false);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
+  const isLoadingJournalRef = useRef(false);
+  const previousTemplateIdRef = useRef<string>('');
 
   useEffect(() => {
     loadTemplates();
   }, []);
 
   useEffect(() => {
-    if (viewType === 'day') {
-      loadJournalByDate(selectedDate);
+    // Wait for templates to load before fetching journal
+    if (viewType === 'day' && templatesLoaded) {
+      loadJournalByDate(selectedDate, selectedTemplateId);
     }
-  }, [selectedDate, viewType]);
+  }, [selectedDate, viewType, templatesLoaded]);
 
   // Update selected template when template ID changes
   useEffect(() => {
@@ -49,6 +53,44 @@ export default function JournalPage() {
       setSelectedTemplate(null);
     }
   }, [selectedTemplateId, templates]);
+
+  // Handle template change: save current data and load new template's data
+  useEffect(() => {
+    // Skip if we're loading a journal from database
+    if (isLoadingJournalRef.current) {
+      return;
+    }
+
+    // Skip on initial mount when previousTemplateIdRef is empty
+    if (previousTemplateIdRef.current === '' && selectedTemplateId !== '') {
+      previousTemplateIdRef.current = selectedTemplateId;
+      return;
+    }
+
+    // If template changed, save current data and load new template's data
+    if (previousTemplateIdRef.current !== selectedTemplateId) {
+      const handleTemplateChange = async () => {
+        // Save current data if there's any content
+        const hasContent = reflection.trim() || Object.keys(customFieldValues).length > 0;
+        if (hasContent && journalId) {
+          try {
+            await saveJournal(false, true); // Silent save
+          } catch (error) {
+            console.error('Error saving before template change:', error);
+          }
+        }
+
+        // Update the previous template reference
+        previousTemplateIdRef.current = selectedTemplateId;
+
+        // Load journal for the new template + current date
+        await loadJournalByDate(selectedDate, selectedTemplateId);
+      };
+
+      handleTemplateChange();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTemplateId]);
 
   const loadTemplates = async () => {
     try {
@@ -64,20 +106,30 @@ export default function JournalPage() {
 
       setTemplates(allTemplates);
 
-      // Set default template if available
+      // Set default template if available (on initial load)
       const defaultTemplate = allTemplates.find(t => t.isDefault);
-      if (defaultTemplate) {
+      if (defaultTemplate && selectedTemplateId === '') {
+        isLoadingJournalRef.current = true;
         setSelectedTemplateId(defaultTemplate._id);
+        previousTemplateIdRef.current = defaultTemplate._id;
+        setTimeout(() => {
+          isLoadingJournalRef.current = false;
+        }, 0);
       }
+      
+      setTemplatesLoaded(true);
     } catch (error) {
       console.error('Error loading templates:', error);
+      setTemplatesLoaded(true); // Set to true even on error to prevent blocking
     }
   };
 
-  const loadJournalByDate = async (date: Date) => {
+  const loadJournalByDate = async (date: Date, templateId?: string) => {
     setLoading(true);
+    isLoadingJournalRef.current = true; // Mark as loading from database
+    
     try {
-      const response = await journalService.getJournalByDate(date);
+      const response = await journalService.getJournalByDate(date, templateId);
       if (response.success && response.data) {
         const journal = response.data;
         setJournalId(journal._id);
@@ -87,21 +139,30 @@ export default function JournalPage() {
         setReflection(journal.reflection || '');
         // Set template if journal has one (handle both populated and non-populated)
         if (journal.templateId) {
-          const templateId = typeof journal.templateId === 'string' 
+          const loadedTemplateId = typeof journal.templateId === 'string' 
             ? journal.templateId 
             : journal.templateId._id;
-          setSelectedTemplateId(templateId);
+          setSelectedTemplateId(loadedTemplateId);
+          previousTemplateIdRef.current = loadedTemplateId;
+        } else {
+          setSelectedTemplateId('');
+          previousTemplateIdRef.current = '';
         }
       } else {
         // Reset form for new entry
         setJournalId(null);
         setCustomFieldValues({});
         setReflection('');
+        // Keep the currently selected template for new entries
       }
     } catch (error) {
       console.error('Error loading journal:', error);
     } finally {
       setLoading(false);
+      // Reset loading flag after state updates
+      setTimeout(() => {
+        isLoadingJournalRef.current = false;
+      }, 0);
     }
   };
 
@@ -368,7 +429,15 @@ export default function JournalPage() {
 
         {viewType === 'weekly' && <WeeklyView selectedDate={selectedDate} />}
 
-        {viewType === 'monthly' && <MonthlyView selectedDate={selectedDate} />}
+        {viewType === 'monthly' && (
+          <MonthlyView 
+            selectedDate={selectedDate} 
+            onDateClick={(date) => {
+              setSelectedDate(date);
+              setViewType('day');
+            }}
+          />
+        )}
       </main>
 
       {/* Push Notification Prompt */}

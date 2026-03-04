@@ -11,6 +11,8 @@ import {
 } from '@/constants/goal.constants';
 import { Sparkles } from 'lucide-react';
 import GoalGeneratorChat from '@/components/goals/GoalGeneratorChat';
+import { toastService } from '@/services/toast.service';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
 
 export default function GoalsPage() {
     const router = useRouter();
@@ -19,6 +21,8 @@ export default function GoalsPage() {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [showChatDrawer, setShowChatDrawer] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         fetchGoals();
@@ -64,26 +68,40 @@ export default function GoalsPage() {
                 fetchStats();
             }
         } catch (error: any) {
-            alert(error.response?.data?.error || 'Failed to update goal status');
+            toastService.error(
+                'Failed to Update Goal',
+                error.response?.data?.error || 'Could not update goal status'
+            );
         } finally {
             setActionLoading(null);
         }
     };
 
     const handleDelete = async (goalId: string) => {
-        if (!confirm('Are you sure you want to archive this goal?')) return;
+        setGoalToDelete(goalId);
+        setShowDeleteModal(true);
+    };
 
-        setActionLoading(goalId);
+    const confirmDelete = async () => {
+        if (!goalToDelete) return;
+
+        setActionLoading(goalToDelete);
         try {
-            const response = await api.delete(`/goals/${goalId}`);
+            const response = await api.delete(`/goals/${goalToDelete}`);
             if (response.data.success) {
-                setGoals(goals.filter((g) => g._id !== goalId));
+                setGoals(goals.filter((g) => g._id !== goalToDelete));
                 fetchStats();
+                toastService.success('Goal archived successfully');
             }
         } catch (error: any) {
-            alert(error.response?.data?.error || 'Failed to archive goal');
+            toastService.error(
+                'Failed to Archive Goal',
+                error.response?.data?.error || 'Could not archive goal'
+            );
         } finally {
             setActionLoading(null);
+            setShowDeleteModal(false);
+            setGoalToDelete(null);
         }
     };
 
@@ -331,6 +349,22 @@ export default function GoalsPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Confirmation Modal for Delete */}
+                <ConfirmationModal
+                    isOpen={showDeleteModal}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setGoalToDelete(null);
+                    }}
+                    onConfirm={confirmDelete}
+                    title="Archive Goal?"
+                    message="Are you sure you want to archive this goal? This action can be undone by restoring the goal later."
+                    confirmText="Archive"
+                    cancelText="Cancel"
+                    confirmVariant="danger"
+                    isLoading={actionLoading === goalToDelete}
+                />
             </div>
         </div>
     );
