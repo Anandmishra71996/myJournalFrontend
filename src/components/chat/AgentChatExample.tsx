@@ -1,6 +1,6 @@
 // Example React component for Agent Chat with Human-in-the-Loop
 // This demonstrates the complete flow of streaming, interrupts, and confirmations
-
+"use client";
 import { useState, useRef, useEffect } from 'react';
 import api from '@/lib/api';
 import { toastService } from '@/services/toast.service';
