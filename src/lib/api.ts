@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const CLIENT_AUTH_COOKIE = 'aigoalreflect_session_client';
+const CLIENT_AUTH_COOKIE = '__session_client';
 
 const getCookieValue = (name: string): string | null => {
     if (typeof document === 'undefined') {
@@ -35,6 +35,7 @@ api.interceptors.request.use(
         // TODO: Temporary fallback for production issue. Remove Authorization header path
         // once cookie-only auth is stable end-to-end.
         const token = getCookieValue(CLIENT_AUTH_COOKIE);
+        console.log('Attaching auth token to request:', token ? 'Yes' : 'No');
         if (token) {
             config.headers?.set('Authorization', `Bearer ${token}`);
         }

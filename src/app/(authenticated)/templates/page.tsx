@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { journalTemplateService } from '@/services/journalTemplate.service';
 import { toastService } from '@/services/toast.service';
 import type { JournalTemplate, CreateTemplateData, UpdateTemplateData } from '@/types/journalTemplate.types';
+import { TemplateGenerationResult } from '@/services/aiTemplate.service';
 import TemplateCard from '@/components/templates/TemplateCard';
 import CloneTemplateModal from '@/components/templates/CloneTemplateModal';
 import ViewTemplateModal from '@/components/templates/ViewTemplateModal';
 import EditTemplateModal from '@/components/templates/EditTemplateModal';
 import CreateTemplateModal from '@/components/templates/CreateTemplateModal';
+import GenerateTemplateModal from '@/components/templates/GenerateTemplateModal';
+import AITemplateResultModal from '@/components/templates/AITemplateResultModal';
 
 type TabType = 'system' | 'user';
 
@@ -25,6 +28,10 @@ export default function TemplatesPage() {
   const [viewingTemplate, setViewingTemplate] = useState<JournalTemplate | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  // AI generation state
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [aiResult, setAiResult] = useState<TemplateGenerationResult | null>(null);
+  const [showAiResultModal, setShowAiResultModal] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -145,6 +152,39 @@ export default function TemplatesPage() {
     setShowEditModal(true);
   };
 
+  // ── AI Generation handlers ───────────────────────────────────────────────
+
+  const handleAiResult = (result: TemplateGenerationResult) => {
+    setAiResult(result);
+    setShowAiResultModal(true);
+  };
+
+  const handleAiReviewAndEdit = (template: JournalTemplate) => {
+    setShowAiResultModal(false);
+    setAiResult(null);
+    setEditingTemplate(template);
+    setShowEditModal(true);
+    setActiveTab('user');
+  };
+
+  const handleAiUseExisting = async (template: JournalTemplate) => {
+    setShowAiResultModal(false);
+    setAiResult(null);
+    // Clone the system/existing template into the user's collection
+    try {
+      const response = await journalTemplateService.cloneTemplate(template._id);
+      if (response.success) {
+        toastService.success('Template added to My Templates!');
+        await loadTemplates();
+        setActiveTab('user');
+      }
+    } catch (error: any) {
+      toastService.error(error.response?.data?.error || 'Failed to use template');
+    }
+  };
+
+  // ────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
@@ -157,13 +197,22 @@ export default function TemplatesPage() {
                 Journal Templates
               </h1>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Create Template
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowGenerateModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-sm"
+              >
+                <SparklesIcon className="w-5 h-5" />
+                Generate with AI
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <PlusIcon className="w-5 h-5" />
+                Create Template
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -286,6 +335,23 @@ export default function TemplatesPage() {
             setEditingTemplate(null);
           }}
           onSave={handleUpdateTemplate}
+        />
+      )}
+      {showGenerateModal && (
+        <GenerateTemplateModal
+          onClose={() => setShowGenerateModal(false)}
+          onResult={handleAiResult}
+        />
+      )}
+      {showAiResultModal && aiResult && (
+        <AITemplateResultModal
+          result={aiResult}
+          onClose={() => {
+            setShowAiResultModal(false);
+            setAiResult(null);
+          }}
+          onReviewAndEdit={handleAiReviewAndEdit}
+          onUseExisting={handleAiUseExisting}
         />
       )}
     </div>

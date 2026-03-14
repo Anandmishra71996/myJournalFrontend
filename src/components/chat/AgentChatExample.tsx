@@ -1,12 +1,12 @@
 // Example React component for Agent Chat with Human-in-the-Loop
 // This demonstrates the complete flow of streaming, interrupts, and confirmations
 "use client";
-import { useState, useRef, useEffect } from 'react';
-import api from '@/lib/api';
-import { toastService } from '@/services/toast.service';
+import { useState, useRef, useEffect } from "react";
+import api from "@/lib/api";
+import { toastService } from "@/services/toast.service";
 
 interface StreamEvent {
-  type: 'thinking' | 'interrupt' | 'response' | 'error';
+  type: "thinking" | "interrupt" | "response" | "error";
   content?: string;
   toolName?: string;
   toolArgs?: any;
@@ -15,7 +15,7 @@ interface StreamEvent {
 }
 
 interface Message {
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
   isToolCall?: boolean;
 }
@@ -30,47 +30,47 @@ async function streamAgentChat(
   message: string,
   threadId: string,
   onEvent: (event: StreamEvent) => void,
-  onError: (error: Error) => void
+  onError: (error: Error) => void,
 ) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/stream`,
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/chat/agent/stream`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include', // Send httpOnly cookies
+        credentials: "include", // Send httpOnly cookies
         body: JSON.stringify({ message, threadId }),
-      }
+      },
     );
 
-    if (!response.ok) throw new Error('Stream failed');
+    if (!response.ok) throw new Error("Stream failed");
 
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n\n');
+      const lines = buffer.split("\n\n");
 
       // Keep incomplete line in buffer
-      buffer = lines.pop() || '';
+      buffer = lines.pop() || "";
 
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith("data: ")) {
           const data = line.slice(6).trim();
-          if (data === '[DONE]') continue;
+          if (data === "[DONE]") continue;
 
           try {
             const event: StreamEvent = JSON.parse(data);
             onEvent(event);
           } catch (e) {
-            console.error('Parse error:', e);
+            console.error("Parse error:", e);
           }
         }
       }
@@ -83,47 +83,47 @@ async function streamAgentChat(
 // Separate function to resume agent execution after user decision
 async function resumeAgentExecution(
   threadId: string,
-  decision: { type: 'approve' | 'edit' | 'reject'; editedArgs?: any },
+  decision: { type: "approve" | "edit" | "reject"; editedArgs?: any },
   onEvent: (event: StreamEvent) => void,
-  onError: (error: Error) => void
+  onError: (error: Error) => void,
 ) {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/resume`,
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/chat/agent/resume`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include', // Send httpOnly cookies
+        credentials: "include", // Send httpOnly cookies
         body: JSON.stringify({ threadId, decision }),
-      }
+      },
     );
 
-    if (!response.ok) throw new Error('Resume failed');
+    if (!response.ok) throw new Error("Resume failed");
 
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n\n');
-      buffer = lines.pop() || '';
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop() || "";
 
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith("data: ")) {
           const data = line.slice(6).trim();
-          if (data === '[DONE]') continue;
+          if (data === "[DONE]") continue;
 
           try {
             const event: StreamEvent = JSON.parse(data);
             onEvent(event);
           } catch (e) {
-            console.error('Parse error:', e);
+            console.error("Parse error:", e);
           }
         }
       }
@@ -134,54 +134,62 @@ async function resumeAgentExecution(
 }
 
 export default function AgentChatExample() {
-  const [threadId] = useState(() => `thread_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [threadId] = useState(
+    () => `thread_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  );
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [pendingTool, setPendingTool] = useState<PendingToolCall | null>(null);
   const [editedArgs, setEditedArgs] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const streamAgentMessage = async (message: string) => {
     setIsStreaming(true);
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
-    setInput('');
+    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    setInput("");
 
-    let currentResponse = '';
+    let currentResponse = "";
 
     await streamAgentChat(
       message,
       threadId,
       (event: StreamEvent) => {
         switch (event.type) {
-          case 'thinking':
+          case "thinking":
             if (event.content) {
               currentResponse += event.content;
-              setMessages(prev => {
+              setMessages((prev) => {
                 const last = prev[prev.length - 1];
-                if (last?.role === 'assistant' && !last.isToolCall) {
-                  return [...prev.slice(0, -1), { ...last, content: currentResponse }];
+                if (last?.role === "assistant" && !last.isToolCall) {
+                  return [
+                    ...prev.slice(0, -1),
+                    { ...last, content: currentResponse },
+                  ];
                 }
-                return [...prev, { role: 'assistant', content: currentResponse }];
+                return [
+                  ...prev,
+                  { role: "assistant", content: currentResponse },
+                ];
               });
             }
             break;
 
-          case 'interrupt':
+          case "interrupt":
             if (event.needsConfirmation && event.toolName && event.toolArgs) {
               setPendingTool({
                 name: event.toolName,
                 args: event.toolArgs,
               });
               setEditedArgs(event.toolArgs);
-              setMessages(prev => [
+              setMessages((prev) => [
                 ...prev,
                 {
-                  role: 'system',
+                  role: "system",
                   content: `🔔 I need your confirmation to execute: ${event.toolName}`,
                   isToolCall: true,
                 },
@@ -189,46 +197,52 @@ export default function AgentChatExample() {
             }
             break;
 
-          case 'response':
+          case "response":
             if (event.content) {
-              setMessages(prev => [...prev, { role: 'assistant', content: event.content! }]);
+              setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: event.content! },
+              ]);
             }
             break;
 
-          case 'error':
-            toastService.error('Agent Error', event.content || 'An error occurred');
+          case "error":
+            toastService.error(
+              "Agent Error",
+              event.content || "An error occurred",
+            );
             break;
         }
       },
       (error: Error) => {
-        toastService.error('Stream Error', error.message);
+        toastService.error("Stream Error", error.message);
         setIsStreaming(false);
-      }
+      },
     );
 
     setIsStreaming(false);
   };
 
-  const handleDecision = async (type: 'approve' | 'edit' | 'reject') => {
+  const handleDecision = async (type: "approve" | "edit" | "reject") => {
     if (!pendingTool) return;
 
     setIsStreaming(true);
     const decision: any = { type };
 
-    if (type === 'edit' && editedArgs) {
+    if (type === "edit" && editedArgs) {
       decision.editedArgs = editedArgs;
     }
 
-    setMessages(prev => [
+    setMessages((prev) => [
       ...prev,
       {
-        role: 'system',
+        role: "system",
         content:
-          type === 'approve'
+          type === "approve"
             ? `✅ Approved: ${pendingTool.name}`
-            : type === 'reject'
-            ? `❌ Rejected: ${pendingTool.name}`
-            : `✏️ Edited: ${pendingTool.name}`,
+            : type === "reject"
+              ? `❌ Rejected: ${pendingTool.name}`
+              : `✏️ Edited: ${pendingTool.name}`,
         isToolCall: true,
       },
     ]);
@@ -237,14 +251,17 @@ export default function AgentChatExample() {
       threadId,
       decision,
       (event: StreamEvent) => {
-        if (event.type === 'response' && event.content) {
-          setMessages(prev => [...prev, { role: 'assistant', content: event.content! }]);
+        if (event.type === "response" && event.content) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: event.content! },
+          ]);
         }
       },
       (error: Error) => {
-        toastService.error('Execution Error', error.message);
+        toastService.error("Execution Error", error.message);
         setIsStreaming(false);
-      }
+      },
     );
 
     setPendingTool(null);
@@ -257,7 +274,9 @@ export default function AgentChatExample() {
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-2xl font-bold">Agent Chat (with Tools)</h2>
-        <p className="text-sm text-gray-500">Try: "Create a weekly fitness goal" or "Save today's journal"</p>
+        <p className="text-sm text-gray-500">
+          Try: "Create a weekly fitness goal" or "Save today's journal"
+        </p>
       </div>
 
       {/* Messages */}
@@ -265,15 +284,15 @@ export default function AgentChatExample() {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
               className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                msg.role === 'user'
-                  ? 'bg-indigo-600 text-white'
-                  : msg.role === 'system'
-                  ? 'bg-yellow-100 text-yellow-900 border-2 border-yellow-300'
-                  : 'bg-gray-200 text-gray-900'
+                msg.role === "user"
+                  ? "bg-indigo-600 text-white"
+                  : msg.role === "system"
+                    ? "bg-yellow-100 text-yellow-900 border-2 border-yellow-300"
+                    : "bg-gray-200 text-gray-900"
               }`}
             >
               {msg.content}
@@ -286,8 +305,10 @@ export default function AgentChatExample() {
       {/* Tool Confirmation Modal */}
       {pendingTool && (
         <div className="mb-4 p-4 bg-white border-2 border-indigo-500 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold mb-2">Confirm Tool: {pendingTool.name}</h3>
-          
+          <h3 className="text-lg font-semibold mb-2">
+            Confirm Tool: {pendingTool.name}
+          </h3>
+
           {/* Editable Args */}
           <div className="space-y-2 mb-4">
             {Object.entries(editedArgs || {}).map(([key, value]) => (
@@ -298,7 +319,9 @@ export default function AgentChatExample() {
                 <input
                   type="text"
                   value={String(value)}
-                  onChange={(e) => setEditedArgs({ ...editedArgs, [key]: e.target.value })}
+                  onChange={(e) =>
+                    setEditedArgs({ ...editedArgs, [key]: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
@@ -308,21 +331,21 @@ export default function AgentChatExample() {
           {/* Action Buttons */}
           <div className="flex gap-2">
             <button
-              onClick={() => handleDecision('approve')}
+              onClick={() => handleDecision("approve")}
               disabled={isStreaming}
               className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
             >
               ✅ Approve
             </button>
             <button
-              onClick={() => handleDecision('edit')}
+              onClick={() => handleDecision("edit")}
               disabled={isStreaming}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               ✏️ Save Edits
             </button>
             <button
-              onClick={() => handleDecision('reject')}
+              onClick={() => handleDecision("reject")}
               disabled={isStreaming}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
             >
@@ -338,7 +361,12 @@ export default function AgentChatExample() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !isStreaming && input && streamAgentMessage(input)}
+          onKeyPress={(e) =>
+            e.key === "Enter" &&
+            !isStreaming &&
+            input &&
+            streamAgentMessage(input)
+          }
           placeholder="Type your message..."
           disabled={isStreaming}
           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
@@ -348,7 +376,7 @@ export default function AgentChatExample() {
           disabled={isStreaming || !input}
           className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
         >
-          {isStreaming ? 'Sending...' : 'Send'}
+          {isStreaming ? "Sending..." : "Send"}
         </button>
       </div>
     </div>

@@ -60,6 +60,33 @@ export type GoalStatus = typeof GOAL_STATUS_OPTIONS[number]['value'];
 export type TrackingMethod = typeof TRACKING_METHODS_OPTIONS[number]['value'];
 export type JournalSignal = typeof JOURNAL_SIGNALS_OPTIONS[number]['value'];
 
+export interface GoalMilestone {
+    _id?: string;
+    title: string;
+    description?: string;
+    targetDate?: string;
+    status: 'pending' | 'completed';
+}
+
+export interface GoalWeeklyPlan {
+    weekNumber: number;
+    focus: string;
+    actions: string[];
+}
+
+export interface GoalActionStep {
+    _id?: string;
+    title: string;
+    frequency: 'daily' | 'weekly';
+    estimatedMinutes?: number;
+    journalSignals?: string[];
+}
+
+export interface GoalProgress {
+    completionPercentage?: number;
+    lastActivityDate?: string;
+}
+
 export interface GoalFormData {
     title: string;
     type: GoalType;
@@ -80,6 +107,12 @@ export interface Goal extends GoalFormData {
     isRepetitive: boolean;
     startDate?: string;
     endDate?: string;
+    generatedBy?: 'user' | 'agent';
+    parentGoalId?: string;
+    milestones?: GoalMilestone[];
+    weeklyPlan?: GoalWeeklyPlan[];
+    actionSteps?: GoalActionStep[];
+    progress?: GoalProgress;
     createdAt: string;
     updatedAt: string;
 }
