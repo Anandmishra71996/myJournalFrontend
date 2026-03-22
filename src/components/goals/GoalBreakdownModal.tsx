@@ -214,7 +214,7 @@ export default function GoalBreakdownModal({ onClose, onPlanCreated }: GoalBreak
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md"
                 >
                     <Sparkles className="w-4 h-4" />
-                    Break Down Goal
+                    Generate Plan
                 </button>
             </div>
         </div>
@@ -444,7 +444,7 @@ export default function GoalBreakdownModal({ onClose, onPlanCreated }: GoalBreak
 
     // ── Step title map ───────────────────────────────────────────────────────
     const stepTitles: Record<Step, string> = {
-        input: 'Break Down Goal with AI',
+        input: 'Generate and Break Down Goal with AI',
         loading: 'Analyzing your goal…',
         clarification: 'Tell us more',
         generating: 'Building your plan…',

@@ -45,25 +45,48 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full p-8 my-8 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+    <div
+      className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto backdrop-blur-[24px]"
+      style={{
+        backgroundColor: 'rgba(8, 10, 14, 0.58)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+      }}
+    >
+      <div
+        className="w-full max-w-4xl h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none sm:rounded-2xl"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 86%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)',
+          boxShadow: '0 28px 70px rgba(0,0,0,0.5)',
+        }}
+      >
+        <div
+          className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-6 sticky top-0 z-10"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 90%, transparent)',
+            borderBottom: '1px solid color-mix(in srgb, var(--color-border) 16%, transparent)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          <h2 className="text-xl sm:text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             Edit Template
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: 'var(--color-text-tertiary)' }}
           >
-            <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+            <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 px-5 sm:px-8 py-5 sm:py-6 overflow-y-auto max-h-[calc(100dvh-142px)] sm:max-h-[calc(90vh-88px)]">
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                 Template Name *
               </label>
               <input
@@ -71,22 +94,32 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 rounded-xl focus:outline-none"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-background) 60%, black)',
+                  border: '1px solid color-mix(in srgb, var(--color-border) 30%, transparent)',
+                }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                 Description
               </label>
               <input
                 type="text"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 rounded-xl focus:outline-none"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-background) 60%, black)',
+                  border: '1px solid color-mix(in srgb, var(--color-border) 30%, transparent)',
+                }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                 Icon (emoji)
               </label>
               <input
@@ -94,21 +127,29 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
                 value={formData.icon}
                 onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                 maxLength={2}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2.5 rounded-xl focus:outline-none"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-background) 60%, black)',
+                  border: '1px solid color-mix(in srgb, var(--color-border) 30%, transparent)',
+                }}
               />
             </div>
           </div>
 
           {/* Fields Section */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="pt-6" style={{ borderTop: '1px solid color-mix(in srgb, var(--color-border) 22%, transparent)' }}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg sm:text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                 Template Fields
               </h3>
               <button
                 type="button"
                 onClick={addField}
-                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-white"
+                style={{
+                  background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))',
+                }}
               >
                 <PlusIcon className="w-4 h-4" />
                 Add Field
@@ -119,24 +160,29 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
               {formData.fields?.map((field, index) => (
                 <div
                   key={field.id}
-                  className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                  className="p-4 rounded-xl"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--color-surface) 55%, var(--color-surface-elevated))',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 22%, transparent)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    <span className="text-sm font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
                       Field #{index + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeField(index)}
-                      className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded transition-colors"
+                      className="p-1.5 rounded transition-colors"
+                      style={{ color: 'var(--color-error)' }}
                     >
                       <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                         Label *
                       </label>
                       <input
@@ -144,17 +190,27 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
                         required
                         value={field.label}
                         onChange={(e) => handleFieldChange(index, { label: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 text-sm rounded-xl focus:outline-none"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          backgroundColor: 'color-mix(in srgb, var(--color-background) 58%, black)',
+                          border: '1px solid color-mix(in srgb, var(--color-border) 28%, transparent)',
+                        }}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                         Type *
                       </label>
                       <select
                         value={field.type}
                         onChange={(e) => handleFieldChange(index, { type: e.target.value as FieldType })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 text-sm rounded-xl focus:outline-none"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          backgroundColor: 'color-mix(in srgb, var(--color-background) 58%, black)',
+                          border: '1px solid color-mix(in srgb, var(--color-border) 28%, transparent)',
+                        }}
                       >
                         <option value="text">Text</option>
                         <option value="textarea">Long Text</option>
@@ -167,15 +223,20 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
                         <option value="time">Time</option>
                       </select>
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <div className="col-span-1 md:col-span-2">
+                      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                         Placeholder
                       </label>
                       <input
                         type="text"
                         value={field.placeholder}
                         onChange={(e) => handleFieldChange(index, { placeholder: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 text-sm rounded-xl focus:outline-none"
+                        style={{
+                          color: 'var(--color-text-primary)',
+                          backgroundColor: 'color-mix(in srgb, var(--color-background) 58%, black)',
+                          border: '1px solid color-mix(in srgb, var(--color-border) 28%, transparent)',
+                        }}
                       />
                     </div>
                     <div className="flex items-center">
@@ -184,9 +245,10 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
                         id={`required-${index}`}
                         checked={field.required}
                         onChange={(e) => handleFieldChange(index, { required: e.target.checked })}
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        className="w-4 h-4 rounded"
+                        style={{ accentColor: 'var(--color-primary)' }}
                       />
-                      <label htmlFor={`required-${index}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      <label htmlFor={`required-${index}`} className="ml-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                         Required
                       </label>
                     </div>
@@ -197,17 +259,34 @@ export default function EditTemplateModal({ template, onClose, onSave }: EditTem
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div
+            className="flex gap-3 pt-4 sticky bottom-0"
+            style={{
+              borderTop: '1px solid color-mix(in srgb, var(--color-border) 22%, transparent)',
+              backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 92%, transparent)',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+              paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))',
+            }}
+          >
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+              className="flex-1 px-4 py-3 rounded-xl transition-colors font-medium"
+              style={{
+                color: 'var(--color-text-secondary)',
+                border: '1px solid color-mix(in srgb, var(--color-border) 28%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--color-surface) 68%, transparent)',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="flex-1 px-4 py-3 text-white rounded-xl transition-colors font-medium"
+              style={{
+                background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))',
+              }}
             >
               Update Template
             </button>

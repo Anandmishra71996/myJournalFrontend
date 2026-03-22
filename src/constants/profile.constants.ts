@@ -58,6 +58,7 @@ export type InsightFrequency = typeof INSIGHT_FREQUENCY_OPTIONS[number]['value']
 
 export interface ProfileFormData {
     name: string;
+    avatar?: string;
     current_role?: string;
     whyUsingApp: WhyUsingApp;
     focusAreas: FocusArea[];

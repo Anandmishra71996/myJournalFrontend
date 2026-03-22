@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { journalService } from '@/services/journal.service';
 import { toast } from '@/lib/utils';
+import type { WeeklyInsight } from '@/constants/insight.constants';
 
 interface WeeklyViewProps {
   selectedDate: Date;
@@ -13,15 +14,43 @@ interface DayEntry {
   dayName: string;
   moodScore?: number;
   energyLevel?: number;
-  wins: string[];
-  challenges: string[];
+  reflectionSnippet?: string;
   hasEntry: boolean;
   journalId?: string;
 }
 
+const TEMPLATE_USAGE_PLACEHOLDER = [
+  { name: 'Deep Reflection', uses: 4, percent: 57 },
+  { name: 'Morning Vitality', uses: 3, percent: 43 },
+  { name: 'Evening Reset', uses: 2, percent: 28 },
+];
+
+const TOP_CHALLENGES_PLACEHOLDER = [
+  'Creative Blockade: Deep work felt harder due to interruptions.',
+  'Energy Dip Midweek: Sleep inconsistency reduced focus on Thursday.',
+  'Context Switching: Multiple parallel tasks reduced flow quality.',
+];
+
+const WEEKLY_INSIGHTS_PLACEHOLDER = [
+  {
+    title: 'Consistency Trend',
+    text: 'Reflection consistency is up 15 percent from last week. Your journaling habit is becoming steadier.',
+  },
+  {
+    title: 'Mood Correlation',
+    text: 'Higher mood scores appeared on days you journaled earlier in the day with a clear intent.',
+  },
+  {
+    title: 'AI Synthesis',
+    text: 'Your strongest entries combine reflection with one concrete action for the next day.',
+  },
+];
+
 export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
   const [weekData, setWeekData] = useState<DayEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weeklyInsight, setWeeklyInsight] = useState<WeeklyInsight | null>(null);
+  const [generatingInsight, setGeneratingInsight] = useState(false);
   const [weekSummary, setWeekSummary] = useState({
     totalWins: 0,
     totalChallenges: 0,
@@ -32,7 +61,60 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
 
   useEffect(() => {
     loadWeekData();
+    loadWeeklyInsight();
   }, [selectedDate]);
+
+  const getWeekStartISO = (date: Date) => {
+    const current = new Date(date);
+    const day = current.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    current.setDate(current.getDate() + diff);
+    current.setHours(0, 0, 0, 0);
+
+    // Format using local date parts to avoid UTC offset shifting weekStart (e.g. 9 -> 8).
+    const year = current.getFullYear();
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    const dayOfMonth = String(current.getDate()).padStart(2, '0');
+    return `${year}-${month}-${dayOfMonth}`;
+  };
+
+  const getReflectionSnippet = (reflection?: string, words = 4) => {
+    if (!reflection) return 'No reflection yet';
+    const trimmed = reflection.trim();
+    if (!trimmed) return 'No reflection yet';
+    const parts = trimmed.split(/\s+/).slice(0, words);
+    return `${parts.join(' ')}...`;
+  };
+
+  const loadWeeklyInsight = async () => {
+    try {
+      const weekStart = getWeekStartISO(selectedDate);
+      const response = await journalService.getWeeklyInsight(weekStart);
+      if (response?.success && response.data) {
+        setWeeklyInsight(response.data);
+      } else {
+        setWeeklyInsight(null);
+      }
+    } catch {
+      setWeeklyInsight(null);
+    }
+  };
+
+  const handleGenerateInsight = async () => {
+    setGeneratingInsight(true);
+    try {
+      const weekStart = getWeekStartISO(selectedDate);
+      const response = await journalService.generateWeeklyInsight(weekStart);
+      if (response?.success && response.data) {
+        setWeeklyInsight(response.data);
+        toast.success('Weekly insights generated');
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to generate weekly insights');
+    } finally {
+      setGeneratingInsight(false);
+    }
+  };
 
   const getWeekDates = (date: Date) => {
     const week: Date[] = [];
@@ -87,8 +169,7 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
               dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
               moodScore: journal.mood?.score,
               energyLevel: journal.mood?.energy,
-              wins: journal.content?.wins || [],
-              challenges: journal.content?.challenges || [],
+              reflectionSnippet: getReflectionSnippet(journal.reflection),
               hasEntry: true,
               journalId: journal._id,
             });
@@ -101,8 +182,7 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
             entries.push({
               date,
               dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-              wins: [],
-              challenges: [],
+              reflectionSnippet: '',
               hasEntry: false,
             });
           }
@@ -121,8 +201,7 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
         const entries: DayEntry[] = weekDates.map(date => ({
           date,
           dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-          wins: [],
-          challenges: [],
+          reflectionSnippet: '',
           hasEntry: false,
         }));
         setWeekData(entries);
@@ -143,79 +222,156 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
   };
 
   const getMoodColor = (score?: number) => {
-    if (!score) return 'bg-gray-200';
-    if (score >= 8) return 'bg-green-500';
-    if (score >= 6) return 'bg-blue-500';
-    if (score >= 4) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (!score) return 'color-mix(in srgb, var(--color-border) 50%, transparent)';
+    if (score >= 8) return 'var(--color-success)';
+    if (score >= 6) return 'var(--color-info)';
+    if (score >= 4) return 'var(--color-warning)';
+    return 'var(--color-error)';
   };
 
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400 mx-auto"></div>
-        <p className="mt-4 text-gray-600 dark:text-gray-400">Loading weekly view...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: 'var(--color-primary)' }}></div>
+        <p className="mt-4" style={{ color: 'var(--color-text-secondary)' }}>Loading weekly view...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* Week Summary */}
-      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">📊 Week Overview</h2>
-          <p className="text-gray-600 dark:text-gray-400">{getWeekRange()}</p>
+    <div className="space-y-8 pb-8">
+      <section className="space-y-5">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] font-semibold" style={{ color: 'var(--color-primary)' }}>
+              Weekly Review
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+              Template Insights
+            </h2>
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {getWeekRange()}
+            </p>
+          </div>
+          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+            Static preview sections for upcoming API integrations
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4">
-            <p className="text-sm text-green-700 dark:text-green-400 font-medium">Days Logged</p>
-            <p className="text-3xl font-bold text-green-900 dark:text-green-300">{weekSummary.daysWithEntries}/7</p>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div
+            className="md:col-span-1 rounded-xl p-5"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 84%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)',
+            }}
+          >
+            <p className="text-xs uppercase tracking-[0.14em] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              Days Logged
+            </p>
+            <p className="mt-3 text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              {weekSummary.daysWithEntries}<span className="text-lg" style={{ color: 'var(--color-text-tertiary)' }}>/7</span>
+            </p>
+            <p className="mt-2 text-xs" style={{ color: 'var(--color-primary)' }}>
+              {weeklyInsight ? `${weeklyInsight.journalCount} entries this week` : `Avg mood ${weekSummary.avgMood}/10`}
+            </p>
           </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4">
-            <p className="text-sm text-blue-700 dark:text-blue-400 font-medium">Total Wins</p>
-            <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{weekSummary.totalWins}</p>
+
+          <div
+            className="md:col-span-2 rounded-xl p-5"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 78%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)',
+            }}
+          >
+            <h3 className="text-sm uppercase tracking-[0.14em] font-semibold mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+              Template Usage
+            </h3>
+            <div className="space-y-3">
+              {TEMPLATE_USAGE_PLACEHOLDER.map((template) => (
+                <div key={template.name}>
+                  <div className="mb-1.5 flex items-center justify-between text-sm">
+                    <span style={{ color: 'var(--color-text-primary)' }}>{template.name}</span>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>{template.uses} uses</span>
+                  </div>
+                  <div className="h-2 rounded-full" style={{ backgroundColor: 'color-mix(in srgb, var(--color-border) 35%, transparent)' }}>
+                    <div
+                      className="h-2 rounded-full"
+                      style={{
+                        width: `${template.percent}%`,
+                        background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-primary-dark) 88%, transparent), var(--color-primary))',
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4">
-            <p className="text-sm text-purple-700 dark:text-purple-400 font-medium">Challenges</p>
-            <p className="text-3xl font-bold text-purple-900 dark:text-purple-300">{weekSummary.totalChallenges}</p>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 rounded-xl p-4">
-            <p className="text-sm text-yellow-700 dark:text-yellow-400 font-medium">Avg Mood</p>
-            <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-300">{weekSummary.avgMood}/10</p>
-          </div>
-          <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl p-4">
-            <p className="text-sm text-pink-700 dark:text-pink-400 font-medium">Avg Energy</p>
-            <p className="text-3xl font-bold text-pink-900 dark:text-pink-300">{weekSummary.avgEnergy}/10</p>
+
+          <div
+            className="md:col-span-2 rounded-xl p-5"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 78%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)',
+            }}
+          >
+            <h3 className="text-sm uppercase tracking-[0.14em] font-semibold mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+              Top Challenges
+            </h3>
+            <ul className="space-y-2.5">
+              {TOP_CHALLENGES_PLACEHOLDER.map((challenge, idx) => (
+                <li key={challenge} className="flex items-start gap-2.5 text-sm">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'var(--color-primary)' }} />
+                  <span style={{ color: idx === 0 ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>{challenge}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              Live challenge ranking will be connected once weekly analysis API is available.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Daily Entries */}
-      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">📅 Daily Entries</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section
+        className="rounded-2xl p-6 md:p-8"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 78%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-border) 22%, transparent)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.28)',
+        }}
+      >
+        <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>
+          Daily Entries
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
           {weekData.map((day, index) => (
             <div
               key={index}
-              className={`rounded-xl p-5 border-2 transition-all ${
-                day.hasEntry
-                  ? 'border-indigo-200 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20 hover:shadow-md'
-                  : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-60'
-              }`}
+              className="rounded-xl p-4 transition-all"
+              style={{
+                backgroundColor: day.hasEntry
+                  ? 'color-mix(in srgb, var(--color-surface) 84%, transparent)'
+                  : 'color-mix(in srgb, var(--color-surface) 62%, transparent)',
+                border: day.hasEntry
+                  ? '1px solid color-mix(in srgb, var(--color-primary) 24%, transparent)'
+                  : '1px solid color-mix(in srgb, var(--color-border) 20%, transparent)',
+                opacity: day.hasEntry ? 1 : 0.7,
+              }}
             >
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">{day.dayName}</h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <h3 className="font-bold text-base" style={{ color: 'var(--color-text-primary)' }}>{day.dayName}</h3>
+                  <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                     {day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
                 {day.hasEntry && (
                   <div className="flex gap-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${getMoodColor(day.moodScore)}`}
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: getMoodColor(day.moodScore) }}
                       title={`Mood: ${day.moodScore}/10`}
                     />
                   </div>
@@ -224,23 +380,18 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
 
               {day.hasEntry ? (
                 <div className="space-y-2 text-sm">
-                  <div>
-                    <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Wins</p>
-                    <p className="font-semibold text-green-700 dark:text-green-400">{day.wins.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Challenges</p>
-                    <p className="font-semibold text-orange-700 dark:text-orange-400">{day.challenges.length}</p>
-                  </div>
+                  <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                    {day.reflectionSnippet}
+                  </p>
                   {day.moodScore && (
-                    <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Mood: {day.moodScore}/10</span>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Energy: {day.energyLevel}/10</span>
+                    <div className="flex justify-between pt-2" style={{ borderTop: '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)' }}>
+                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Mood: {day.moodScore}/10</span>
+                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Energy: {day.energyLevel}/10</span>
                     </div>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-500 italic">No entry for this day</p>
+                <p className="text-sm italic" style={{ color: 'var(--color-text-tertiary)' }}>No entry for this day</p>
               )}
             </div>
           ))}
@@ -248,33 +399,77 @@ export default function WeeklyView({ selectedDate }: WeeklyViewProps) {
       </section>
 
       {/* Week Insights */}
-      <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">💡 Week Insights</h2>
-        <div className="space-y-4">
-          {weekData.filter(d => d.hasEntry && d.wins.length > 0).length > 0 ? (
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">🎉 This Week's Wins</h3>
-              <ul className="space-y-2">
-                {weekData
-                  .filter(d => d.hasEntry && d.wins.length > 0)
-                  .slice(0, 5)
-                  .map((day, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-green-600 dark:text-green-400 font-bold">•</span>
-                      <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{day.dayName}</p>
-                        {day.wins.slice(0, 2).map((win, winIdx) => (
-                          <p key={winIdx} className="text-gray-900 dark:text-gray-100">{win}</p>
-                        ))}
-                      </div>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-500 italic">No wins recorded this week yet</p>
-          )}
-        </div>
+      <section
+        className="rounded-2xl p-6 md:p-8"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--color-surface-elevated) 76%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-border) 22%, transparent)',
+        }}
+      >
+        <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>
+          Week Insights
+        </h2>
+        {!weeklyInsight ? (
+          <div
+            className="rounded-xl p-6 text-center"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-surface) 82%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-border) 18%, transparent)',
+            }}
+          >
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+              No insights available for this week yet.
+            </p>
+            <button
+              onClick={handleGenerateInsight}
+              disabled={generatingInsight}
+              className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 88%, transparent), var(--color-primary))',
+                color: '#ffffff',
+              }}
+            >
+              {generatingInsight ? 'Generating...' : 'Generate Insights'}
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {(weeklyInsight.reflection?.length ? weeklyInsight.reflection.slice(0, 3).map((text, index) => ({
+              title: index === 0 ? 'Reflection' : index === 1 ? 'Pattern' : 'Focus',
+              text,
+            })) : WEEKLY_INSIGHTS_PLACEHOLDER).map((insight) => (
+              <article
+                key={insight.title}
+                className="rounded-xl p-4"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--color-surface) 82%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-border) 18%, transparent)',
+                }}
+              >
+                <p className="text-xs uppercase tracking-[0.14em] font-semibold mb-2" style={{ color: 'var(--color-primary)' }}>
+                  {insight.title}
+                </p>
+                <p className="text-sm leading-6" style={{ color: 'var(--color-text-secondary)' }}>
+                  {insight.text}
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
+        {weeklyInsight?.suggestion && (
+          <div
+            className="mt-6 rounded-xl p-4"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-primary) 22%, transparent)',
+            }}
+          >
+            <p className="text-xs uppercase tracking-[0.14em] font-semibold mb-2" style={{ color: 'var(--color-primary)' }}>
+              Suggestion
+            </p>
+            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{weeklyInsight.suggestion}</p>
+          </div>
+        )}
       </section>
     </div>
   );

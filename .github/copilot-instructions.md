@@ -2,6 +2,18 @@
 
 Next.js 16 App Router + React 19 + Zustand + Tailwind CSS PWA.
 
+## Mandatory Design Skill
+
+For any design or UI-related task, agent must read and follow:
+- `frontend/.github/skills/Design/SKILL.md`
+
+This is required before making visual/styling decisions, including:
+- Page or component redesigns
+- Tailwind/CSS updates
+- Typography, spacing, color, depth/elevation, motion, and interaction changes
+
+If there is any conflict between generic styling guidance and design direction, prioritize `frontend/.github/skills/Design/SKILL.md` for design outcomes.
+
 ## Tech Stack Specifics
 
 - **Framework**: Next.js 16 with App Router (not Pages Router)

@@ -98,6 +98,8 @@ export interface GoalFormData {
     isRepetitive?: boolean;
     startDate?: string;
     endDate?: string;
+    existingGoalId?: string;
+    parentGoalId?: string;
 }
 
 export interface Goal extends GoalFormData {

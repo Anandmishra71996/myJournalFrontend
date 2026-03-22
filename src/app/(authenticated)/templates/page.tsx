@@ -1,36 +1,50 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { PlusIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { journalTemplateService } from '@/services/journalTemplate.service';
-import { toastService } from '@/services/toast.service';
-import type { JournalTemplate, CreateTemplateData, UpdateTemplateData } from '@/types/journalTemplate.types';
-import { TemplateGenerationResult } from '@/services/aiTemplate.service';
-import TemplateCard from '@/components/templates/TemplateCard';
-import CloneTemplateModal from '@/components/templates/CloneTemplateModal';
-import ViewTemplateModal from '@/components/templates/ViewTemplateModal';
-import EditTemplateModal from '@/components/templates/EditTemplateModal';
-import CreateTemplateModal from '@/components/templates/CreateTemplateModal';
-import GenerateTemplateModal from '@/components/templates/GenerateTemplateModal';
-import AITemplateResultModal from '@/components/templates/AITemplateResultModal';
+import { useState, useEffect } from "react";
+import {
+  PlusIcon,
+  SparklesIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { journalTemplateService } from "@/services/journalTemplate.service";
+import { toastService } from "@/services/toast.service";
+import type {
+  JournalTemplate,
+  CreateTemplateData,
+  UpdateTemplateData,
+} from "@/types/journalTemplate.types";
+import { TemplateGenerationResult } from "@/services/aiTemplate.service";
+import TemplateCard from "@/components/templates/TemplateCard";
+import CloneTemplateModal from "@/components/templates/CloneTemplateModal";
+import ViewTemplateModal from "@/components/templates/ViewTemplateModal";
+import EditTemplateModal from "@/components/templates/EditTemplateModal";
+import CreateTemplateModal from "@/components/templates/CreateTemplateModal";
+import GenerateTemplateModal from "@/components/templates/GenerateTemplateModal";
+import AITemplateResultModal from "@/components/templates/AITemplateResultModal";
 
-type TabType = 'system' | 'user';
+type TabType = "system" | "user";
 
 export default function TemplatesPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('system');
+  const [activeTab, setActiveTab] = useState<TabType>("system");
+  const [searchQuery, setSearchQuery] = useState("");
   const [systemTemplates, setSystemTemplates] = useState<JournalTemplate[]>([]);
   const [userTemplates, setUserTemplates] = useState<JournalTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCloneModal, setShowCloneModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<JournalTemplate | null>(null);
-  const [editingTemplate, setEditingTemplate] = useState<JournalTemplate | null>(null);
-  const [viewingTemplate, setViewingTemplate] = useState<JournalTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<JournalTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] =
+    useState<JournalTemplate | null>(null);
+  const [viewingTemplate, setViewingTemplate] =
+    useState<JournalTemplate | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   // AI generation state
   const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [aiResult, setAiResult] = useState<TemplateGenerationResult | null>(null);
+  const [aiResult, setAiResult] = useState<TemplateGenerationResult | null>(
+    null,
+  );
   const [showAiResultModal, setShowAiResultModal] = useState(false);
 
   useEffect(() => {
@@ -52,8 +66,8 @@ export default function TemplatesPage() {
         setUserTemplates(userRes.data);
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
-      toastService.error('Failed to load templates');
+      console.error("Error loading templates:", error);
+      toastService.error("Failed to load templates");
     } finally {
       setLoading(false);
     }
@@ -64,51 +78,65 @@ export default function TemplatesPage() {
     setShowCloneModal(true);
   };
 
-  const handleCreateFromSystem = async (systemTemplate: JournalTemplate, customName?: string) => {
+  const handleCreateFromSystem = async (
+    systemTemplate: JournalTemplate,
+    customName?: string,
+  ) => {
     try {
       const response = await journalTemplateService.cloneTemplate(
         systemTemplate._id,
-        customName ? { name: customName } : undefined
+        customName ? { name: customName } : undefined,
       );
       if (response.success) {
-        toastService.success(response.message || 'Template created successfully!');
+        toastService.success(
+          response.message || "Template created successfully!",
+        );
         await loadTemplates();
         setShowCloneModal(false);
         setSelectedTemplate(null);
-        setActiveTab('user');
+        setActiveTab("user");
       }
     } catch (error: any) {
-      console.error('Error cloning template:', error);
-      toastService.error(error.response?.data?.error || 'Failed to create template');
+      console.error("Error cloning template:", error);
+      toastService.error(
+        error.response?.data?.error || "Failed to create template",
+      );
     }
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm('Are you sure you want to delete this template?')) {
+    if (!confirm("Are you sure you want to delete this template?")) {
       return;
     }
     try {
       const response = await journalTemplateService.deleteTemplate(templateId);
       if (response.success) {
-        toastService.success(response.message || 'Template deleted successfully!');
+        toastService.success(
+          response.message || "Template deleted successfully!",
+        );
         await loadTemplates();
       }
     } catch (error: any) {
-      console.error('Error deleting template:', error);
-      toastService.error(error.response?.data?.error || 'Failed to delete template');
+      console.error("Error deleting template:", error);
+      toastService.error(
+        error.response?.data?.error || "Failed to delete template",
+      );
     }
   };
 
   const handleSetDefault = async (templateId: string) => {
     try {
-      const response = await journalTemplateService.setDefaultTemplate(templateId);
+      const response =
+        await journalTemplateService.setDefaultTemplate(templateId);
       if (response.success) {
-        toastService.success('Default template updated!');
+        toastService.success("Default template updated!");
         await loadTemplates();
       }
     } catch (error: any) {
-      console.error('Error setting default template:', error);
-      toastService.error(error.response?.data?.error || 'Failed to set default template');
+      console.error("Error setting default template:", error);
+      toastService.error(
+        error.response?.data?.error || "Failed to set default template",
+      );
     }
   };
 
@@ -116,29 +144,43 @@ export default function TemplatesPage() {
     try {
       const response = await journalTemplateService.createTemplate(data);
       if (response.success) {
-        toastService.success(response.message || 'Template created successfully!');
+        toastService.success(
+          response.message || "Template created successfully!",
+        );
         await loadTemplates();
         setShowCreateModal(false);
-        setActiveTab('user');
+        setActiveTab("user");
       }
     } catch (error: any) {
-      console.error('Error creating template:', error);
-      toastService.error(error.response?.data?.error || 'Failed to create template');
+      console.error("Error creating template:", error);
+      toastService.error(
+        error.response?.data?.error || "Failed to create template",
+      );
     }
   };
 
-  const handleUpdateTemplate = async (templateId: string, updates: UpdateTemplateData) => {
+  const handleUpdateTemplate = async (
+    templateId: string,
+    updates: UpdateTemplateData,
+  ) => {
     try {
-      const response = await journalTemplateService.updateTemplate(templateId, updates);
+      const response = await journalTemplateService.updateTemplate(
+        templateId,
+        updates,
+      );
       if (response.success) {
-        toastService.success(response.message || 'Template updated successfully!');
+        toastService.success(
+          response.message || "Template updated successfully!",
+        );
         await loadTemplates();
         setShowEditModal(false);
         setEditingTemplate(null);
       }
     } catch (error: any) {
-      console.error('Error updating template:', error);
-      toastService.error(error.response?.data?.error || 'Failed to update template');
+      console.error("Error updating template:", error);
+      toastService.error(
+        error.response?.data?.error || "Failed to update template",
+      );
     }
   };
 
@@ -164,7 +206,7 @@ export default function TemplatesPage() {
     setAiResult(null);
     setEditingTemplate(template);
     setShowEditModal(true);
-    setActiveTab('user');
+    setActiveTab("user");
   };
 
   const handleAiUseExisting = async (template: JournalTemplate) => {
@@ -174,129 +216,279 @@ export default function TemplatesPage() {
     try {
       const response = await journalTemplateService.cloneTemplate(template._id);
       if (response.success) {
-        toastService.success('Template added to My Templates!');
+        toastService.success("Template added to My Templates!");
         await loadTemplates();
-        setActiveTab('user');
+        setActiveTab("user");
       }
     } catch (error: any) {
-      toastService.error(error.response?.data?.error || 'Failed to use template');
+      toastService.error(
+        error.response?.data?.error || "Failed to use template",
+      );
     }
   };
 
   // ────────────────────────────────────────────────────────────────────────
 
+  const filteredSystemTemplates = systemTemplates.filter((template) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      template.name.toLowerCase().includes(query) ||
+      template.description?.toLowerCase().includes(query) ||
+      template.fields.some((field) => field.label.toLowerCase().includes(query))
+    );
+  });
+
+  const filteredUserTemplates = userTemplates.filter((template) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      template.name.toLowerCase().includes(query) ||
+      template.description?.toLowerCase().includes(query) ||
+      template.fields.some((field) => field.label.toLowerCase().includes(query))
+    );
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Journal Logo" className="w-10 h-10" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--color-background)" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 pb-28 md:pb-10">
+        <header className="mb-8 md:mb-10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p
+                className="text-xs uppercase tracking-[0.16em] font-semibold"
+                style={{ color: "var(--color-primary)" }}
+              >
+                Templates Gallery
+              </p>
+              <h1
+                className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1"
+                style={{ color: "var(--color-text-primary)" }}
+              >
                 Journal Templates
               </h1>
+              <p
+                className="mt-2 text-sm md:text-base"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                Explore curated systems and build your own custom reflection
+                flows.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={() => setShowGenerateModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-primary) 16%, transparent)",
+                  color: "var(--color-primary)",
+                }}
               >
                 <SparklesIcon className="w-5 h-5" />
                 Generate with AI
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-white transition-all"
+                style={{
+                  background:
+                    "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))",
+                }}
               >
                 <PlusIcon className="w-5 h-5" />
                 Create Template
               </button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
-          <button
-            onClick={() => setActiveTab('system')}
-            className={`px-6 py-3 font-medium transition-all ${
-              activeTab === 'system'
-                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+        <section className="mb-6 md:mb-8 space-y-5">
+          <div
+            className="flex items-center gap-5 border-b"
+            style={{
+              borderColor:
+                "color-mix(in srgb, var(--color-border) 40%, transparent)",
+            }}
           >
-            System Templates
-          </button>
-          <button
-            onClick={() => setActiveTab('user')}
-            className={`px-6 py-3 font-medium transition-all ${
-              activeTab === 'user'
-                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
-          >
-            My Templates
-          </button>
-        </div>
+            <button
+              onClick={() => setActiveTab("system")}
+              className="pb-3 text-sm md:text-base font-semibold border-b-2 transition-all"
+              style={{
+                color:
+                  activeTab === "system"
+                    ? "var(--color-primary)"
+                    : "var(--color-text-secondary)",
+                borderColor:
+                  activeTab === "system"
+                    ? "var(--color-primary)"
+                    : "transparent",
+              }}
+            >
+              System Templates
+            </button>
+            <button
+              onClick={() => setActiveTab("user")}
+              className="pb-3 text-sm md:text-base font-semibold border-b-2 transition-all"
+              style={{
+                color:
+                  activeTab === "user"
+                    ? "var(--color-primary)"
+                    : "var(--color-text-secondary)",
+                borderColor:
+                  activeTab === "user" ? "var(--color-primary)" : "transparent",
+              }}
+            >
+              My Templates
+            </button>
+          </div>
 
-        {/* Content */}
+          <div
+            className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+            style={{
+              backgroundColor:
+                "color-mix(in srgb, var(--color-surface-elevated) 78%, transparent)",
+              border:
+                "1px solid color-mix(in srgb, var(--color-border) 28%, transparent)",
+            }}
+          >
+            <MagnifyingGlassIcon
+              className="w-5 h-5"
+              style={{ color: "var(--color-text-tertiary)" }}
+            />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search templates by name, description, or field"
+              className="w-full bg-transparent text-sm focus:outline-none"
+              style={{ color: "var(--color-text-primary)" }}
+            />
+          </div>
+        </section>
+
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400"></div>
+          <div className="flex items-center justify-center py-16">
+            <div
+              className="animate-spin rounded-full h-12 w-12 border-b-2"
+              style={{ borderColor: "var(--color-primary)" }}
+            ></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeTab === 'system' ? (
-              systemTemplates.length > 0 ? (
-                systemTemplates.map((template) => (
-                  <TemplateCard
-                    key={template._id}
-                    template={template}
-                    onView={handleViewTemplate}
-                    onClone={handleCloneTemplate}
-                    onEdit={handleEditTemplate}
-                    onDelete={handleDeleteTemplate}
-                    onSetDefault={handleSetDefault}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500 dark:text-gray-400">No system templates available</p>
-                </div>
-              )
-            ) : (
-              userTemplates.length > 0 ? (
-                userTemplates.map((template) => (
-                  <TemplateCard
-                    key={template._id}
-                    template={template}
-                    onView={handleViewTemplate}
-                    onClone={handleCloneTemplate}
-                    onEdit={handleEditTemplate}
-                    onDelete={handleDeleteTemplate}
-                    onSetDefault={handleSetDefault}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <>
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {(activeTab === "system"
+                ? filteredSystemTemplates
+                : filteredUserTemplates
+              ).map((template) => (
+                <TemplateCard
+                  key={template._id}
+                  template={template}
+                  onView={handleViewTemplate}
+                  onClone={handleCloneTemplate}
+                  onEdit={handleEditTemplate}
+                  onDelete={handleDeleteTemplate}
+                  onSetDefault={handleSetDefault}
+                />
+              ))}
+
+              {activeTab === "system" &&
+                filteredSystemTemplates.length === 0 && (
+                  <div className="col-span-full text-center py-14">
+                    <p style={{ color: "var(--color-text-secondary)" }}>
+                      No system templates available
+                    </p>
+                  </div>
+                )}
+
+              {activeTab === "user" && filteredUserTemplates.length === 0 && (
+                <div className="col-span-full text-center py-14">
+                  <p
+                    className="mb-4"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
                     You haven't created any templates yet
                   </p>
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))",
+                    }}
                   >
                     <PlusIcon className="w-5 h-5" />
                     Create Your First Template
                   </button>
                 </div>
-              )
+              )}
+            </section>
+
+            {activeTab === "system" && filteredSystemTemplates.length > 0 && (
+              <section
+                className="mt-10 rounded-2xl p-5 md:p-6"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-surface-elevated) 72%, transparent)",
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-border) 24%, transparent)",
+                }}
+              >
+                <p
+                  className="text-xs uppercase tracking-[0.14em] font-semibold mb-2"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  AI Suggestion
+                </p>
+                <h2
+                  className="text-lg md:text-xl font-semibold mb-1"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Try “{filteredSystemTemplates[0]?.name}” this week
+                </h2>
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  Great for structured, low-friction journaling and consistent
+                  weekly review.
+                </p>
+              </section>
             )}
-          </div>
+          </>
         )}
+      </div>
+
+      <div className="fixed bottom-4 right-4 z-30 flex md:hidden flex-col gap-2">
+        <button
+          onClick={() => setShowGenerateModal(true)}
+          className="inline-flex items-center justify-center h-12 w-12 rounded-full"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--color-primary) 18%, transparent)",
+            color: "var(--color-primary)",
+            border:
+              "1px solid color-mix(in srgb, var(--color-primary) 24%, transparent)",
+          }}
+          title="Generate with AI"
+        >
+          <SparklesIcon className="w-6 h-6" />
+        </button>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center justify-center h-14 w-14 rounded-full text-white"
+          style={{
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))",
+            boxShadow: "0 14px 30px rgba(0,0,0,0.28)",
+          }}
+          title="Create Template"
+        >
+          <PlusIcon className="w-7 h-7" />
+        </button>
       </div>
 
       {/* Modals */}

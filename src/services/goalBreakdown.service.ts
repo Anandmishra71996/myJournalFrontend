@@ -3,6 +3,7 @@ import type { GoalMilestone, GoalWeeklyPlan, GoalActionStep } from '@/constants/
 
 export interface GoalBreakdownPlan {
     mainGoalId: string;
+    childGoalIds?: string[];
     title: string;
     milestones: GoalMilestone[];
     weeklyPlan: GoalWeeklyPlan[];

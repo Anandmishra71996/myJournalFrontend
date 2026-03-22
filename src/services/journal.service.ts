@@ -1,5 +1,6 @@
 import api from '@/lib/api';
 import { Journal, JournalData } from '@/types/journal.types';
+import { WeeklyInsight } from '@/constants/insight.constants';
 
 export const journalService = {
     createJournal: async (data: JournalData) => {
@@ -51,6 +52,16 @@ export const journalService = {
                 endDate: endDate.toISOString(),
             },
         });
+        return response.data;
+    },
+
+    getWeeklyInsight: async (weekStart: string): Promise<{ success: boolean; data: WeeklyInsight }> => {
+        const response = await api.get(`/insights?weekStart=${weekStart}`);
+        return response.data;
+    },
+
+    generateWeeklyInsight: async (weekStart: string): Promise<{ success: boolean; data: WeeklyInsight }> => {
+        const response = await api.post('/insights/generate', { weekStart });
         return response.data;
     },
 };

@@ -1,11 +1,15 @@
 {
-  "mcpServers": {
+  "servers": {
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "AQ.Ab8RN6KYppsAYtuGiY4xdn8V6Rh9IZX2PHy9xJPE1ljVK6JcRw"
+      }
+    },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@latest"
-      ]
+      "args": ["-y", "next-devtools-mcp@latest"]
     }
   }
 }

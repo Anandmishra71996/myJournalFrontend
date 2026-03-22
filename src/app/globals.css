@@ -6,33 +6,60 @@
 
 /* Default Theme - Calm */
 :root {
-  /* Primary Colors - Calm & Serene */
-  --color-primary: #6366F1;
-  --color-primary-light: #818CF8;
-  --color-primary-dark: #4F46E5;
-  
-  /* Secondary Colors - Nature-inspired */
-  --color-secondary: #10B981;
-  --color-secondary-light: #34D399;
-  --color-secondary-dark: #059669;
-  
-  /* Accent Colors */
-  --color-accent: #F59E0B;
-  --color-accent-light: #FCD34D;
-  
-  /* Neutral Colors */
-  --color-background: #FFFFFF;
-  --color-surface: #F9FAFB;
-  --color-surface-elevated: #FFFFFF;
-  
-  /* Text Colors */
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
-  
-  /* Border & Divider */
-  --color-border: #E5E7EB;
-  --color-divider: #F3F4F6;
+  /* Design-skill aligned palette (light mode counterpart) */
+  --color-primary: #7c4dff;
+  --color-primary-light: #9f82ff;
+  --color-primary-dark: #6335e8;
+
+  --color-secondary: #8e61c9;
+  --color-secondary-light: #f3ebff;
+  --color-secondary-dark: #7346ac;
+
+  --color-accent: #bf517c;
+  --color-accent-light: #d56f97;
+
+  --color-background: #f4f3f8;
+  --color-surface: #efedf5;
+  --color-surface-elevated: #ffffff;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #f7f5fb;
+  --color-surface-high: #ece9f4;
+  --color-surface-highest: #e1dceb;
+  --color-surface-bright: #ffffff;
+
+  --color-text-primary: #1a1c1e;
+  --color-text-secondary: #4f5560;
+  --color-text-tertiary: #7d8390;
+
+  --color-border: #cfc8dd;
+  --color-divider: #e8e4f0;
+  --color-outline: #8b809c;
+  --color-outline-variant: #c7bed8;
+
+  /* Goal dashboard semantic tokens */
+  --color-goal-ai-surface: rgba(104, 52, 235, 0.06);
+  --color-goal-ai-border: rgba(104, 52, 235, 0.35);
+  --color-goal-ai-glow: rgba(104, 52, 235, 0.12);
+  --color-goal-chip-surface: rgba(123, 82, 184, 0.10);
+  --color-goal-chip-border: rgba(123, 82, 184, 0.35);
+
+  --color-goal-cta-text: #ffffff;
+  --color-goal-filter-active-bg: #7c4dff;
+  --color-goal-filter-active-text: #ffffff;
+  --color-goal-breakdown-bg: #7c4dff;
+  --color-goal-breakdown-hover: #6335e8;
+  --color-goal-breakdown-border: #7c4dff;
+  --color-goal-breakdown-text: #ffffff;
+
+  --color-status-success-soft: rgba(16, 185, 129, 0.16);
+  --color-status-warning-soft: rgba(245, 158, 11, 0.18);
+  --color-status-danger-soft: rgba(239, 68, 68, 0.16);
+  --color-status-info-soft: rgba(59, 130, 246, 0.16);
+
+  --color-status-success-text: #0f766e;
+  --color-status-warning-text: #92400e;
+  --color-status-danger-text: #b91c1c;
+  --color-status-info-text: #1d4ed8;
   
   /* Status Colors */
   --color-success: #10B981;
@@ -75,33 +102,60 @@
 
 /* Dark Theme */
 .dark {
-  /* Primary Colors - Lighter for dark mode */
-  --color-primary: #818CF8;
-  --color-primary-light: #A5B4FC;
-  --color-primary-dark: #6366F1;
-  
-  /* Secondary Colors */
-  --color-secondary: #34D399;
-  --color-secondary-light: #6EE7B7;
-  --color-secondary-dark: #10B981;
-  
-  /* Accent Colors */
-  --color-accent: #FBBF24;
-  --color-accent-light: #FCD34D;
-  
-  /* Neutral Colors - Inverted */
-  --color-background: #111827;
-  --color-surface: #1F2937;
-  --color-surface-elevated: #374151;
-  
-  /* Text Colors - Inverted */
-  --color-text-primary: #F9FAFB;
-  --color-text-secondary: #D1D5DB;
-  --color-text-tertiary: #9CA3AF;
-  
-  /* Border & Divider */
-  --color-border: #374151;
-  --color-divider: #1F2937;
+  /* AIReflect palette from design skill */
+  --color-primary: #b6a0ff;
+  --color-primary-light: #a98fff;
+  --color-primary-dark: #7e51ff;
+
+  --color-secondary: #bc8df9;
+  --color-secondary-light: #d6b6ff;
+  --color-secondary-dark: #5b2d94;
+
+  --color-accent: #ff96bb;
+  --color-accent-light: #fb81ae;
+
+  --color-background: #0c0e10;
+  --color-surface: #171a1c;
+  --color-surface-elevated: #1d2022;
+  --color-surface-lowest: #000000;
+  --color-surface-low: #111416;
+  --color-surface-high: #1d2022;
+  --color-surface-highest: #232629;
+  --color-surface-bright: #292c2f;
+
+  --color-text-primary: #eeeef0;
+  --color-text-secondary: #aaabad;
+  --color-text-tertiary: #747578;
+
+  --color-border: #46484a;
+  --color-divider: #232629;
+  --color-outline: #747578;
+  --color-outline-variant: #46484a;
+
+  /* Goal dashboard semantic tokens */
+  --color-goal-ai-surface: rgba(182, 160, 255, 0.10);
+  --color-goal-ai-border: rgba(182, 160, 255, 0.35);
+  --color-goal-ai-glow: rgba(126, 81, 255, 0.16);
+  --color-goal-chip-surface: rgba(188, 141, 249, 0.12);
+  --color-goal-chip-border: rgba(188, 141, 249, 0.32);
+
+  --color-goal-cta-text: #f3ebff;
+  --color-goal-filter-active-bg: #7e51ff;
+  --color-goal-filter-active-text: #eeeef0;
+  --color-goal-breakdown-bg: #5b2d94;
+  --color-goal-breakdown-hover: #8e61c9;
+  --color-goal-breakdown-border: #b6a0ff;
+  --color-goal-breakdown-text: #d6b6ff;
+
+  --color-status-success-soft: rgba(52, 211, 153, 0.18);
+  --color-status-warning-soft: rgba(251, 191, 36, 0.20);
+  --color-status-danger-soft: rgba(248, 113, 113, 0.20);
+  --color-status-info-soft: rgba(96, 165, 250, 0.20);
+
+  --color-status-success-text: #a7f3d0;
+  --color-status-warning-text: #fde68a;
+  --color-status-danger-text: #fecaca;
+  --color-status-info-text: #bfdbfe;
   
   /* Status Colors - Adjusted for dark mode */
   --color-success: #34D399;
