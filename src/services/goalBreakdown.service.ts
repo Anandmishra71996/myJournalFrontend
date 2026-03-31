@@ -23,6 +23,7 @@ export interface GoalBreakdownRequest {
     type: 'weekly' | 'monthly' | 'yearly';
     parentGoalId?: string;
     clarificationAnswers?: Record<string, string>;
+    clarificationIteration?: number;
 }
 
 class GoalBreakdownService {
@@ -39,8 +40,18 @@ class GoalBreakdownService {
     async generateBreakdown(
         request: GoalBreakdownRequest
     ): Promise<{ success: boolean; data: GoalBreakdownResult; message: string }> {
-        const response = await api.post('/ai/goals/breakdown', request);
-        return response.data;
+        try {
+            const response = await api.post('/ai/goals/breakdown', request, {
+                // Goal planning can involve multiple LLM steps and DB writes.
+                timeout: 120000,
+            });
+            return response.data;
+        } catch (error: any) {
+            if (error?.code === 'ECONNABORTED') {
+                throw new Error('Goal generation is taking longer than expected. Please try again.');
+            }
+            throw error;
+        }
     }
 }
 

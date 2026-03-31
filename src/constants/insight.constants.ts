@@ -13,6 +13,14 @@ export interface WeeklyInsight {
     journalCount: number;
     reflection: string[];
     goalSummaries: GoalSummary[];
+    challengesFaced: Array<{
+        challengeType: 'procrastination' | 'time_management' | 'emotional_regulation' | 'focus' | 'consistency' | 'stress' | 'other';
+        title: string;
+        evidence: string;
+        generalizedWhy: string;
+        articleHeadings: string[];
+        solutions: string[];
+    }>;
     suggestion?: string;
     generatedAt: string;
     sourceVersion: number;

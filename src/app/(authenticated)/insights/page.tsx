@@ -75,7 +75,21 @@ export default function InsightsPage() {
       toast.success("Weekly insights generated!");
     } catch (error: any) {
       console.error("Error generating insight:", error);
-      toast.error(error.response?.data?.error || "Failed to generate insights");
+      const errorMessage =
+        error.response?.data?.error || "Failed to generate insights";
+
+      // Provide specific guidance for common errors
+      if (errorMessage.includes("No new journals added")) {
+        toast.error(
+          "No new journals added. Update an existing journal or add a new one to regenerate insights.",
+        );
+      } else if (errorMessage.includes("At least 3 journal entries")) {
+        toast.error(errorMessage);
+      } else if (errorMessage.includes("At least 4 days")) {
+        toast.error(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setGenerating(false);
     }
@@ -392,6 +406,98 @@ export default function InsightsPage() {
                     className={`${surfaceCardClass} p-5 text-sm text-[var(--color-text-secondary)]`}
                   >
                     No linked goals were detected for this week.
+                  </div>
+                )}
+              </section>
+
+              <section className="col-span-12 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-[var(--color-text-primary)] sm:text-xl">
+                    Challenges Faced
+                  </h3>
+                  <span className="rounded-full bg-[var(--color-surface-high)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-text-tertiary)]">
+                    Pattern Analysis
+                  </span>
+                </div>
+
+                {insight.challengesFaced &&
+                insight.challengesFaced.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                    {insight.challengesFaced.map((challenge, index) => (
+                      <article
+                        key={index}
+                        className={`${surfaceCardClass} space-y-3 p-5`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="text-base font-semibold text-[var(--color-text-primary)]">
+                            {challenge.title}
+                          </h4>
+                          <span className="rounded-full bg-[var(--color-surface-high)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+                            {challenge.challengeType.replace("_", " ")}
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                          <span className="font-semibold text-[var(--color-text-primary)]">
+                            Evidence:{" "}
+                          </span>
+                          {challenge.evidence}
+                        </p>
+
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                          <span className="font-semibold text-[var(--color-text-primary)]">
+                            Why this happens:{" "}
+                          </span>
+                          {challenge.generalizedWhy}
+                        </p>
+
+                        {challenge.articleHeadings.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-tertiary)]">
+                              Related Research Topics
+                            </p>
+                            <ul className="space-y-1">
+                              {challenge.articleHeadings.map(
+                                (heading, headingIndex) => (
+                                  <li
+                                    key={headingIndex}
+                                    className="text-sm text-[var(--color-text-secondary)]"
+                                  >
+                                    • {heading}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        )}
+
+                        {challenge.solutions.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-tertiary)]">
+                              Practical Solutions
+                            </p>
+                            <ul className="space-y-1">
+                              {challenge.solutions.map(
+                                (solution, solutionIndex) => (
+                                  <li
+                                    key={solutionIndex}
+                                    className="text-sm text-[var(--color-text-secondary)]"
+                                  >
+                                    • {solution}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    className={`${surfaceCardClass} p-5 text-sm text-[var(--color-text-secondary)]`}
+                  >
+                    No major challenge patterns were detected for this week.
                   </div>
                 )}
               </section>

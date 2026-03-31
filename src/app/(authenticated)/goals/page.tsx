@@ -21,6 +21,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import GoalBreakdownModal from "@/components/goals/GoalBreakdownModal";
+import GoalTemplateAssistantModal from "@/components/goals/GoalTemplateAssistantModal";
 import { toastService } from "@/services/toast.service";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 
@@ -31,6 +32,7 @@ export default function GoalsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showBreakdownModal, setShowBreakdownModal] = useState(false);
+  const [showGoalTemplateModal, setShowGoalTemplateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
@@ -573,6 +575,13 @@ export default function GoalsPage() {
               <WandSparkles className="h-4 w-4" />
               Generate with AI
             </button>
+            <button
+              onClick={() => setShowGoalTemplateModal(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-goal-chip-border)] bg-[var(--color-goal-chip-surface)] px-5 py-2.5 font-semibold text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-secondary)]/18"
+            >
+              <Sparkles className="h-4 w-4" />
+              Create Template for Goals
+            </button>
           </div>
 
           <section className="relative mb-8 overflow-hidden rounded-2xl border border-[var(--color-goal-ai-border)] bg-[var(--color-goal-ai-surface)] p-6 backdrop-blur-xl md:p-8">
@@ -581,7 +590,7 @@ export default function GoalsPage() {
               <div className="rounded-2xl bg-[var(--color-goal-chip-surface)] p-3">
                 <Sparkles className="h-8 w-8 text-[var(--color-secondary)]" />
               </div>
-              <div className="flex-1">
+              {/* <div className="flex-1">
                 <h3 className="mb-1 text-xl font-bold text-[var(--color-secondary)]">
                   AI Goal Architect
                 </h3>
@@ -604,7 +613,7 @@ export default function GoalsPage() {
                     Optimize timeline
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           </section>
 
@@ -646,6 +655,17 @@ export default function GoalsPage() {
           <GoalBreakdownModal
             onClose={() => setShowBreakdownModal(false)}
             onPlanCreated={() => {
+              fetchGoals();
+              fetchStats();
+            }}
+          />
+        )}
+
+        {showGoalTemplateModal && (
+          <GoalTemplateAssistantModal
+            goals={goals}
+            onClose={() => setShowGoalTemplateModal(false)}
+            onUpdated={() => {
               fetchGoals();
               fetchStats();
             }}
