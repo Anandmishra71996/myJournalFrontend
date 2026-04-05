@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Brain,
   ChevronRight,
+  CreditCard,
   Download,
   Flame,
   Lock,
@@ -362,11 +363,34 @@ export default function ProfilePage() {
                 <div className="mb-4 flex items-center gap-2">
                   <Download className="h-4 w-4 text-[color:var(--color-text-tertiary)]" />
                   <h2 className="text-sm font-semibold text-[color:var(--color-text-primary)]">
-                    Archive Settings
+                    Subscription & Billing
                   </h2>
                 </div>
 
                 <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/subscription")}
+                    className="flex w-full items-center justify-between rounded-[14px] bg-[color:var(--color-surface-container-high)]/88 px-4 py-3 text-left"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-lg bg-[color:var(--color-primary-dark)]/35 p-2">
+                        <CreditCard className="h-4 w-4 text-[color:var(--color-primary)]" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[color:var(--color-text-primary)]">
+                          Subscription & Billing
+                        </p>
+                        <p className="mt-1 text-xs text-[color:var(--color-text-secondary)]">
+                          View plan, upgrade, cancel, or reactivate your
+                          subscription
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-[color:var(--color-text-tertiary)]" />
+                  </button>
+
+                  {/*
                   <button
                     type="button"
                     onClick={() =>
@@ -430,6 +454,7 @@ export default function ProfilePage() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-red-300" />
                   </button>
+                  */}
                 </div>
               </section>
 
