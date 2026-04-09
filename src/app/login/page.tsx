@@ -342,10 +342,10 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-8 flex justify-center gap-6">
-              <Link href="#" className="text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]">
+              <Link href="/privacy-policy" className="text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]">
+              <Link href="/terms-of-service" className="text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]">
                 Terms of Service
               </Link>
             </div>

@@ -426,10 +426,10 @@ export default function SignupPage() {
             </p>
 
             <footer className="hidden flex-wrap justify-center gap-x-6 gap-y-2 pt-4 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-tertiary)] md:flex">
-              <Link href="#" className="hover:text-[var(--color-primary)]">
+              <Link href="/privacy-policy" className="hover:text-[var(--color-primary)]">
                 Privacy Policy
               </Link>
-              <Link href="#" className="hover:text-[var(--color-primary)]">
+              <Link href="/terms-of-service" className="hover:text-[var(--color-primary)]">
                 Terms of Service
               </Link>
               <Link href="#" className="hover:text-[var(--color-primary)]">

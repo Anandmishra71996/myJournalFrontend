@@ -83,6 +83,18 @@ export default function Home() {
             >
               Testimonials
             </a>
+            <a
+              href="#about"
+              className="transition hover:text-[color:var(--color-text-primary)]"
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              className="transition hover:text-[color:var(--color-text-primary)]"
+            >
+              Contact
+            </a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
@@ -349,6 +361,304 @@ export default function Home() {
         </div>
       </section>
 
+      <section
+        id="about"
+        className="bg-surface/70 py-16 sm:py-20"
+      >
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+              About AIReflect
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
+              Building tools for self-awareness in a fast-paced world
+            </p>
+          </div>
+
+          {/* Company Information */}
+          <div className="mb-12 rounded-3xl border border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_8%,var(--color-surface-elevated)),color-mix(in_srgb,var(--color-secondary)_6%,var(--color-surface-elevated)))] p-8">
+            <h3 className="mb-6 text-xl font-bold tracking-tight">
+              Company Information
+            </h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[color:var(--color-text-secondary)]">
+                  Company Name
+                </p>
+                <p className="text-lg font-bold">AIGoalReflect</p>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[color:var(--color-text-secondary)]">
+                  Founded
+                </p>
+                <p className="text-lg font-bold">2026</p>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[color:var(--color-text-secondary)]">
+                  Founder & Lead Developer
+                </p>
+                <a
+                  href="https://www.linkedin.com/in/anandmishraleaddeveloper"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-lg font-bold text-[color:var(--color-primary)] transition hover:underline"
+                >
+                  Anand Mishra
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                </a>
+                <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">
+                  Lead Full-Stack Engineer | AI Systems & RAG Architect
+                </p>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-[color:var(--color-text-secondary)]">
+                  Team Size
+                </p>
+                <p className="text-lg font-bold">1 (Founder-Led)</p>
+              </div>
+              <div className="md:col-span-2">
+                <p className="mb-2 text-sm font-semibold text-[color:var(--color-text-secondary)]">
+                  Headquarters
+                </p>
+                <p className="text-lg font-bold">
+                  Village Puremohan, Rampur Gauri, Pratapgarh 230001, Uttar Pradesh, India
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+                <h3 className="mb-4 text-2xl font-bold tracking-tight">
+                  Our Mission
+                </h3>
+                <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
+                  We believe journaling shouldn't be a chore. AIReflect combines the timeless practice of self-reflection with modern AI to help you understand your patterns, emotions, and growth trajectory—all while keeping your thoughts completely private.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+                <h3 className="mb-4 text-2xl font-bold tracking-tight">
+                  Privacy First
+                </h3>
+                <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
+                  Your journal is your safe space. We use end-to-end encryption for all entries, meaning only you can read your thoughts. We don't sell data, train public models on your writing, or compromise your privacy—ever.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+                <h3 className="mb-4 text-2xl font-bold tracking-tight">
+                  Why We Built This
+                </h3>
+                <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
+                  Traditional journaling apps felt static. Therapy journaling prompts felt generic. We wanted something that actually understood context, adapted to your writing style, and revealed insights you might have missed—without sacrificing the intimacy of a personal journal.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+                <h3 className="mb-4 text-2xl font-bold tracking-tight">
+                  Our Founder
+                </h3>
+                <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
+                  Founded by Anand Mishra, a Lead Full-Stack Engineer with expertise in AI Systems and RAG Architecture. With AWS certification and experience in modern tech stacks including Angular, React, Node.js, and LangGraph, Anand combines technical excellence with a passion for building meaningful products that enhance self-awareness.
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+                <h3 className="mb-4 text-2xl font-bold tracking-tight">
+                  Open Beta
+                </h3>
+                <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
+                  We're currently in free beta, which means you can explore all features at no cost while we refine the experience. Your feedback shapes the product, and early adopters will receive special perks when we launch premium features.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="contact"
+        className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
+      >
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+            Get In Touch
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
+            Questions, feedback, or just want to say hi? We'd love to hear from you.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="space-y-8">
+            <div>
+              <h3 className="mb-6 text-xl font-bold tracking-tight">
+                Contact Information
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[color:color-mix(in_srgb,var(--color-primary)_14%,transparent)]">
+                    <svg
+                      className="h-5 w-5 text-[color:var(--color-primary)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Email</p>
+                    <a
+                      href="mailto:hello@aireflect.app"
+                      className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
+                    >
+                      hello@aireflect.app
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[color:color-mix(in_srgb,var(--color-primary)_14%,transparent)]">
+                    <svg
+                      className="h-5 w-5 text-[color:var(--color-primary)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Support</p>
+                    <a
+                      href="mailto:support@aireflect.app"
+                      className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
+                    >
+                      support@aireflect.app
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[color:color-mix(in_srgb,var(--color-primary)_14%,transparent)]">
+                    <svg
+                      className="h-5 w-5 text-[color:var(--color-primary)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Feedback</p>
+                    <a
+                      href="mailto:feedback@aireflect.app"
+                      className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
+                    >
+                      feedback@aireflect.app
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-6">
+              <h4 className="mb-3 font-semibold">
+                Beta User Support
+              </h4>
+              <p className="text-sm leading-relaxed text-[color:var(--color-text-secondary)]">
+                During our beta phase, we typically respond within 24 hours. Your feedback directly shapes the product roadmap, so we genuinely appreciate hearing from you.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-8">
+            <h3 className="mb-6 text-xl font-bold tracking-tight">
+              Send us a message
+            </h3>
+            <form className="space-y-5">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="mb-2 block text-sm font-semibold"
+                >
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  className="w-full rounded-xl border border-[color:var(--color-border)] bg-background px-4 py-3 transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-sm font-semibold"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  className="w-full rounded-xl border border-[color:var(--color-border)] bg-background px-4 py-3 transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="message"
+                  className="mb-2 block text-sm font-semibold"
+                >
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={5}
+                  className="w-full rounded-xl border border-[color:var(--color-border)] bg-background px-4 py-3 transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                  placeholder="Tell us what's on your mind..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-gradient-to-br from-[color:var(--color-primary-dark)] to-[color:var(--color-primary)] px-6 py-3.5 font-semibold text-white shadow-lg shadow-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] transition hover:scale-[1.02]"
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
         <div className="mx-auto max-w-4xl overflow-hidden rounded-[2rem] border border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_14%,var(--color-surface-elevated)),color-mix(in_srgb,var(--color-secondary)_12%,var(--color-surface-elevated)))] p-8 text-center shadow-2xl sm:p-12">
           <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
@@ -382,23 +692,26 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-6 px-4 py-10 text-sm sm:flex-row sm:px-6 lg:px-8">
           <div>
             <p className="font-bold tracking-tight">AIReflect</p>
-            <p className="mt-1 text-[color:var(--color-text-tertiary)]">
-              © 2026 AIReflect. Crafted for reflective minds.
+            <p className="mt-1 text-xs text-[color:var(--color-text-tertiary)]">
+              © 2026 AIGoalReflect. Crafted for reflective minds.
+            </p>
+            <p className="mt-1 text-xs text-[color:var(--color-text-tertiary)]">
+              Village Puremohan, Rampur Gauri, Pratapgarh 230001, India
             </p>
           </div>
           <div className="flex items-center gap-6 text-[color:var(--color-text-secondary)]">
-            <a
-              href="#"
+            <Link
+              href="/privacy-policy"
               className="transition hover:text-[color:var(--color-primary)]"
             >
               Privacy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/terms-of-service"
               className="transition hover:text-[color:var(--color-primary)]"
             >
               Terms
-            </a>
+            </Link>
             <a
               href="#"
               className="transition hover:text-[color:var(--color-primary)]"
