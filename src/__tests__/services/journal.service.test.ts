@@ -6,6 +6,7 @@ import { journalService } from '@/services/journal.service'
 import { mockApiResponse, mockApiError, TestDataBuilder } from '../utils/testHelpers'
 
 jest.mock('@/lib/api', () => ({
+    __esModule: true,
     default: {
         get: jest.fn(),
         post: jest.fn(),
@@ -121,6 +122,24 @@ describe('JournalService', () => {
 
             expect(mockApi.put).toHaveBeenCalledWith(`/journals/${journalId}`, updates)
             expect(result).toEqual(mockJournal)
+        })
+
+        it('should serialize Date values as ISO strings in multipart audio updates', async () => {
+            const journalId = 'journal-123'
+            const updates = {
+                date: new Date('2026-04-19T05:52:17.010Z'),
+                reflection: 'Updated content',
+                customFieldValues: { mood: 'focused' },
+            }
+
+            mockApi.put.mockResolvedValue(mockApiResponse({ success: true }))
+
+            await journalService.updateJournal(journalId, updates as any, [new Blob(['audio'])])
+
+            const [, formData] = mockApi.put.mock.calls[0]
+            expect(formData).toBeInstanceOf(FormData)
+            expect((formData as FormData).get('date')).toBe('2026-04-19T05:52:17.010Z')
+            expect((formData as FormData).get('customFieldValues')).toBe(JSON.stringify({ mood: 'focused' }))
         })
     })
 

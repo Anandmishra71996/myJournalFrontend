@@ -33,10 +33,12 @@ export default function InsightsPage() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    const { weekStart: currentWeekStart, weekEnd: currentWeekEnd } =
-      getCurrentWeek();
-    setWeekStart(currentWeekStart);
-    setWeekEnd(currentWeekEnd);
+    const { weekStart: currentWeekStart } = getCurrentWeek();
+    const prevWeekStart = getPreviousWeek(currentWeekStart);
+    const prevWeekEnd = new Date(prevWeekStart);
+    prevWeekEnd.setDate(prevWeekEnd.getDate() + 6);
+    setWeekStart(prevWeekStart);
+    setWeekEnd(prevWeekEnd.toISOString().split("T")[0]);
   }, []);
 
   useEffect(() => {

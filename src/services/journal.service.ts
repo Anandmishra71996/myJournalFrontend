@@ -3,7 +3,48 @@ import { Journal, JournalData } from '@/types/journal.types';
 import { WeeklyInsight } from '@/constants/insight.constants';
 
 export const journalService = {
-    createJournal: async (data: JournalData) => {
+    buildJournalFormData: (data: JournalData, audioFiles: Blob[]) => {
+        const formData = new FormData();
+
+        audioFiles.forEach((audioBlob, index) => {
+            formData.append('audioFiles', audioBlob, `recording-${index}.webm`);
+        });
+
+        Object.entries(data).forEach(([key, value]) => {
+            if (value === undefined || value === null) {
+                return;
+            }
+
+            if (value instanceof Date) {
+                formData.append(key, value.toISOString());
+                return;
+            }
+
+            if (typeof value === 'object') {
+                formData.append(key, JSON.stringify(value));
+                return;
+            }
+
+            formData.append(key, String(value));
+        });
+
+        return formData;
+    },
+
+    createJournal: async (data: JournalData, audioFiles?: Blob[]) => {
+        // If audio files are provided, use FormData
+        if (audioFiles && audioFiles.length > 0) {
+            const formData = journalService.buildJournalFormData(data, audioFiles);
+
+            const response = await api.post('/journals', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        }
+
+        // No audio files, send as regular JSON
         const response = await api.post('/journals', data);
         return response.data;
     },
@@ -25,13 +66,31 @@ export const journalService = {
         return response.data;
     },
 
-    updateJournal: async (id: string, data: Partial<JournalData>) => {
+    updateJournal: async (id: string, data: Partial<JournalData>, audioFiles?: Blob[]) => {
+        // If audio files are provided, use FormData
+        if (audioFiles && audioFiles.length > 0) {
+            const formData = journalService.buildJournalFormData(data as JournalData, audioFiles);
+
+            const response = await api.put(`/journals/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        }
+
+        // No audio files, send as regular JSON
         const response = await api.put(`/journals/${id}`, data);
         return response.data;
     },
 
     deleteJournal: async (id: string) => {
         const response = await api.delete(`/journals/${id}`);
+        return response.data;
+    },
+
+    refreshAudioUrls: async (id: string) => {
+        const response = await api.post(`/journals/${id}/refresh-audio-urls`);
         return response.data;
     },
 

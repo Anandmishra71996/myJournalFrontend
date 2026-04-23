@@ -17,6 +17,13 @@ import type { JournalTemplate } from "@/types/journalTemplate.types";
 
 type ViewType = "day" | "weekly" | "monthly";
 
+interface VoiceRecording {
+  id: string;
+  blob: Blob;
+  duration?: number;
+  url: string;
+}
+
 export default function JournalPage() {
   const [viewType, setViewType] = useState<ViewType>("day");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -32,6 +39,7 @@ export default function JournalPage() {
     [fieldId: string]: any;
   }>({});
   const [reflection, setReflection] = useState<string>("");
+  const [voiceRecordings, setVoiceRecordings] = useState<VoiceRecording[]>([]);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [templatesLoaded, setTemplatesLoaded] = useState(false);
@@ -151,6 +159,8 @@ export default function JournalPage() {
         setCustomFieldValues(journal.customFieldValues || {});
         // Load reflection
         setReflection(journal.reflection || "");
+        // Clear voice recordings (they're already saved)
+        clearVoiceRecordings();
         // Set template if journal has one (handle both populated and non-populated)
         if (journal.templateId) {
           const loadedTemplateId =
@@ -168,6 +178,7 @@ export default function JournalPage() {
         setJournalId(null);
         setCustomFieldValues({});
         setReflection("");
+        clearVoiceRecordings();
         // Keep the currently selected template for new entries
       }
     } catch (error) {
@@ -196,14 +207,24 @@ export default function JournalPage() {
         customFieldValues: customFieldValues,
       };
 
+      // Prepare audio files from voice recordings
+      const audioFiles =
+        voiceRecordings.length > 0
+          ? voiceRecordings.map((r) => r.blob)
+          : undefined;
+
       // Store current data for comparison
       lastSavedDataRef.current = JSON.stringify(data);
 
       let response;
       if (journalId) {
-        response = await journalService.updateJournal(journalId, data);
+        response = await journalService.updateJournal(
+          journalId,
+          data,
+          audioFiles,
+        );
       } else {
-        response = await journalService.createJournal(data);
+        response = await journalService.createJournal(data, audioFiles);
         if (response.success && response.data) {
           setJournalId(response.data._id);
 
@@ -224,6 +245,10 @@ export default function JournalPage() {
 
       if (response.success) {
         setLastSyncTime(new Date());
+        // Clear voice recordings after successful save
+        if (audioFiles && audioFiles.length > 0) {
+          clearVoiceRecordings();
+        }
         if (!isSilent) {
           const message = isComplete
             ? "Journal saved successfully!"
@@ -251,6 +276,14 @@ export default function JournalPage() {
   const handleManualSync = useCallback(() => {
     saveJournal(false, true);
   }, []);
+
+  // Clear voice recordings and revoke object URLs
+  const clearVoiceRecordings = () => {
+    voiceRecordings.forEach((recording) => {
+      URL.revokeObjectURL(recording.url);
+    });
+    setVoiceRecordings([]);
+  };
 
   // Auto-save with 10-second interval
   useEffect(() => {
@@ -662,6 +695,8 @@ export default function JournalPage() {
                 lastSyncTime={lastSyncTime}
                 isSyncing={isSyncing}
                 onManualSync={handleManualSync}
+                voiceRecordings={voiceRecordings}
+                setVoiceRecordings={setVoiceRecordings}
               />
             </section>
           </div>

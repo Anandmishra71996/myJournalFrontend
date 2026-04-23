@@ -1,5 +1,15 @@
 import { JournalTemplate } from './journalTemplate.types';
 
+export interface VoiceRecording {
+    audioUrl: string;
+    audioPath: string;
+    transcription?: string;
+    duration?: number;
+    size?: number;
+    language?: string;
+    recordedAt: string;
+}
+
 export interface Journal {
     _id: string;
     userId: string;
@@ -10,6 +20,8 @@ export interface Journal {
     customFieldValues: { [fieldId: string]: any };
     tags: string[];
     isPrivate: boolean;
+    // Voice journaling (multiple recordings supported)
+    voiceRecordings?: VoiceRecording[];
     createdAt: string;
     updatedAt: string;
 }

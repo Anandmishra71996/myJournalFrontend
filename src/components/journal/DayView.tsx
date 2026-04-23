@@ -1,7 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import DynamicField from "./DynamicField";
+import { AudioRecorder } from "../audio/AudioRecorder";
 import type { JournalTemplate } from "@/types/journalTemplate.types";
+
+interface VoiceRecording {
+  id: string;
+  blob: Blob;
+  duration?: number;
+  url: string; // Object URL for preview
+}
 
 interface DayViewProps {
   saving: boolean;
@@ -17,6 +26,8 @@ interface DayViewProps {
   lastSyncTime?: Date | null;
   isSyncing?: boolean;
   onManualSync?: () => void;
+  voiceRecordings: VoiceRecording[];
+  setVoiceRecordings: React.Dispatch<React.SetStateAction<VoiceRecording[]>>;
 }
 
 export default function DayView({
@@ -31,12 +42,42 @@ export default function DayView({
   lastSyncTime,
   isSyncing = false,
   onManualSync,
+  voiceRecordings,
+  setVoiceRecordings,
 }: DayViewProps) {
+  const [inputMode, setInputMode] = useState<"text" | "voice">("text");
+
   const handleCustomFieldChange = (fieldId: string, value: any) => {
     setCustomFieldValues((prev) => ({
       ...prev,
       [fieldId]: value,
     }));
+  };
+
+  // Handle voice recording completion - store locally, don't upload yet
+  const handleVoiceRecordingComplete = (audioBlob: Blob) => {
+    const newRecording: VoiceRecording = {
+      id: Date.now().toString(),
+      blob: audioBlob,
+      url: URL.createObjectURL(audioBlob),
+    };
+
+    setVoiceRecordings((prev) => [...prev, newRecording]);
+
+    // Switch back to text mode
+    setInputMode("text");
+  };
+
+  // Remove voice recording
+  const removeVoiceRecording = (id: string) => {
+    setVoiceRecordings((prev) => {
+      const recording = prev.find((r) => r.id === id);
+      if (recording) {
+        // Revoke object URL to free memory
+        URL.revokeObjectURL(recording.url);
+      }
+      return prev.filter((r) => r.id !== id);
+    });
   };
 
   // Format last sync time
@@ -86,29 +127,135 @@ export default function DayView({
         </div>
 
         <div className="space-y-6">
-          {/* Free-flow reflection field - always shown */}
-          <div>
-            {/* <label htmlFor="reflection" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              What happened today? ✨
-            </label> */}
-            <textarea
-              id="reflection"
-              value={reflection}
-              onChange={(e) => setReflection(e.target.value)}
-              placeholder="Write freely about your day, thoughts, feelings, or anything on your mind..."
-              rows={6}
-              className="w-full px-4 py-3 rounded-xl text-base transition-colors resize-none focus:outline-none focus:ring-2"
+          {/* Input mode toggle */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setInputMode("text")}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                inputMode === "text"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+              }`}
+            >
+              ✍️ Type
+            </button>
+            <button
+              onClick={() => setInputMode("voice")}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                inputMode === "voice"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+              }`}
+            >
+              🎤 Voice
+            </button>
+          </div>
+
+          {/* Free-flow reflection field - text mode */}
+          {inputMode === "text" && (
+            <div>
+              <textarea
+                id="reflection"
+                value={reflection}
+                onChange={(e) => setReflection(e.target.value)}
+                placeholder="Write freely about your day, thoughts, feelings, or anything on your mind..."
+                rows={6}
+                className="w-full px-4 py-3 rounded-xl text-base transition-colors resize-none focus:outline-none focus:ring-2"
+                style={{
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-background) 60%, transparent)",
+                  color: "var(--color-text-primary)",
+                  boxShadow:
+                    "inset 0 0 0 1px color-mix(in srgb, var(--color-border) 12%, transparent)",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Voice recording mode */}
+          {inputMode === "voice" && (
+            <div
+              className="p-6 rounded-xl"
               style={{
                 border:
                   "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
                 backgroundColor:
                   "color-mix(in srgb, var(--color-background) 60%, transparent)",
-                color: "var(--color-text-primary)",
-                boxShadow:
-                  "inset 0 0 0 1px color-mix(in srgb, var(--color-border) 12%, transparent)",
               }}
-            />
-          </div>
+            >
+              <h3
+                className="text-lg font-semibold mb-4"
+                style={{ color: "var(--color-text-primary)" }}
+              >
+                🎤 Record Your Journal Entry
+              </h3>
+              <AudioRecorder
+                onRecordingComplete={handleVoiceRecordingComplete}
+                onRecordingCancel={() => setInputMode("text")}
+                maxDuration={300}
+              />
+              <p
+                className="mt-4 text-sm"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                Your voice will be automatically transcribed when you save. You
+                can record multiple voice notes.
+              </p>
+            </div>
+          )}
+
+          {/* Display recorded voice notes */}
+          {voiceRecordings.length > 0 && (
+            <div
+              className="p-4 rounded-xl space-y-3"
+              style={{
+                border:
+                  "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
+                backgroundColor:
+                  "color-mix(in srgb, var(--color-background) 60%, transparent)",
+              }}
+            >
+              <h4
+                className="text-sm font-semibold mb-2"
+                style={{ color: "var(--color-text-primary)" }}
+              >
+                🎵 Voice Recordings ({voiceRecordings.length})
+              </h4>
+              {voiceRecordings.map((recording, index) => (
+                <div
+                  key={recording.id}
+                  className="flex items-center gap-3 p-3 rounded-lg"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-surface-elevated) 40%, transparent)",
+                  }}
+                >
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    #{index + 1}
+                  </span>
+                  <audio
+                    src={recording.url}
+                    controls
+                    className="flex-1"
+                    style={{ height: "32px" }}
+                  />
+                  <button
+                    onClick={() => removeVoiceRecording(recording.id)}
+                    className="px-3 py-1 text-sm rounded hover:bg-red-500/20 transition-colors"
+                    style={{ color: "var(--color-error)" }}
+                    title="Remove recording"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Template-specific fields */}
           {templateFields.length > 0 ? (
