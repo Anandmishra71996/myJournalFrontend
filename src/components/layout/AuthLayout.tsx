@@ -7,6 +7,7 @@ import { Bars3Icon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import Sidebar from "./Sidebar";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import BetaBanner from "@/components/BetaBanner";
+import { BRAND_NAME } from "@/constants/brand.constants";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     "/insights": "Insights",
     "/profile": "Profile",
     "/chat": "AI Chat",
+    "/subscription": "Subscription",
   };
 
   const pageTitle =
@@ -100,8 +102,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   // Show loading indicator while verifying authentication
   if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)]">
+        <div className="w-12 h-12 border-4 border-[var(--color-outline)] border-t-[var(--color-primary)] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -165,7 +167,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                   className="text-xs uppercase tracking-[0.14em]"
                   style={{ color: "var(--color-text-tertiary)" }}
                 >
-                  AIReflect
+                  {BRAND_NAME}
                 </p>
                 <h1
                   className="text-base sm:text-lg font-semibold truncate"

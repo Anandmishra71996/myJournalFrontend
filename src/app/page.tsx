@@ -1,22 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
+  Bars3Icon,
   ChartBarIcon,
   ChatBubbleBottomCenterTextIcon,
   LightBulbIcon,
   LockClosedIcon,
   ShieldCheckIcon,
   SparklesIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useAuthStore } from "@/store/authStore";
+import { BRAND_NAME } from "@/constants/brand.constants";
 
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,7 +65,7 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="text-xl font-extrabold tracking-tight sm:text-2xl">
             <span className="bg-gradient-to-r from-[color:var(--color-primary-dark)] to-[color:var(--color-primary-light)] bg-clip-text text-transparent">
-              AIReflect
+              {BRAND_NAME}
             </span>
           </div>
           <nav className="hidden items-center gap-8 text-sm text-[color:var(--color-text-secondary)] md:flex">
@@ -109,8 +113,43 @@ export default function Home() {
             >
               Sign Up
             </Link>
+            <button
+              className="ml-1 rounded-lg p-2 text-[color:var(--color-text-secondary)] transition hover:bg-[color:color-mix(in_srgb,var(--color-surface-high)_80%,transparent)] hover:text-[color:var(--color-text-primary)] md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <XMarkIcon className="h-6 w-6" />
+              ) : (
+                <Bars3Icon className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile navigation menu */}
+        {mobileMenuOpen && (
+          <div className="border-t border-[color:color-mix(in_srgb,var(--color-border)_50%,transparent)] bg-[color:color-mix(in_srgb,var(--color-background)_95%,transparent)] px-4 pb-4 pt-2 md:hidden">
+            <nav className="flex flex-col gap-1">
+              {[
+                { href: "#features", label: "Features" },
+                { href: "#how-it-works", label: "How It Works" },
+                { href: "#testimonials", label: "Testimonials" },
+                { href: "#about", label: "About" },
+                { href: "#contact", label: "Contact" },
+              ].map(({ href, label }) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-[color:var(--color-text-secondary)] transition hover:bg-[color:color-mix(in_srgb,var(--color-surface-high)_70%,transparent)] hover:text-[color:var(--color-text-primary)]"
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+          </div>
+        )}
       </header>
 
       <section className="mx-auto grid w-full max-w-7xl gap-12 px-4 pb-14 pt-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:pb-24 lg:pt-24">
@@ -321,7 +360,7 @@ export default function Home() {
               name: "Sarah Chen",
               role: "Product Designer",
               quote:
-                "AIReflect helped me connect my midweek stress to poor sleep patterns. The insight quality feels surprisingly human.",
+                "AIGoalReflect helped me connect my midweek stress to poor sleep patterns. The insight quality feels surprisingly human.",
             },
             {
               initials: "MJ",
@@ -361,14 +400,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        id="about"
-        className="bg-surface/70 py-16 sm:py-20"
-      >
+      <section id="about" className="bg-surface/70 py-16 sm:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14 text-center">
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
-              About AIReflect
+              About {BRAND_NAME}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
               Building tools for self-awareness in a fast-paced world
@@ -404,8 +440,12 @@ export default function Home() {
                   className="inline-flex items-center gap-2 text-lg font-bold text-[color:var(--color-primary)] transition hover:underline"
                 >
                   Anand Mishra
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  <svg
+                    className="h-4 w-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                   </svg>
                 </a>
                 <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">
@@ -423,7 +463,8 @@ export default function Home() {
                   Headquarters
                 </p>
                 <p className="text-lg font-bold">
-                  Village Puremohan, Rampur Gauri, Pratapgarh 230001, Uttar Pradesh, India
+                  Village Puremohan, Rampur Gauri, Pratapgarh 230001, Uttar
+                  Pradesh, India
                 </p>
               </div>
             </div>
@@ -436,7 +477,10 @@ export default function Home() {
                   Our Mission
                 </h3>
                 <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
-                  We believe journaling shouldn't be a chore. AIReflect combines the timeless practice of self-reflection with modern AI to help you understand your patterns, emotions, and growth trajectory—all while keeping your thoughts completely private.
+                  We believe journaling shouldn't be a chore. {BRAND_NAME}{" "}
+                  combines the timeless practice of self-reflection with modern
+                  AI to help you understand your patterns, emotions, and growth
+                  trajectory—all while keeping your thoughts completely private.
                 </p>
               </div>
 
@@ -445,7 +489,10 @@ export default function Home() {
                   Privacy First
                 </h3>
                 <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
-                  Your journal is your safe space. We use end-to-end encryption for all entries, meaning only you can read your thoughts. We don't sell data, train public models on your writing, or compromise your privacy—ever.
+                  Your journal is your safe space. We use end-to-end encryption
+                  for all entries, meaning only you can read your thoughts. We
+                  don't sell data, train public models on your writing, or
+                  compromise your privacy—ever.
                 </p>
               </div>
             </div>
@@ -456,7 +503,11 @@ export default function Home() {
                   Why We Built This
                 </h3>
                 <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
-                  Traditional journaling apps felt static. Therapy journaling prompts felt generic. We wanted something that actually understood context, adapted to your writing style, and revealed insights you might have missed—without sacrificing the intimacy of a personal journal.
+                  Traditional journaling apps felt static. Therapy journaling
+                  prompts felt generic. We wanted something that actually
+                  understood context, adapted to your writing style, and
+                  revealed insights you might have missed—without sacrificing
+                  the intimacy of a personal journal.
                 </p>
               </div>
 
@@ -465,7 +516,12 @@ export default function Home() {
                   Our Founder
                 </h3>
                 <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
-                  Founded by Anand Mishra, a Lead Full-Stack Engineer with expertise in AI Systems and RAG Architecture. With AWS certification and experience in modern tech stacks including Angular, React, Node.js, and LangGraph, Anand combines technical excellence with a passion for building meaningful products that enhance self-awareness.
+                  Founded by Anand Mishra, a Lead Full-Stack Engineer with
+                  expertise in AI Systems and RAG Architecture. With AWS
+                  certification and experience in modern tech stacks including
+                  Angular, React, Node.js, and LangGraph, Anand combines
+                  technical excellence with a passion for building meaningful
+                  products that enhance self-awareness.
                 </p>
               </div>
 
@@ -474,7 +530,10 @@ export default function Home() {
                   Open Beta
                 </h3>
                 <p className="leading-relaxed text-[color:var(--color-text-secondary)]">
-                  We're currently in free beta, which means you can explore all features at no cost while we refine the experience. Your feedback shapes the product, and early adopters will receive special perks when we launch premium features.
+                  We're currently in free beta, which means you can explore all
+                  features at no cost while we refine the experience. Your
+                  feedback shapes the product, and early adopters will receive
+                  special perks when we launch premium features.
                 </p>
               </div>
             </div>
@@ -491,7 +550,8 @@ export default function Home() {
             Get In Touch
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
-            Questions, feedback, or just want to say hi? We'd love to hear from you.
+            Questions, feedback, or just want to say hi? We'd love to hear from
+            you.
           </p>
         </div>
 
@@ -521,10 +581,10 @@ export default function Home() {
                   <div>
                     <p className="font-semibold">Email</p>
                     <a
-                      href="mailto:hello@aireflect.app"
+                      href="mailto:hello@aigoalreflect.online"
                       className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
                     >
-                      hello@aireflect.app
+                      hello@aigoalreflect.online
                     </a>
                   </div>
                 </div>
@@ -548,10 +608,10 @@ export default function Home() {
                   <div>
                     <p className="font-semibold">Support</p>
                     <a
-                      href="mailto:support@aireflect.app"
+                      href="mailto:hello@aigoalreflect.online"
                       className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
                     >
-                      support@aireflect.app
+                      hello@aigoalreflect.online
                     </a>
                   </div>
                 </div>
@@ -575,10 +635,10 @@ export default function Home() {
                   <div>
                     <p className="font-semibold">Feedback</p>
                     <a
-                      href="mailto:feedback@aireflect.app"
+                      href="mailto:hello@aigoalreflect.online"
                       className="text-[color:var(--color-text-secondary)] transition hover:text-[color:var(--color-primary)]"
                     >
-                      feedback@aireflect.app
+                      hello@aigoalreflect.online
                     </a>
                   </div>
                 </div>
@@ -586,11 +646,11 @@ export default function Home() {
             </div>
 
             <div className="rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-6">
-              <h4 className="mb-3 font-semibold">
-                Beta User Support
-              </h4>
+              <h4 className="mb-3 font-semibold">Beta User Support</h4>
               <p className="text-sm leading-relaxed text-[color:var(--color-text-secondary)]">
-                During our beta phase, we typically respond within 24 hours. Your feedback directly shapes the product roadmap, so we genuinely appreciate hearing from you.
+                During our beta phase, we typically respond within 24 hours.
+                Your feedback directly shapes the product roadmap, so we
+                genuinely appreciate hearing from you.
               </p>
             </div>
           </div>
@@ -691,7 +751,7 @@ export default function Home() {
       <footer className="border-t border-[color:color-mix(in_srgb,var(--color-border)_55%,transparent)] bg-background">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-6 px-4 py-10 text-sm sm:flex-row sm:px-6 lg:px-8">
           <div>
-            <p className="font-bold tracking-tight">AIReflect</p>
+            <p className="font-bold tracking-tight">{BRAND_NAME}</p>
             <p className="mt-1 text-xs text-[color:var(--color-text-tertiary)]">
               © 2026 AIGoalReflect. Crafted for reflective minds.
             </p>

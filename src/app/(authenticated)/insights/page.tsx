@@ -23,7 +23,12 @@ import {
   LightBulbIcon,
   ArrowPathIcon,
   ArrowUpTrayIcon,
+  StarIcon as StarOutline,
 } from "@heroicons/react/24/outline";
+import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
+import { AiFeedback } from "@/constants/aiFeedback.constants";
+import { journalService } from "@/services/journal.service";
+import AiFeedbackModal from "@/components/feedback/AiFeedbackModal";
 
 export default function InsightsPage() {
   const [weekStart, setWeekStart] = useState<string>("");
@@ -31,6 +36,12 @@ export default function InsightsPage() {
   const [insight, setInsight] = useState<WeeklyInsight | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Feedback state
+  const [feedback, setFeedback] = useState<AiFeedback | null>(null);
+  const [quickRatingPending, setQuickRatingPending] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
 
   useEffect(() => {
     const { weekStart: currentWeekStart } = getCurrentWeek();
@@ -50,16 +61,49 @@ export default function InsightsPage() {
   const fetchInsight = async () => {
     setLoading(true);
     setInsight(null);
+    setFeedback(null);
 
     try {
       const response = await api.get(`/insights?weekStart=${weekStart}`);
-      setInsight(response.data.data);
+      const fetchedInsight: WeeklyInsight = response.data.data;
+      setInsight(fetchedInsight);
+
+      // Load existing feedback in parallel
+      try {
+        const fbRes = await journalService.getAiFeedback(
+          "weekly_insight",
+          fetchedInsight._id,
+        );
+        setFeedback(fbRes.data);
+      } catch {
+        // No feedback yet — fine
+      }
     } catch (error: any) {
       if (error.response?.status !== 404) {
         console.error("Error fetching insight:", error);
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleQuickRating = async (star: number) => {
+    if (!insight || quickRatingPending) return;
+    setQuickRatingPending(true);
+    try {
+      const res = await journalService.submitAiFeedback(
+        "weekly_insight",
+        insight._id,
+        {
+          quickRating: star,
+          contextDate: insight.weekStart,
+        },
+      );
+      setFeedback(res.data);
+    } catch {
+      toast.error("Failed to save rating");
+    } finally {
+      setQuickRatingPending(false);
     }
   };
 
@@ -308,6 +352,59 @@ export default function InsightsPage() {
               </div>
             </section>
 
+            {/* Quick Feedback Bar */}
+            <div
+              className={`${surfaceCardClass} flex flex-wrap items-center justify-between gap-4 px-5 py-4`}
+            >
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  How useful was this insight?
+                </p>
+                {feedback?.quickRating ? (
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    You rated this {feedback.quickRating}/5
+                  </p>
+                ) : (
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    Tap a star to rate
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const filled =
+                      (hoveredStar ?? feedback?.quickRating ?? 0) >= star;
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                        disabled={quickRatingPending}
+                        onClick={() => handleQuickRating(star)}
+                        onMouseEnter={() => setHoveredStar(star)}
+                        onMouseLeave={() => setHoveredStar(null)}
+                        className="rounded p-0.5 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {filled ? (
+                          <StarSolid className="h-6 w-6 text-[var(--color-secondary)]" />
+                        ) : (
+                          <StarOutline className="h-6 w-6 text-[var(--color-text-tertiary)]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackModalOpen(true)}
+                  className="text-xs font-semibold text-[var(--color-primary)] underline-offset-2 hover:underline"
+                >
+                  Detailed feedback
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-12 gap-4 sm:gap-6">
               <section className="col-span-12 space-y-4 lg:col-span-8">
                 <div className="flex items-center justify-between">
@@ -507,6 +604,18 @@ export default function InsightsPage() {
           </div>
         )}
       </div>
+
+      {insight && (
+        <AiFeedbackModal
+          isOpen={feedbackModalOpen}
+          onClose={() => setFeedbackModalOpen(false)}
+          contentType="weekly_insight"
+          contentId={insight._id}
+          contextDate={insight.weekStart}
+          initialFeedback={feedback}
+          onFeedbackSaved={(saved) => setFeedback(saved)}
+        />
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import api from "@/lib/api";
+import { BRAND_NAME } from "@/constants/brand.constants";
 
 type Step = "email" | "otp" | "reset";
 
@@ -130,24 +131,26 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <Link href="/">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Journal
+            <h1 className="text-4xl font-bold text-[var(--color-primary)] mb-2">
+              {BRAND_NAME}
             </h1>
           </Link>
-          <p className="text-gray-600">Reset Your Password</p>
+          <p className="text-[var(--color-text-secondary)]">
+            Reset Your Password
+          </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-[var(--color-surface-high)] rounded-2xl shadow-2xl p-8 border border-[var(--color-outline-variant)]/30">
           {/* Back to Login Link */}
           <Link
             href="/login"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-indigo-600 mb-6 transition-colors"
+            className="inline-flex items-center text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] mb-6 transition-colors"
           >
             <ArrowLeftIcon className="w-4 h-4 mr-1" />
             Back to Login
@@ -156,10 +159,10 @@ export default function ForgotPasswordPage() {
           {/* Step 1: Enter Email */}
           {step === "email" && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
                 Forgot Password?
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-[var(--color-text-secondary)] mb-6">
                 Enter your email and we'll send you an OTP to reset your
                 password.
               </p>
@@ -168,7 +171,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2"
                   >
                     Email Address
                   </label>
@@ -177,7 +180,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-3 border border-[var(--color-outline-variant)]/50 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface-low)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] outline-none"
                     placeholder="you@example.com"
                     required
                   />
@@ -186,7 +189,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--color-primary)]/20"
                 >
                   {loading ? "Sending..." : "Send OTP"}
                 </button>
@@ -197,16 +200,16 @@ export default function ForgotPasswordPage() {
           {/* Step 2: Enter OTP */}
           {step === "otp" && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
                 Enter OTP
               </h2>
-              <p className="text-gray-600 mb-2">
+              <p className="text-[var(--color-text-secondary)] mb-2">
                 We've sent a 6-digit OTP to <strong>{email}</strong>
               </p>
 
               {timerActive && (
                 <div className="flex items-center justify-center mb-6">
-                  <div className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-mono text-lg font-bold">
+                  <div className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-4 py-2 rounded-lg font-mono text-lg font-bold">
                     ⏱️ {formatTime(timeLeft)}
                   </div>
                 </div>
@@ -216,7 +219,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="otp"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2"
                   >
                     Enter 6-digit OTP
                   </label>
@@ -230,7 +233,7 @@ export default function ForgotPasswordPage() {
                         .slice(0, 6);
                       setOtp(value);
                     }}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 focus:bg-white text-center text-2xl tracking-widest font-mono"
+                    className="w-full px-4 py-3 border border-[var(--color-outline-variant)]/50 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface-low)] text-[var(--color-text-primary)] outline-none text-center text-2xl tracking-widest font-mono"
                     placeholder="000000"
                     maxLength={6}
                     required
@@ -240,7 +243,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--color-primary)]/20"
                 >
                   {loading ? "Verifying..." : "Verify OTP"}
                 </button>
@@ -250,7 +253,7 @@ export default function ForgotPasswordPage() {
                     type="button"
                     onClick={handleResendOTP}
                     disabled={loading || timerActive}
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-sm text-[var(--color-primary)] hover:opacity-80 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {timerActive ? "Wait to resend OTP" : "Resend OTP"}
                   </button>
@@ -262,10 +265,10 @@ export default function ForgotPasswordPage() {
           {/* Step 3: Reset Password */}
           {step === "reset" && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
                 Reset Password
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-[var(--color-text-secondary)] mb-6">
                 Enter your new password below
               </p>
 
@@ -273,7 +276,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="newPassword"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2"
                   >
                     New Password
                   </label>
@@ -282,7 +285,7 @@ export default function ForgotPasswordPage() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-3 border border-[var(--color-outline-variant)]/50 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface-low)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] outline-none"
                     placeholder="At least 8 characters"
                     required
                     minLength={8}
@@ -292,7 +295,7 @@ export default function ForgotPasswordPage() {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-2"
                   >
                     Confirm Password
                   </label>
@@ -301,7 +304,7 @@ export default function ForgotPasswordPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-3 border border-[var(--color-outline-variant)]/50 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all bg-[var(--color-surface-low)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] outline-none"
                     placeholder="Confirm your password"
                     required
                   />
@@ -310,7 +313,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--color-primary)]/20"
                 >
                   {loading ? "Resetting..." : "Reset Password"}
                 </button>
@@ -321,11 +324,11 @@ export default function ForgotPasswordPage() {
 
         {/* Alternative Action */}
         <div className="text-center mt-6">
-          <p className="text-gray-600">
+          <p className="text-[var(--color-text-secondary)]">
             Remember your password?{" "}
             <Link
               href="/login"
-              className="text-indigo-600 hover:text-indigo-700 font-semibold"
+              className="text-[var(--color-primary)] hover:opacity-80 font-semibold"
             >
               Log In
             </Link>

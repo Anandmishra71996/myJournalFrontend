@@ -196,7 +196,10 @@ export default function GoalBreakdownModal({
   const renderInputStep = () => (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label
+          className="block text-sm font-medium mb-1.5"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
           What's your goal?
         </label>
         <textarea
@@ -205,9 +208,19 @@ export default function GoalBreakdownModal({
           placeholder="e.g. Improve physical health, learn Spanish, get promoted…"
           rows={3}
           maxLength={500}
-          className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+          className="w-full px-4 py-2.5 rounded-xl resize-none focus:outline-none focus:ring-2"
+          style={{
+            backgroundColor: "var(--color-surface-container-lowest)",
+            color: "var(--color-text-primary)",
+            outline:
+              "1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent)",
+            focusRingColor: "var(--color-primary)",
+          }}
         />
-        <p className="text-xs text-gray-400 mt-1 text-right">
+        <p
+          className="text-xs mt-1 text-right"
+          style={{ color: "var(--color-text-tertiary)" }}
+        >
           {goal.length}/500
         </p>
       </div>
@@ -215,7 +228,10 @@ export default function GoalBreakdownModal({
       {/* Quick examples */}
       {CATEGORY_EXAMPLES[category] && (
         <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          <p
+            className="text-xs font-medium mb-2"
+            style={{ color: "var(--color-text-tertiary)" }}
+          >
             Quick examples:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -224,7 +240,14 @@ export default function GoalBreakdownModal({
                 key={ex}
                 type="button"
                 onClick={() => setGoal(ex)}
-                className="px-3 py-1 text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                className="px-3 py-1 text-xs rounded-full transition-colors"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-primary) 14%, transparent)",
+                  color: "var(--color-primary)",
+                  outline:
+                    "1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)",
+                }}
               >
                 {ex}
               </button>
@@ -235,13 +258,22 @@ export default function GoalBreakdownModal({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label
+            className="block text-sm font-medium mb-1.5"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Category
           </label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface-container-lowest)",
+              color: "var(--color-text-primary)",
+              outline:
+                "1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent)",
+            }}
           >
             {GOAL_CATEGORIES_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -251,13 +283,22 @@ export default function GoalBreakdownModal({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label
+            className="block text-sm font-medium mb-1.5"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Timeframe
           </label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as any)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-3 py-2.5 rounded-xl"
+            style={{
+              backgroundColor: "var(--color-surface-container-lowest)",
+              color: "var(--color-text-primary)",
+              outline:
+                "1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent)",
+            }}
           >
             {GOAL_TYPES_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -271,14 +312,24 @@ export default function GoalBreakdownModal({
       <div className="flex gap-3 pt-1">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+          className="flex-1 px-4 py-2.5 rounded-xl transition-colors font-medium"
+          style={{
+            border:
+              "1px solid color-mix(in srgb, var(--color-outline-variant) 40%, transparent)",
+            color: "var(--color-text-secondary)",
+          }}
         >
           Cancel
         </button>
         <button
           onClick={handleGenerate}
           disabled={!goal.trim()}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+            color: "white",
+          }}
         >
           <Sparkles className="w-4 h-4" />
           Generate Plan
@@ -289,29 +340,55 @@ export default function GoalBreakdownModal({
 
   const renderLoadingStep = (message: string) => (
     <div className="py-8 text-center">
-      <Sparkles className="w-12 h-12 text-indigo-500 animate-pulse mx-auto mb-4" />
-      <p className="font-semibold text-gray-900 dark:text-white mb-2">
+      <Sparkles
+        className="w-12 h-12 animate-pulse mx-auto mb-4"
+        style={{ color: "var(--color-primary)" }}
+      />
+      <p
+        className="font-semibold mb-2"
+        style={{ color: "var(--color-text-primary)" }}
+      >
         {message}
       </p>
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm" style={{ color: "var(--color-text-tertiary)" }}>
         The AI is crafting a realistic plan for you. This usually takes 5–15
         seconds.
       </p>
       <div className="mt-6 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 dark:border-indigo-400" />
+        <div
+          className="animate-spin rounded-full h-10 w-10 border-b-2"
+          style={{ borderColor: "var(--color-primary)" }}
+        />
       </div>
     </div>
   );
 
   const renderClarificationStep = () => (
     <div className="space-y-5">
-      <div className="flex items-start gap-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4">
-        <AlertCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
+      <div
+        className="flex items-start gap-3 rounded-xl p-4"
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+          outline:
+            "1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)",
+        }}
+      >
+        <AlertCircle
+          className="w-5 h-5 flex-shrink-0 mt-0.5"
+          style={{ color: "var(--color-primary)" }}
+        />
         <div>
-          <p className="text-sm font-medium text-indigo-800 dark:text-indigo-300">
+          <p
+            className="text-sm font-medium"
+            style={{ color: "var(--color-text-primary)" }}
+          >
             A few quick questions
           </p>
-          <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+          <p
+            className="text-xs mt-1"
+            style={{ color: "var(--color-text-secondary)" }}
+          >
             Your goal is a bit broad. Answer these to get a precise, actionable
             plan.
           </p>
@@ -321,7 +398,10 @@ export default function GoalBreakdownModal({
       <div className="space-y-4">
         {clarifyingQuestions.map((question, i) => (
           <div key={i}>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               {i + 1}. {question}
             </label>
             <input
@@ -331,7 +411,13 @@ export default function GoalBreakdownModal({
                 setAnswers((prev) => ({ ...prev, [question]: e.target.value }))
               }
               placeholder="Your answer…"
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 rounded-xl"
+              style={{
+                backgroundColor: "var(--color-surface-container-lowest)",
+                color: "var(--color-text-primary)",
+                outline:
+                  "1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent)",
+              }}
             />
           </div>
         ))}
@@ -340,14 +426,24 @@ export default function GoalBreakdownModal({
       <div className="flex gap-3 pt-1">
         <button
           onClick={handleReset}
-          className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+          className="flex-1 px-4 py-2.5 rounded-xl transition-colors font-medium"
+          style={{
+            border:
+              "1px solid color-mix(in srgb, var(--color-outline-variant) 40%, transparent)",
+            color: "var(--color-text-secondary)",
+          }}
         >
           Start Over
         </button>
         <button
           onClick={handleSubmitAnswers}
           disabled={!allAnswered}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+            color: "white",
+          }}
         >
           Generate Plan
           <ChevronRight className="w-4 h-4" />
@@ -375,8 +471,14 @@ export default function GoalBreakdownModal({
 
         {/* Goal title */}
         <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Target className="w-4 h-4 text-indigo-500" />
+          <h3
+            className="text-base font-bold flex items-center gap-2"
+            style={{ color: "var(--color-text-primary)" }}
+          >
+            <Target
+              className="w-4 h-4"
+              style={{ color: "var(--color-primary)" }}
+            />
             {result.title}
           </h3>
         </div>
@@ -384,28 +486,50 @@ export default function GoalBreakdownModal({
         {/* Milestones */}
         {result.milestones?.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-purple-500 inline-block" />
+            <h4
+              className="text-sm font-semibold mb-2 flex items-center gap-1.5"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full inline-block"
+                style={{ backgroundColor: "var(--color-secondary)" }}
+              />
               Milestones ({result.milestones.length})
             </h4>
             <div className="space-y-2">
               {result.milestones.map((m, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2.5 bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3"
+                  className="flex items-start gap-2.5 rounded-lg p-3"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-secondary) 12%, transparent)",
+                  }}
                 >
-                  <Circle className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                  <Circle
+                    className="w-4 h-4 flex-shrink-0 mt-0.5"
+                    style={{ color: "var(--color-secondary)" }}
+                  />
                   <div>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
                       {m.title}
                     </p>
                     {m.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <p
+                        className="text-xs mt-0.5"
+                        style={{ color: "var(--color-text-tertiary)" }}
+                      >
                         {m.description}
                       </p>
                     )}
                     {m.targetDate && (
-                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1">
+                      <p
+                        className="text-xs mt-1 flex items-center gap-1"
+                        style={{ color: "var(--color-secondary)" }}
+                      >
                         <Calendar className="w-3 h-3" />
                         {new Date(m.targetDate).toLocaleDateString("en-US", {
                           month: "short",
@@ -424,21 +548,41 @@ export default function GoalBreakdownModal({
         {/* Weekly Plan */}
         {result.weeklyPlan?.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+            <h4
+              className="text-sm font-semibold mb-2 flex items-center gap-1.5"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full inline-block"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              />
               Weekly Plan (first {Math.min(result.weeklyPlan.length, 4)} weeks)
             </h4>
             <div className="space-y-2">
               {result.weeklyPlan.slice(0, 4).map((week) => (
                 <div
                   key={week.weekNumber}
-                  className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3"
+                  className="rounded-lg p-3"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                  }}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded-full">
+                    <span
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-primary) 18%, transparent)",
+                        color: "var(--color-primary)",
+                      }}
+                    >
                       Week {week.weekNumber}
                     </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
                       {week.focus}
                     </span>
                   </div>
@@ -446,9 +590,13 @@ export default function GoalBreakdownModal({
                     {week.actions.map((action, ai) => (
                       <li
                         key={ai}
-                        className="text-xs text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
+                        className="text-xs flex items-center gap-1.5"
+                        style={{ color: "var(--color-text-secondary)" }}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                        <span
+                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: "var(--color-primary)" }}
+                        />
                         {action}
                       </li>
                     ))}
@@ -462,20 +610,30 @@ export default function GoalBreakdownModal({
         {/* Action Steps */}
         {result.actionSteps?.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+            <h4
+              className="text-sm font-semibold mb-2 flex items-center gap-1.5"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              <span className="w-2 h-2 rounded-full inline-block bg-green-500" />
               Daily & Weekly Actions
             </h4>
             <div className="space-y-2">
               {result.actionSteps.map((step, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2.5 bg-green-50 dark:bg-green-900/20 rounded-lg p-3"
+                  className="flex items-start gap-2.5 rounded-lg p-3"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, #22c55e 10%, transparent)",
+                  }}
                 >
                   <Zap className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: "var(--color-text-primary)" }}
+                      >
                         {step.title}
                       </p>
                       <span
@@ -488,13 +646,19 @@ export default function GoalBreakdownModal({
                         {step.frequency}
                       </span>
                       {step.estimatedMinutes && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span
+                          className="text-xs"
+                          style={{ color: "var(--color-text-tertiary)" }}
+                        >
                           {step.estimatedMinutes} min
                         </span>
                       )}
                     </div>
                     {step.journalSignals && step.journalSignals.length > 0 && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p
+                        className="text-xs mt-1"
+                        style={{ color: "var(--color-text-tertiary)" }}
+                      >
                         📓 Journal signals: {step.journalSignals.join(", ")}
                       </p>
                     )}
@@ -506,17 +670,30 @@ export default function GoalBreakdownModal({
         )}
 
         {/* Actions */}
-        <div className="flex gap-3 pt-2 sticky bottom-0 bg-white dark:bg-gray-800 pb-1">
+        <div
+          className="flex gap-3 pt-2 sticky bottom-0 pb-1"
+          style={{ backgroundColor: "var(--color-surface-elevated)" }}
+        >
           <button
             onClick={handleReset}
-            className="flex items-center gap-1.5 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium text-sm"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl transition-colors font-medium text-sm"
+            style={{
+              border:
+                "1px solid color-mix(in srgb, var(--color-outline-variant) 40%, transparent)",
+              color: "var(--color-text-secondary)",
+            }}
           >
             <RotateCcw className="w-4 h-4" />
             New Goal
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-medium text-sm shadow-md"
+            className="flex-1 px-4 py-2.5 rounded-xl transition-all font-medium text-sm"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+              color: "white",
+            }}
           >
             View Goals ✓
           </button>
@@ -527,25 +704,49 @@ export default function GoalBreakdownModal({
 
   const renderErrorStep = () => (
     <div className="py-6 text-center space-y-4">
-      <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
-        <AlertCircle className="w-6 h-6 text-red-500" />
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--color-error) 18%, transparent)",
+        }}
+      >
+        <AlertCircle
+          className="w-6 h-6"
+          style={{ color: "var(--color-error)" }}
+        />
       </div>
       <div>
-        <p className="font-semibold text-gray-900 dark:text-white mb-1">
+        <p
+          className="font-semibold mb-1"
+          style={{ color: "var(--color-text-primary)" }}
+        >
           Something went wrong
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
+        <p className="text-sm" style={{ color: "var(--color-text-tertiary)" }}>
+          {error}
+        </p>
       </div>
       <div className="flex gap-3 justify-center">
         <button
           onClick={onClose}
-          className="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+          className="px-4 py-2.5 rounded-xl transition-colors font-medium"
+          style={{
+            border:
+              "1px solid color-mix(in srgb, var(--color-outline-variant) 40%, transparent)",
+            color: "var(--color-text-secondary)",
+          }}
         >
           Cancel
         </button>
         <button
           onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors font-medium"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+            color: "white",
+          }}
         >
           <RotateCcw className="w-4 h-4" />
           Try Again
@@ -566,22 +767,41 @@ export default function GoalBreakdownModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
+      <div
+        className="rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden"
+        style={{ backgroundColor: "var(--color-surface-elevated)" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{
+            borderBottom:
+              "1px solid color-mix(in srgb, var(--color-outline-variant) 25%, transparent)",
+          }}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-primary-dark), var(--color-primary))",
+              }}
+            >
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h2
+              className="text-lg font-bold"
+              style={{ color: "var(--color-text-primary)" }}
+            >
               {stepTitles[step]}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: "var(--color-text-tertiary)" }}
           >
-            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -593,16 +813,18 @@ export default function GoalBreakdownModal({
             {(["input", "clarification", "result"] as const).map((s, i) => (
               <div
                 key={s}
-                className={`h-1 rounded-full flex-1 transition-all ${
-                  s === step
-                    ? "bg-indigo-500"
-                    : i <
-                        (["input", "clarification", "result"] as const).indexOf(
-                          step,
-                        )
-                      ? "bg-indigo-300"
-                      : "bg-gray-200 dark:bg-gray-600"
-                }`}
+                className="h-1 rounded-full flex-1 transition-all"
+                style={{
+                  backgroundColor:
+                    s === step
+                      ? "var(--color-primary)"
+                      : i <
+                          (
+                            ["input", "clarification", "result"] as const
+                          ).indexOf(step)
+                        ? "color-mix(in srgb, var(--color-primary) 45%, transparent)"
+                        : "var(--color-surface-container-high)",
+                }}
               />
             ))}
           </div>

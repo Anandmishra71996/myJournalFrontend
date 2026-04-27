@@ -9,22 +9,22 @@ export default function BetaBanner() {
 
   useEffect(() => {
     setIsMounted(true);
-    
+
     // Check if beta mode is enabled
-    const betaMode = process.env.NEXT_PUBLIC_BETA_MODE === 'true';
+    const betaMode = process.env.NEXT_PUBLIC_BETA_MODE === "true";
     if (!betaMode) {
       return;
     }
 
     // Check if banner was dismissed
-    const dismissed = localStorage.getItem('beta-banner-dismissed');
+    const dismissed = localStorage.getItem("beta-banner-dismissed");
     if (!dismissed) {
       setIsVisible(true);
     }
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem('beta-banner-dismissed', 'true');
+    localStorage.setItem("beta-banner-dismissed", "true");
     setIsVisible(false);
   };
 
@@ -40,16 +40,19 @@ export default function BetaBanner() {
           <BeakerIcon className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm md:text-base font-medium">
             <span className="font-bold">Beta Testing Mode</span>
-            <span className="hidden sm:inline"> — You're helping us build something amazing! </span>
+            <span className="hidden sm:inline">
+              {" "}
+              — You're helping us build something amazing!{" "}
+            </span>
             <a
-              href="mailto:anandmishra71996@gmail.com"
+              href="mailto:hello@aigoalreflect.online"
               className="underline hover:text-blue-200 ml-1"
             >
               Report issues
             </a>
           </p>
         </div>
-        
+
         <button
           onClick={handleDismiss}
           className="ml-4 p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"

@@ -131,21 +131,33 @@ export default function DayView({
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setInputMode("text")}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                inputMode === "text"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors`}
+              style={{
+                backgroundColor:
+                  inputMode === "text"
+                    ? "var(--color-primary)"
+                    : "var(--color-surface-container-high)",
+                color:
+                  inputMode === "text"
+                    ? "white"
+                    : "var(--color-text-secondary)",
+              }}
             >
               ✍️ Type
             </button>
             <button
               onClick={() => setInputMode("voice")}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                inputMode === "voice"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-              }`}
+              className={`px-4 py-2 rounded-lg transition-colors`}
+              style={{
+                backgroundColor:
+                  inputMode === "voice"
+                    ? "var(--color-primary)"
+                    : "var(--color-surface-container-high)",
+                color:
+                  inputMode === "voice"
+                    ? "white"
+                    : "var(--color-text-secondary)",
+              }}
             >
               🎤 Voice
             </button>

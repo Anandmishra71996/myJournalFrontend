@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
+import { BRAND_NAME } from '@/constants/brand.constants';
 
 interface PushNotificationState {
     isSupported: boolean;
@@ -272,7 +273,7 @@ export function usePushNotifications() {
         try {
             await api.post('/push/send-test', {
                 title: 'Test Notification',
-                body: 'This is a test notification from your Journaling App!',
+                body: `This is a test notification from ${BRAND_NAME}!`,
                 url: '/journal',
             });
             return true;

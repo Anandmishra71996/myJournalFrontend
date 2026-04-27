@@ -1,6 +1,7 @@
 import api from '@/lib/api';
 import { Journal, JournalData } from '@/types/journal.types';
 import { WeeklyInsight } from '@/constants/insight.constants';
+import { AiFeedback, ContentType, SectionFeedback } from '@/constants/aiFeedback.constants';
 
 export const journalService = {
     buildJournalFormData: (data: JournalData, audioFiles: Blob[]) => {
@@ -121,6 +122,20 @@ export const journalService = {
 
     generateWeeklyInsight: async (weekStart: string): Promise<{ success: boolean; data: WeeklyInsight }> => {
         const response = await api.post('/insights/generate', { weekStart });
+        return response.data;
+    },
+
+    getAiFeedback: async (contentType: ContentType, contentId: string): Promise<{ success: boolean; data: AiFeedback | null }> => {
+        const response = await api.get(`/feedback/${contentType}/${contentId}`);
+        return response.data;
+    },
+
+    submitAiFeedback: async (
+        contentType: ContentType,
+        contentId: string,
+        payload: { quickRating?: number; sections?: SectionFeedback[]; contextDate?: string },
+    ): Promise<{ success: boolean; data: AiFeedback }> => {
+        const response = await api.post(`/feedback/${contentType}/${contentId}`, payload);
         return response.data;
     },
 };

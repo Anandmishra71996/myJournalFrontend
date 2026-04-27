@@ -70,7 +70,7 @@ api.interceptors.response.use(
                     // returns 401 for unauthenticated users, which would otherwise
                     // trigger window.location.href = '/login' → full reload → repeat.
                     if (typeof window !== 'undefined') {
-                        const publicPathPrefixes = ['/login', '/signup', '/forgot-password', '/preview', '/auth/', '/pricing'];
+                        const publicPathPrefixes = ['/login', '/signup', '/forgot-password', '/preview', '/auth/', '/pricing', '/privacy-policy', '/terms-of-service'];
                         const currentPath = window.location.pathname;
                         const onPublicPage =
                             currentPath === '/' ||

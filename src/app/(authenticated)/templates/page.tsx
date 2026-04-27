@@ -279,6 +279,32 @@ export default function TemplatesPage() {
               </p>
             </div>
 
+            <div className="flex items-center gap-3 md:hidden">
+              <button
+                onClick={() => setShowGenerateModal(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-primary) 16%, transparent)",
+                  color: "var(--color-primary)",
+                }}
+              >
+                <SparklesIcon className="w-4 h-4" />
+                AI
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-white transition-all"
+                style={{
+                  background:
+                    "linear-gradient(135deg, color-mix(in srgb, var(--color-primary-dark) 90%, transparent), var(--color-primary))",
+                }}
+              >
+                <PlusIcon className="w-4 h-4" />
+                New
+              </button>
+            </div>
+
             <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={() => setShowGenerateModal(true)}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import ThemeToggle from "@/components/ThemeToggle";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/constants/brand.constants";
 import {
   BookOpenIcon,
   ChartBarIcon,
@@ -13,6 +14,7 @@ import {
   SparklesIcon,
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
+  CreditCardIcon,
 } from "@heroicons/react/24/outline";
 
 interface SidebarProps {
@@ -35,6 +37,7 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
     { name: "Goals", href: "/goals", icon: ChartBarIcon },
     { name: "Insights", href: "/insights", icon: SparklesIcon },
     { name: "Profile", href: "/profile", icon: UserCircleIcon },
+    { name: "Subscription", href: "/subscription", icon: CreditCardIcon },
   ];
 
   const handleLogout = () => {
@@ -82,13 +85,13 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
               className="text-xl font-semibold tracking-tight"
               style={{ color: "var(--color-text-primary)" }}
             >
-              Journal
+              {BRAND_NAME}
             </h1>
             <p
               className="text-xs mt-0.5"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              Daily reflection studio
+              {BRAND_TAGLINE}
             </p>
           </div>
         </div>
