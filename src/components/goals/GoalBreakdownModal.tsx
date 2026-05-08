@@ -214,7 +214,6 @@ export default function GoalBreakdownModal({
             color: "var(--color-text-primary)",
             outline:
               "1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent)",
-            focusRingColor: "var(--color-primary)",
           }}
         />
         <p
