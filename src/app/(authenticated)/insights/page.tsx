@@ -29,6 +29,7 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { AiFeedback } from "@/constants/aiFeedback.constants";
 import { journalService } from "@/services/journal.service";
 import AiFeedbackModal from "@/components/feedback/AiFeedbackModal";
+import { exportInsightAsPdf } from "@/utils/exportInsightPdf";
 
 export default function InsightsPage() {
   const [weekStart, setWeekStart] = useState<string>("");
@@ -36,6 +37,7 @@ export default function InsightsPage() {
   const [insight, setInsight] = useState<WeeklyInsight | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Feedback state
   const [feedback, setFeedback] = useState<AiFeedback | null>(null);
@@ -104,6 +106,20 @@ export default function InsightsPage() {
       toast.error("Failed to save rating");
     } finally {
       setQuickRatingPending(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!insight || exporting) return;
+    setExporting(true);
+    try {
+      await exportInsightAsPdf(insight);
+      toast.success("Report exported successfully!");
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Failed to export report. Please try again.");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -191,13 +207,17 @@ export default function InsightsPage() {
             {!loading && insight && (
               <button
                 type="button"
-                disabled
-                aria-disabled="true"
-                title="Export report is coming soon"
-                className={`inline-flex items-center gap-2 rounded-xl bg-[var(--color-surface-high)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] ${nonFunctionalButtonClass}`}
+                onClick={handleExportPdf}
+                disabled={exporting}
+                title="Export insight as PDF"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-surface-high)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] transition-colors hover:bg-[var(--color-surface-bright)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <ArrowUpTrayIcon className="h-4 w-4" />
-                Export Report
+                {exporting ? (
+                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowUpTrayIcon className="h-4 w-4" />
+                )}
+                {exporting ? "Exporting..." : "Export Report"}
               </button>
             )}
           </div>
