@@ -20,6 +20,8 @@ export interface AgentStreamCallbacks {
     onToken: (token: string) => void;
     onInterrupt: (event: AgentInterruptEvent) => void;
     onError: (msg: string) => void;
+    /** Called once on the first message of a new conversation with the persisted conversation ID. */
+    onConversationId?: (id: string) => void;
 }
 
 export interface AgentResumeCallbacks {
@@ -215,12 +217,15 @@ class ChatService {
     }
 
     /**
-     * Stream a message through the agent (with tools and HITL support)
+     * Stream a message through the agent (with tools and HITL support).
+     * Pass conversationId to continue an existing session; omit to start a new one.
+     * The backend will emit a conversation_id event on the first message of a new session.
      */
     async agentStream(
         message: string,
         threadId: string,
         callbacks: AgentStreamCallbacks,
+        conversationId?: string,
     ): Promise<void> {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/stream`,
@@ -228,7 +233,7 @@ class ChatService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ message, threadId }),
+                body: JSON.stringify({ message, threadId, conversationId }),
             }
         );
 
@@ -238,6 +243,7 @@ class ChatService {
         }
 
         await this._readSseStream(response, {
+            conversation_id: (content) => callbacks.onConversationId?.(content),
             thinking: (content) => callbacks.onToken(content),
             response: (content) => callbacks.onToken(content),
             interrupt: (_content, raw) => {
@@ -250,12 +256,14 @@ class ChatService {
     }
 
     /**
-     * Resume agent after a HITL decision (approve / edit / reject)
+     * Resume agent after a HITL decision (approve / edit / reject).
+     * Pass conversationId so the backend can append the assistant's response.
      */
     async resumeAgent(
         threadId: string,
         decision: AgentDecision,
         callbacks: AgentResumeCallbacks,
+        conversationId?: string,
     ): Promise<void> {
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/resume`,
@@ -263,7 +271,7 @@ class ChatService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ threadId, decision }),
+                body: JSON.stringify({ threadId, decision, conversationId }),
             }
         );
 

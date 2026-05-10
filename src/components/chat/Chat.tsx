@@ -85,6 +85,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
     try {
       await chatService.agentStream(userInput, threadId, {
         onToken: appendAssistantToken,
+        onConversationId: (id) => setCurrentConversationId(id),
         onInterrupt: (event: AgentInterruptEvent) => {
           setPendingInterrupt({ toolName: event.toolName, toolArgs: event.toolArgs });
           setEditedArgs(event.toolArgs);
@@ -95,7 +96,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
           toast.error(msg || 'Something went wrong');
           setMessages((prev) => prev.slice(0, -1));
         },
-      });
+      }, currentConversationId);
     } catch (error: any) {
       toast.error(error.message || 'Failed to send message');
       setMessages((prev) => prev.slice(0, -1));
@@ -120,7 +121,7 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
       await chatService.resumeAgent(threadId, decision, {
         onToken: appendAssistantToken,
         onError: (msg: string) => toast.error(msg),
-      });
+      }, currentConversationId);
     } catch (error: any) {
       toast.error(error.message || 'Failed to resume');
     } finally {
@@ -157,14 +158,12 @@ export default function ChatComponent({ conversationId }: ChatComponentProps) {
               <div className="flex items-center gap-2">
                 <SparklesIcon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 flex-shrink-0" />
                 <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
-                  AI Chat
+                  Personal Growth AI
                 </h1>
               </div>
-              {conversation && (
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">
-                  {conversation.title}
-                </p>
-              )}
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                {conversation ? conversation.title : 'Analyze habits, uncover patterns, and stay accountable.'}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button

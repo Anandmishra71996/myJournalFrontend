@@ -27,7 +27,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     "/goals": "Goals",
     "/insights": "Insights",
     "/profile": "Profile",
-    "/chat": "AI Chat",
+    "/chat": "Personal Growth AI",
     "/subscription": "Subscription",
   };
 
