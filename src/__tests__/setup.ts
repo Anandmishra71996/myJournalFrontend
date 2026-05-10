@@ -1,6 +1,12 @@
 // Jest setup file for frontend tests
 import '@testing-library/jest-dom'
 
+// Polyfill Web APIs not available in jsdom
+import { TextEncoder, TextDecoder } from 'util'
+import { ReadableStream } from 'stream/web'
+
+Object.assign(global, { TextEncoder, TextDecoder, ReadableStream })
+
 // Mock next/navigation to avoid errors in tests
 jest.mock('next/navigation', () => ({
     useRouter() {

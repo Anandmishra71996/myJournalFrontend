@@ -11,6 +11,27 @@ export interface StreamCallbacks {
     onChunk?: (chunk: string) => void;
 }
 
+export interface AgentInterruptEvent {
+    toolName: string;
+    toolArgs: Record<string, unknown>;
+}
+
+export interface AgentStreamCallbacks {
+    onToken: (token: string) => void;
+    onInterrupt: (event: AgentInterruptEvent) => void;
+    onError: (msg: string) => void;
+}
+
+export interface AgentResumeCallbacks {
+    onToken: (token: string) => void;
+    onError: (msg: string) => void;
+}
+
+export type AgentDecision =
+    | { type: 'approve' }
+    | { type: 'reject' }
+    | { type: 'edit'; editedArgs: Record<string, unknown> };
+
 export interface Conversation {
     id: string;
     title: string;
@@ -190,6 +211,108 @@ class ChatService {
             throw new Error(
                 error.response?.data?.error || 'Failed to create conversation'
             );
+        }
+    }
+
+    /**
+     * Stream a message through the agent (with tools and HITL support)
+     */
+    async agentStream(
+        message: string,
+        threadId: string,
+        callbacks: AgentStreamCallbacks,
+    ): Promise<void> {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/stream`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ message, threadId }),
+            }
+        );
+
+        if (!response.ok) {
+            callbacks.onError('Failed to connect to agent');
+            return;
+        }
+
+        await this._readSseStream(response, {
+            thinking: (content) => callbacks.onToken(content),
+            response: (content) => callbacks.onToken(content),
+            interrupt: (_content, raw) => {
+                if (raw.toolName && raw.toolArgs) {
+                    callbacks.onInterrupt({ toolName: raw.toolName as string, toolArgs: raw.toolArgs as Record<string, unknown> });
+                }
+            },
+            error: (content) => callbacks.onError(content),
+        });
+    }
+
+    /**
+     * Resume agent after a HITL decision (approve / edit / reject)
+     */
+    async resumeAgent(
+        threadId: string,
+        decision: AgentDecision,
+        callbacks: AgentResumeCallbacks,
+    ): Promise<void> {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/chat/agent/resume`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ threadId, decision }),
+            }
+        );
+
+        if (!response.ok) {
+            callbacks.onError('Failed to resume agent');
+            return;
+        }
+
+        await this._readSseStream(response, {
+            thinking: (content) => callbacks.onToken(content),
+            response: (content) => callbacks.onToken(content),
+            error: (content) => callbacks.onError(content),
+        });
+    }
+
+    private async _readSseStream(
+        response: Response,
+        handlers: Partial<Record<string, (content: string, raw: Record<string, unknown>) => void>>,
+    ): Promise<void> {
+        const reader = response.body?.getReader();
+        if (!reader) return;
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const events = buffer.split('\n\n');
+            buffer = events.pop() ?? '';
+
+            for (const event of events) {
+                if (!event.startsWith('data: ')) continue;
+                const data = event.slice(6).trim();
+                if (data === '[DONE]') continue;
+
+                try {
+                    const parsed = JSON.parse(data) as Record<string, unknown>;
+                    const type = parsed.type as string | undefined;
+                    const content = (parsed.content as string) ?? '';
+                    if (type && handlers[type]) {
+                        handlers[type]!(content, parsed);
+                    }
+                } catch {
+                    // skip malformed SSE lines
+                }
+            }
         }
     }
 
