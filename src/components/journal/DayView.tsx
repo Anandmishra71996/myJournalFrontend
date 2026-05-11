@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DynamicField from "./DynamicField";
 import { AudioRecorder } from "../audio/AudioRecorder";
 import type { JournalTemplate } from "@/types/journalTemplate.types";
+import type { VoiceRecording as SavedVoiceRecording } from "@/types/journal.types";
 
 interface VoiceRecording {
   id: string;
@@ -28,6 +29,7 @@ interface DayViewProps {
   onManualSync?: () => void;
   voiceRecordings: VoiceRecording[];
   setVoiceRecordings: React.Dispatch<React.SetStateAction<VoiceRecording[]>>;
+  savedVoiceRecordings?: SavedVoiceRecording[];
 }
 
 export default function DayView({
@@ -44,8 +46,16 @@ export default function DayView({
   onManualSync,
   voiceRecordings,
   setVoiceRecordings,
+  savedVoiceRecordings = [],
 }: DayViewProps) {
   const [inputMode, setInputMode] = useState<"text" | "voice">("text");
+
+  // Default to voice tab when saved recordings exist
+  useEffect(() => {
+    if (savedVoiceRecordings.length > 0) {
+      setInputMode("voice");
+    }
+  }, [savedVoiceRecordings]);
 
   const handleCustomFieldChange = (fieldId: string, value: any) => {
     setCustomFieldValues((prev) => ({
@@ -61,11 +71,8 @@ export default function DayView({
       blob: audioBlob,
       url: URL.createObjectURL(audioBlob),
     };
-
     setVoiceRecordings((prev) => [...prev, newRecording]);
-
-    // Switch back to text mode
-    setInputMode("text");
+    // Stay in voice mode so user can see the queued recording and record more
   };
 
   // Remove voice recording
@@ -143,7 +150,7 @@ export default function DayView({
                     : "var(--color-text-secondary)",
               }}
             >
-              ✍️ Type
+              Type
             </button>
             <button
               onClick={() => setInputMode("voice")}
@@ -159,7 +166,7 @@ export default function DayView({
                     : "var(--color-text-secondary)",
               }}
             >
-              🎤 Voice
+              Voice{savedVoiceRecordings.length > 0 ? ` (${savedVoiceRecordings.length})` : ""}
             </button>
           </div>
 
@@ -186,86 +193,151 @@ export default function DayView({
             </div>
           )}
 
-          {/* Voice recording mode */}
+          {/* Voice mode: saved recordings + new recorder */}
           {inputMode === "voice" && (
-            <div
-              className="p-6 rounded-xl"
-              style={{
-                border:
-                  "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
-                backgroundColor:
-                  "color-mix(in srgb, var(--color-background) 60%, transparent)",
-              }}
-            >
-              <h3
-                className="text-lg font-semibold mb-4"
-                style={{ color: "var(--color-text-primary)" }}
-              >
-                🎤 Record Your Journal Entry
-              </h3>
-              <AudioRecorder
-                onRecordingComplete={handleVoiceRecordingComplete}
-                onRecordingCancel={() => setInputMode("text")}
-                maxDuration={300}
-              />
-              <p
-                className="mt-4 text-sm"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                Your voice will be automatically transcribed when you save. You
-                can record multiple voice notes.
-              </p>
-            </div>
-          )}
-
-          {/* Display recorded voice notes */}
-          {voiceRecordings.length > 0 && (
-            <div
-              className="p-4 rounded-xl space-y-3"
-              style={{
-                border:
-                  "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
-                backgroundColor:
-                  "color-mix(in srgb, var(--color-background) 60%, transparent)",
-              }}
-            >
-              <h4
-                className="text-sm font-semibold mb-2"
-                style={{ color: "var(--color-text-primary)" }}
-              >
-                🎵 Voice Recordings ({voiceRecordings.length})
-              </h4>
-              {voiceRecordings.map((recording, index) => (
+            <div className="space-y-4">
+              {/* Saved recordings from DB */}
+              {savedVoiceRecordings.length > 0 && (
                 <div
-                  key={recording.id}
-                  className="flex items-center gap-3 p-3 rounded-lg"
+                  className="p-4 rounded-xl space-y-3"
                   style={{
+                    border:
+                      "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
                     backgroundColor:
-                      "color-mix(in srgb, var(--color-surface-elevated) 40%, transparent)",
+                      "color-mix(in srgb, var(--color-background) 60%, transparent)",
                   }}
                 >
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "var(--color-text-secondary)" }}
+                  <h4
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: "var(--color-text-primary)" }}
                   >
-                    #{index + 1}
-                  </span>
-                  <audio
-                    src={recording.url}
-                    controls
-                    className="flex-1"
-                    style={{ height: "32px" }}
-                  />
-                  <button
-                    onClick={() => removeVoiceRecording(recording.id)}
-                    className="px-3 py-1 text-sm rounded hover:bg-red-500/20 transition-colors"
-                    style={{ color: "var(--color-error)" }}
-                    title="Remove recording"
-                  >
-                    Remove
-                  </button>
+                    Saved Recordings ({savedVoiceRecordings.length})
+                  </h4>
+                  {savedVoiceRecordings.map((recording, index) => (
+                    <div
+                      key={recording.recordedAt + index}
+                      className="p-3 rounded-lg space-y-2"
+                      style={{
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-surface-elevated) 40%, transparent)",
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="text-sm font-medium flex-shrink-0"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          #{index + 1}
+                        </span>
+                        <audio
+                          src={recording.audioUrl}
+                          controls
+                          className="flex-1"
+                          style={{ height: "32px" }}
+                        />
+                        <span
+                          className="text-xs flex-shrink-0"
+                          style={{ color: "var(--color-text-tertiary)" }}
+                        >
+                          {new Date(recording.recordedAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      {recording.transcription && (
+                        <p
+                          className="text-sm pl-8 leading-relaxed"
+                          style={{ color: "var(--color-text-secondary)" }}
+                        >
+                          {recording.transcription}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {/* New recording section */}
+              <div
+                className="p-6 rounded-xl"
+                style={{
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-background) 60%, transparent)",
+                }}
+              >
+                <h3
+                  className="text-lg font-semibold mb-4"
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Record a New Entry
+                </h3>
+                <AudioRecorder
+                  onRecordingComplete={handleVoiceRecordingComplete}
+                  onRecordingCancel={() => setInputMode("text")}
+                  maxDuration={300}
+                />
+                <p
+                  className="mt-4 text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  Your voice will be automatically transcribed when you save.
+                  You can record multiple voice notes.
+                </p>
+              </div>
+
+              {/* Pending (unsaved) local recordings */}
+              {voiceRecordings.length > 0 && (
+                <div
+                  className="p-4 rounded-xl space-y-3"
+                  style={{
+                    border:
+                      "1px solid color-mix(in srgb, var(--color-border) 26%, transparent)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-background) 60%, transparent)",
+                  }}
+                >
+                  <h4
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: "var(--color-text-primary)" }}
+                  >
+                    Pending Upload ({voiceRecordings.length})
+                  </h4>
+                  {voiceRecordings.map((recording, index) => (
+                    <div
+                      key={recording.id}
+                      className="flex items-center gap-3 p-3 rounded-lg"
+                      style={{
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-surface-elevated) 40%, transparent)",
+                      }}
+                    >
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        #{index + 1}
+                      </span>
+                      <audio
+                        src={recording.url}
+                        controls
+                        className="flex-1"
+                        style={{ height: "32px" }}
+                      />
+                      <button
+                        onClick={() => removeVoiceRecording(recording.id)}
+                        className="px-3 py-1 text-sm rounded hover:bg-red-500/20 transition-colors"
+                        style={{ color: "var(--color-error)" }}
+                        title="Remove recording"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

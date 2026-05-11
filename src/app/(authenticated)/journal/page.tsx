@@ -14,6 +14,7 @@ import WeeklyView from "@/components/journal/WeeklyView";
 import MonthlyView from "@/components/journal/MonthlyView";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import type { JournalTemplate } from "@/types/journalTemplate.types";
+import type { VoiceRecording as SavedVoiceRecording } from "@/types/journal.types";
 
 type ViewType = "day" | "weekly" | "monthly";
 
@@ -40,6 +41,7 @@ export default function JournalPage() {
   }>({});
   const [reflection, setReflection] = useState<string>("");
   const [voiceRecordings, setVoiceRecordings] = useState<VoiceRecording[]>([]);
+  const [savedVoiceRecordings, setSavedVoiceRecordings] = useState<SavedVoiceRecording[]>([]);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [templatesLoaded, setTemplatesLoaded] = useState(false);
@@ -159,8 +161,10 @@ export default function JournalPage() {
         setCustomFieldValues(journal.customFieldValues || {});
         // Load reflection
         setReflection(journal.reflection || "");
-        // Clear voice recordings (they're already saved)
+        // Clear local (unsaved) voice recordings
         clearVoiceRecordings();
+        // Load saved voice recordings from the DB journal
+        setSavedVoiceRecordings(journal.voiceRecordings || []);
         // Set template if journal has one (handle both populated and non-populated)
         if (journal.templateId) {
           const loadedTemplateId =
@@ -179,6 +183,7 @@ export default function JournalPage() {
         setCustomFieldValues({});
         setReflection("");
         clearVoiceRecordings();
+        setSavedVoiceRecordings([]);
         // Keep the currently selected template for new entries
       }
     } catch (error) {
@@ -245,9 +250,16 @@ export default function JournalPage() {
 
       if (response.success) {
         setLastSyncTime(new Date());
-        // Clear voice recordings after successful save
+        // After saving, clear local blobs and sync state from the saved response
         if (audioFiles && audioFiles.length > 0) {
           clearVoiceRecordings();
+          if (response.data?.voiceRecordings) {
+            setSavedVoiceRecordings(response.data.voiceRecordings);
+          }
+          // Reflect the backend-merged reflection (typed text + transcription) in the textarea
+          if (response.data?.reflection !== undefined) {
+            setReflection(response.data.reflection);
+          }
         }
         if (!isSilent) {
           const message = isComplete
@@ -697,6 +709,7 @@ export default function JournalPage() {
                 onManualSync={handleManualSync}
                 voiceRecordings={voiceRecordings}
                 setVoiceRecordings={setVoiceRecordings}
+                savedVoiceRecordings={savedVoiceRecordings}
               />
             </section>
           </div>
