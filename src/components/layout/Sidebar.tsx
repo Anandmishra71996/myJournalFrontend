@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 import ThemeToggle from "@/components/ThemeToggle";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/constants/brand.constants";
 import {
@@ -26,12 +27,14 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
+  const { featureLimits } = useSubscriptionStore();
   const isLocalEnv = process.env.NEXT_PUBLIC_NODE_ENV === "local";
+  const showChat = featureLimits.allowAIChat || isLocalEnv;
 
   const navigation = [
     { name: "Journal", href: "/journal", icon: BookOpenIcon },
     { name: "Templates", href: "/templates", icon: DocumentTextIcon },
-    ...(isLocalEnv
+    ...(showChat
       ? [{ name: "Chat", href: "/chat", icon: ChatBubbleLeftRightIcon }]
       : []),
     { name: "Goals", href: "/goals", icon: ChartBarIcon },
