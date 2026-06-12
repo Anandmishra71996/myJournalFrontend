@@ -85,6 +85,8 @@ export interface GoalActionStep {
 export interface GoalProgress {
     completionPercentage?: number;
     lastActivityDate?: string;
+    signalHitsThisWeek?: number;
+    signalHitRate?: number;
 }
 
 export interface GoalFormData {

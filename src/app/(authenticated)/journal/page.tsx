@@ -41,7 +41,9 @@ export default function JournalPage() {
   }>({});
   const [reflection, setReflection] = useState<string>("");
   const [voiceRecordings, setVoiceRecordings] = useState<VoiceRecording[]>([]);
-  const [savedVoiceRecordings, setSavedVoiceRecordings] = useState<SavedVoiceRecording[]>([]);
+  const [savedVoiceRecordings, setSavedVoiceRecordings] = useState<
+    SavedVoiceRecording[]
+  >([]);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [templatesLoaded, setTemplatesLoaded] = useState(false);
@@ -715,7 +717,15 @@ export default function JournalPage() {
           </div>
         )}
 
-        {viewType === "weekly" && <WeeklyView selectedDate={selectedDate} />}
+        {viewType === "weekly" && (
+          <WeeklyView
+            selectedDate={selectedDate}
+            onOpenDay={(date) => {
+              setSelectedDate(date);
+              setViewType("day");
+            }}
+          />
+        )}
 
         {viewType === "monthly" && (
           <MonthlyView

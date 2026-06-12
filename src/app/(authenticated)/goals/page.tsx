@@ -19,6 +19,7 @@ import {
   Zap,
   Plus,
   WandSparkles,
+  Pencil,
 } from "lucide-react";
 import GoalBreakdownModal from "@/components/goals/GoalBreakdownModal";
 import GoalTemplateAssistantModal from "@/components/goals/GoalTemplateAssistantModal";
@@ -39,6 +40,9 @@ export default function GoalsPage() {
   const [goalFilter, setGoalFilter] = useState<
     "all" | "active" | "completed" | "past"
   >("all");
+  const [milestoneLoading, setMilestoneLoading] = useState<string | null>(null);
+  const [progressModal, setProgressModal] = useState<{ goalId: string; current: number } | null>(null);
+  const [progressInput, setProgressInput] = useState("");
 
   useEffect(() => {
     fetchGoals();
@@ -66,6 +70,49 @@ export default function GoalsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+    }
+  };
+
+  const handleMilestoneToggle = async (goal: Goal, index: number) => {
+    if (!goal.milestones) return;
+    const key = `${goal._id}-${index}`;
+    setMilestoneLoading(key);
+    const updated = goal.milestones.map((m, i) =>
+      i === index ? { ...m, status: m.status === "completed" ? "pending" : "completed" } : m
+    );
+    try {
+      const response = await api.put(`/goals/${goal._id}`, { milestones: updated });
+      if (response.data.success) {
+        setGoals((prev) => prev.map((g) => g._id === goal._id ? response.data.data : g));
+      }
+    } catch (error: any) {
+      toastService.error("Failed to update milestone", error.response?.data?.error || "Could not toggle milestone");
+    } finally {
+      setMilestoneLoading(null);
+    }
+  };
+
+  const openProgressModal = (goalId: string, current: number) => {
+    setProgressInput(String(current));
+    setProgressModal({ goalId, current });
+  };
+
+  const handleManualProgress = async () => {
+    if (!progressModal) return;
+    const pct = parseInt(progressInput, 10);
+    if (isNaN(pct) || pct < 0 || pct > 100) return;
+    setActionLoading(progressModal.goalId);
+    try {
+      const response = await api.patch(`/goals/${progressModal.goalId}/progress`, { completionPercentage: pct });
+      if (response.data.success) {
+        setGoals((prev) => prev.map((g) => g._id === progressModal.goalId ? response.data.data : g));
+        toastService.success("Progress updated");
+      }
+    } catch (error: any) {
+      toastService.error("Failed to update progress", error.response?.data?.error || "Could not update progress");
+    } finally {
+      setActionLoading(null);
+      setProgressModal(null);
     }
   };
 
@@ -190,7 +237,8 @@ export default function GoalsPage() {
       goal.progress?.completionPercentage ??
       (totalMilestones > 0
         ? Math.round((completedMilestones / totalMilestones) * 100)
-        : null);
+        : 0);
+    const signalHits = goal.progress?.signalHitsThisWeek ?? null;
 
     return (
       <div
@@ -237,28 +285,66 @@ export default function GoalsPage() {
           </p>
         )}
 
-        {/* Progress bar for milestone-based goals */}
-        {hasBreakdown && progressPct !== null && (
-          <div className="mb-3">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-[var(--color-text-secondary)]">
-                Progress
-              </span>
+        {/* Progress bar — always visible */}
+        <div className="mb-3">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              Progress
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openProgressModal(goal._id, progressPct)}
+                className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                title="Update progress manually"
+              >
+                <Pencil className="w-3 h-3" />
+                {hasBreakdown ? "Override" : "Update"}
+              </button>
               <span className="text-xs font-semibold text-[var(--color-primary)]">
                 {progressPct}%
               </span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-[var(--color-surface-highest)]">
-              <div
-                className="h-1.5 rounded-full bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary)] transition-all"
-                style={{ width: `${progressPct}%` }}
-              />
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-[var(--color-surface-highest)]">
+            <div
+              className="h-1.5 rounded-full bg-gradient-to-r from-[var(--color-primary-dark)] to-[var(--color-primary)] transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          {totalMilestones > 0 && (
+            <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+              {completedMilestones}/{totalMilestones} milestones · auto-calculated from checkboxes
+            </p>
+          )}
+        </div>
+
+        {/* Journal activity this week */}
+        {signalHits !== null && (
+          <div className="mb-3">
+            <p className="text-xs text-[var(--color-text-secondary)] mb-1">
+              Journal activity this week
+            </p>
+            <div className="flex gap-1">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-2 rounded-sm transition-colors"
+                  style={{
+                    backgroundColor: i < signalHits
+                      ? "var(--color-primary)"
+                      : "var(--color-surface-highest)",
+                  }}
+                />
+              ))}
             </div>
-            {totalMilestones > 0 && (
-              <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                {completedMilestones}/{totalMilestones} milestones
-              </p>
-            )}
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
+              {signalHits === 0
+                ? "Not yet detected in journals"
+                : `Mentioned ${signalHits}/7 days`}
+              {!hasBreakdown && signalHits >= 3 && (
+                <span className="ml-1 text-green-600 dark:text-green-400">· progress auto-updated</span>
+              )}
+            </p>
           </div>
         )}
 
@@ -325,34 +411,42 @@ export default function GoalsPage() {
             {goal.milestones && goal.milestones.length > 0 && (
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">
-                  Milestones
+                  Milestones · {completedMilestones}/{totalMilestones} done
                 </p>
                 <div className="space-y-1.5">
-                  {goal.milestones.map((m, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      {m.status === "completed" ? (
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-status-success-text)]" />
-                      ) : (
-                        <Circle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-text-tertiary)]" />
-                      )}
-                      <div>
-                        <p
-                          className={`text-sm ${m.status === "completed" ? "line-through text-[var(--color-text-tertiary)]" : "text-[var(--color-text-primary)]"}`}
-                        >
-                          {m.title}
-                        </p>
-                        {m.targetDate && (
-                          <p className="text-xs text-[var(--color-secondary)]">
-                            by{" "}
-                            {new Date(m.targetDate).toLocaleDateString(
-                              "en-US",
-                              { month: "short", day: "numeric" },
-                            )}
-                          </p>
+                  {goal.milestones.map((m, i) => {
+                    const key = `${goal._id}-${i}`;
+                    const isToggling = milestoneLoading === key;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleMilestoneToggle(goal, i)}
+                        disabled={isToggling || isLoading}
+                        className="flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[var(--color-surface-highest)] disabled:opacity-60"
+                      >
+                        {isToggling ? (
+                          <span className="mt-0.5 h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
+                        ) : m.status === "completed" ? (
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-status-success-text)]" />
+                        ) : (
+                          <Circle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--color-text-tertiary)]" />
                         )}
-                      </div>
-                    </div>
-                  ))}
+                        <div>
+                          <p
+                            className={`text-sm ${m.status === "completed" ? "line-through text-[var(--color-text-tertiary)]" : "text-[var(--color-text-primary)]"}`}
+                          >
+                            {m.title}
+                          </p>
+                          {m.targetDate && (
+                            <p className="text-xs text-[var(--color-secondary)]">
+                              by{" "}
+                              {new Date(m.targetDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -687,6 +781,72 @@ export default function GoalsPage() {
           confirmVariant="danger"
           isLoading={actionLoading === goalToDelete}
         />
+
+        {/* Manual Progress Update Modal */}
+        {progressModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="w-full max-w-sm rounded-2xl border border-[var(--color-outline-variant)] bg-[var(--color-surface-low)] p-6 shadow-xl">
+              <h3 className="mb-1 text-base font-bold text-[var(--color-text-primary)]">
+                Update Progress
+              </h3>
+              <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
+                Set the completion percentage for this goal.
+              </p>
+
+              {/* Preset chips */}
+              <div className="mb-4 flex flex-wrap gap-2">
+                {[0, 10, 25, 50, 75, 90, 100].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setProgressInput(String(p))}
+                    className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                      progressInput === String(p)
+                        ? "bg-[var(--color-primary)] text-white"
+                        : "border border-[var(--color-outline-variant)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-highest)]"
+                    }`}
+                  >
+                    {p}%
+                  </button>
+                ))}
+              </div>
+
+              {/* Free input */}
+              <div className="mb-5 flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={progressInput}
+                  onChange={(e) => setProgressInput(e.target.value)}
+                  className="w-full rounded-xl border border-[var(--color-outline-variant)] bg-[var(--color-surface)] px-4 py-2.5 text-center text-lg font-bold text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  placeholder="0"
+                />
+                <span className="text-[var(--color-text-secondary)] text-lg">%</span>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setProgressModal(null)}
+                  className="flex-1 rounded-xl border border-[var(--color-outline-variant)] px-4 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-highest)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleManualProgress}
+                  disabled={
+                    actionLoading === progressModal.goalId ||
+                    isNaN(parseInt(progressInput, 10)) ||
+                    parseInt(progressInput, 10) < 0 ||
+                    parseInt(progressInput, 10) > 100
+                  }
+                  className="flex-1 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {actionLoading === progressModal.goalId ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
