@@ -19,6 +19,8 @@ import {
   Clock,
   AlertCircle,
   ListTodo,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 type ViewMode = "list" | "calendar";
@@ -32,50 +34,41 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-function groupTasksByDate(tasks: Task[]): Record<string, Task[]> {
+function getFocusLabel(focus: Date): string {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const nextWeek = new Date(today);
-  nextWeek.setDate(nextWeek.getDate() + 7);
+  if (isSameDay(focus, today)) return "Today";
+  if (isSameDay(focus, tomorrow)) return "Tomorrow";
+  return focus.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+}
+
+function groupTasksByDate(tasks: Task[], focusDate: Date): Record<string, Task[]> {
+  const focus = new Date(focusDate);
+  focus.setHours(0, 0, 0, 0);
+  const focusLabel = getFocusLabel(focus);
 
   const groups: Record<string, Task[]> = {
     Overdue: [],
-    Today: [],
-    Tomorrow: [],
-    "This week": [],
-    Later: [],
+    [focusLabel]: [],
     "No date": [],
-    Recurring: [],
   };
 
   for (const task of tasks) {
-    if (task.recurrence) {
-      groups["Recurring"].push(task);
-      continue;
-    }
     if (!task.dueDate) {
       groups["No date"].push(task);
       continue;
     }
     const due = new Date(task.dueDate);
     due.setHours(0, 0, 0, 0);
-    const todayStart = new Date(today);
-    todayStart.setHours(0, 0, 0, 0);
-    const tomorrowStart = new Date(tomorrow);
-    tomorrowStart.setHours(0, 0, 0, 0);
 
-    if (due < todayStart && task.status !== "done") {
+    if (due < focus && task.status !== "done") {
       groups["Overdue"].push(task);
-    } else if (isSameDay(due, todayStart)) {
-      groups["Today"].push(task);
-    } else if (isSameDay(due, tomorrowStart)) {
-      groups["Tomorrow"].push(task);
-    } else if (due <= nextWeek) {
-      groups["This week"].push(task);
-    } else {
-      groups["Later"].push(task);
+    } else if (isSameDay(due, focus)) {
+      groups[focusLabel].push(task);
     }
+    // tasks after focus date are not shown — navigate forward to find them
   }
 
   return groups;
@@ -99,7 +92,13 @@ export default function PlannerPage() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [populating, setPopulating] = useState(false);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
+  const [selectedListDate, setSelectedListDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
 
   useEffect(() => {
     fetchAll();
@@ -125,7 +124,7 @@ export default function PlannerPage() {
 
   const handleToggleDone = async (task: Task, completionNote?: string) => {
     const isDone =
-      task.status === "done" && (!task.recurrence || isCompletedToday(task));
+      task.status === "done" && (!task.isOccurrence || isCompletedToday(task));
 
     const newStatus = isDone ? "pending" : "done";
     try {
@@ -147,13 +146,33 @@ export default function PlannerPage() {
     } catch {}
   };
 
+  const handleStatusChange = async (task: Task, status: Task["status"]) => {
+    try {
+      const updated = await taskService.updateStatus(task._id, status as any);
+      setTasks((prev) => prev.map((t) => (t._id === task._id ? updated : t)));
+      fetchStats();
+    } catch {
+      toastService.error("Error", "Failed to update task status");
+    }
+  };
+
   const handleOpenCreate = () => {
     setEditTask(null);
     setModalOpen(true);
   };
 
-  const handleOpenEdit = (task: Task) => {
-    setEditTask(task);
+  const handleOpenEdit = async (task: Task) => {
+    if (task.isOccurrence && task.parentTaskId) {
+      try {
+        const parent = await taskService.getTaskById(task.parentTaskId);
+        setEditTask(parent);
+      } catch {
+        toastService.error("Error", "Could not load recurring task series");
+        return;
+      }
+    } else {
+      setEditTask(task);
+    }
     setModalOpen(true);
   };
 
@@ -161,17 +180,17 @@ export default function PlannerPage() {
     setSubmitting(true);
     try {
       if (editTask) {
-        const updated = await taskService.updateTask(editTask._id, data);
-        setTasks((prev) => prev.map((t) => (t._id === editTask._id ? updated : t)));
+        await taskService.updateTask(editTask._id, data);
         toastService.success("Task updated");
+        // Re-fetch all so pruned/spawned occurrences reflect immediately
+        await fetchAll();
       } else {
-        const created = await taskService.createTask(data);
-        setTasks((prev) => [created, ...prev]);
+        await taskService.createTask(data);
         toastService.success("Task created");
+        await fetchAll();
       }
       setModalOpen(false);
       setEditTask(null);
-      fetchStats();
     } catch (err: any) {
       toastService.error("Error", err.response?.data?.error || "Failed to save task");
     } finally {
@@ -209,9 +228,52 @@ export default function PlannerPage() {
     });
   }, [filteredTasks, selectedCalendarDate]);
 
-  const groups = useMemo(() => groupTasksByDate(filteredTasks), [filteredTasks]);
+  const focusLabel = useMemo(() => getFocusLabel(selectedListDate), [selectedListDate]);
+  const groups = useMemo(() => groupTasksByDate(filteredTasks, selectedListDate), [filteredTasks, selectedListDate]);
+  const SECTION_ORDER = useMemo(() => ["Overdue", focusLabel, "No date"], [focusLabel]);
 
-  const SECTION_ORDER = ["Overdue", "Today", "Tomorrow", "This week", "Later", "Recurring", "No date"];
+  const isListDateToday = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return isSameDay(selectedListDate, today);
+  }, [selectedListDate]);
+
+  const navigateListDate = (delta: number) => {
+    setSelectedListDate((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + delta);
+      return d;
+    });
+  };
+
+  const goToListToday = () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    setSelectedListDate(d);
+  };
+
+  // Show populate button when any recurring occurrences are loaded
+  const hasOpenRecurring = useMemo(
+    () => tasks.some((t) => t.isOccurrence),
+    [tasks]
+  );
+
+  const handlePopulate = async () => {
+    setPopulating(true);
+    try {
+      const result = await taskService.populateRecurring();
+      if (result.populated > 0) {
+        await fetchAll();
+        toastService.success("Upcoming tasks loaded", `Extended ${result.populated} recurring series`);
+      } else {
+        toastService.success("Already up to date", "No open-ended recurring tasks to extend");
+      }
+    } catch {
+      toastService.error("Error", "Failed to populate recurring tasks");
+    } finally {
+      setPopulating(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -337,6 +399,68 @@ export default function PlannerPage() {
       ) : view === "list" ? (
         /* ── List View ── */
         <div className="space-y-6">
+          {/* Date navigator */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => navigateListDate(-1)}
+                className="p-1.5 rounded-lg transition-colors hover:opacity-70"
+                style={{ color: "var(--color-text-secondary)" }}
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span
+                className="text-sm font-semibold px-2 min-w-[120px] text-center"
+                style={{ color: "var(--color-text-primary)" }}
+              >
+                {selectedListDate.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+              <button
+                onClick={() => navigateListDate(1)}
+                className="p-1.5 rounded-lg transition-colors hover:opacity-70"
+                style={{ color: "var(--color-text-secondary)" }}
+                aria-label="Next day"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isListDateToday && (
+                <button
+                  onClick={goToListToday}
+                  className="text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors"
+                  style={{
+                    color: "var(--color-primary)",
+                    borderColor: "var(--color-primary)",
+                    backgroundColor: "color-mix(in srgb, var(--color-primary) 8%, transparent)",
+                  }}
+                >
+                  Today
+                </button>
+              )}
+              {hasOpenRecurring && (
+                <button
+                  onClick={handlePopulate}
+                  disabled={populating}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors"
+                  style={{
+                    color: populating ? "var(--color-text-tertiary)" : "var(--color-text-secondary)",
+                    borderColor: "var(--color-border)",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  <RefreshCw className={`w-3 h-3 ${populating ? "animate-spin" : ""}`} />
+                  {populating ? "Loading..." : "Load upcoming"}
+                </button>
+              )}
+            </div>
+          </div>
+
           {SECTION_ORDER.map((section) => {
             const sectionTasks = groups[section] ?? [];
             if (sectionTasks.length === 0) return null;
@@ -370,6 +494,7 @@ export default function PlannerPage() {
                       key={task._id}
                       task={task}
                       onToggleDone={handleToggleDone}
+                      onStatusChange={handleStatusChange}
                       onEdit={handleOpenEdit}
                       onDelete={setDeleteTarget}
                     />
@@ -379,17 +504,17 @@ export default function PlannerPage() {
             );
           })}
 
-          {filteredTasks.length === 0 && (
+          {SECTION_ORDER.every((s) => (groups[s] ?? []).length === 0) && (
             <div className="text-center py-16">
               <ListTodo
                 className="w-12 h-12 mx-auto mb-3"
                 style={{ color: "var(--color-text-tertiary)" }}
               />
               <p className="text-sm font-medium" style={{ color: "var(--color-text-secondary)" }}>
-                No tasks yet
+                No tasks for {focusLabel.toLowerCase()}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--color-text-tertiary)" }}>
-                Add your first task to get started
+                {isListDateToday ? "Add your first task to get started" : "Navigate to another day or add a task"}
               </p>
               <button
                 onClick={handleOpenCreate}
@@ -442,6 +567,7 @@ export default function PlannerPage() {
                         key={task._id}
                         task={task}
                         onToggleDone={handleToggleDone}
+                        onStatusChange={handleStatusChange}
                         onEdit={handleOpenEdit}
                         onDelete={setDeleteTarget}
                       />

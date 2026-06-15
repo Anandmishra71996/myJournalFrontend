@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Task } from "@/types/task.types";
+import { Task, TaskStatus } from "@/types/task.types";
 import { PRIORITY_CONFIG } from "@/constants/task.constants";
 import {
   Check,
@@ -12,11 +12,14 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
+  Play,
+  RotateCcw,
 } from "lucide-react";
 
 interface TaskCardProps {
   task: Task;
   onToggleDone: (task: Task, completionNote?: string) => void;
+  onStatusChange: (task: Task, status: TaskStatus) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
 }
@@ -47,13 +50,19 @@ function formatDueDate(dateStr: string): string {
 }
 
 function isOverdue(task: Task): boolean {
-  if (!task.dueDate || task.status === "done" || task.recurrence) return false;
+  if (!task.dueDate || task.status === "done") return false;
   const due = new Date(task.dueDate);
   due.setHours(23, 59, 59, 999);
   return due < new Date();
 }
 
-export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskCardProps) {
+export default function TaskCard({
+  task,
+  onToggleDone,
+  onStatusChange,
+  onEdit,
+  onDelete,
+}: TaskCardProps) {
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -61,7 +70,9 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
   const priority = PRIORITY_CONFIG[task.priority];
   const isDone =
     task.status === "done" &&
-    (!task.recurrence || isCompletedToday(task));
+    (!task.isOccurrence || isCompletedToday(task));
+  const isInProgress = task.status === "in_progress";
+  const isPending = task.status === "pending";
   const overdue = isOverdue(task);
 
   const handleCheckClick = () => {
@@ -83,6 +94,18 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
     setCompletionNote("");
   };
 
+  // Circle button border/fill based on status
+  const circleBorderColor = isDone
+    ? "var(--color-primary)"
+    : isInProgress
+    ? "#f59e0b"
+    : priority.color;
+  const circleBg = isDone
+    ? "var(--color-primary)"
+    : isInProgress
+    ? "rgba(245,158,11,0.12)"
+    : "transparent";
+
   return (
     <div
       className="rounded-xl border p-4 transition-all duration-200"
@@ -90,21 +113,27 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
         backgroundColor: isDone
           ? "color-mix(in srgb, var(--color-surface-elevated) 60%, transparent)"
           : "var(--color-surface-elevated)",
-        borderColor: "color-mix(in srgb, var(--color-border) 60%, transparent)",
+        borderColor: isInProgress
+          ? "rgba(245,158,11,0.35)"
+          : "color-mix(in srgb, var(--color-border) 60%, transparent)",
         opacity: isDone ? 0.7 : 1,
       }}
     >
       <div className="flex items-start gap-3">
+        {/* Status circle */}
         <button
           onClick={handleCheckClick}
           className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200"
-          style={{
-            borderColor: isDone ? "var(--color-primary)" : priority.color,
-            backgroundColor: isDone ? "var(--color-primary)" : "transparent",
-          }}
+          style={{ borderColor: circleBorderColor, backgroundColor: circleBg }}
           aria-label={isDone ? "Mark pending" : "Mark done"}
         >
           {isDone && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+          {isInProgress && (
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: "#f59e0b" }}
+            />
+          )}
         </button>
 
         <div className="flex-1 min-w-0">
@@ -126,11 +155,28 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
               {task.title}
             </span>
 
-            {task.recurrence && (
-              <RefreshCw
-                className="w-3 h-3 flex-shrink-0"
-                style={{ color: "var(--color-text-tertiary)" }}
-              />
+            {/* In progress badge */}
+            {isInProgress && (
+              <span
+                className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                style={{ color: "#f59e0b", backgroundColor: "rgba(245,158,11,0.12)" }}
+              >
+                In progress
+              </span>
+            )}
+
+            {/* Recurring label chip — non-interactive */}
+            {task.isOccurrence && (
+              <span
+                className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full border select-none"
+                style={{
+                  color: "var(--color-text-tertiary)",
+                  borderColor: "var(--color-border)",
+                }}
+              >
+                <RefreshCw className="w-2.5 h-2.5" />
+                Recurring
+              </span>
             )}
           </div>
 
@@ -141,16 +187,14 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
                 style={{ color: overdue ? "var(--color-error)" : "var(--color-text-tertiary)" }}
               >
                 <Clock className="w-3 h-3" />
-                {overdue ? "Overdue · " : ""}{formatDueDate(task.dueDate)}
+                {overdue ? "Overdue · " : ""}
+                {formatDueDate(task.dueDate)}
                 {task.dueTime && ` · ${task.dueTime}`}
               </span>
             )}
 
             {task.estimatedMinutes && (
-              <span
-                className="text-xs"
-                style={{ color: "var(--color-text-tertiary)" }}
-              >
+              <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
                 ~{task.estimatedMinutes >= 60
                   ? `${task.estimatedMinutes / 60}h`
                   : `${task.estimatedMinutes}m`}
@@ -180,25 +224,44 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
           )}
 
           {expanded && task.description && (
-            <p
-              className="mt-1.5 text-sm"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
+            <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-secondary)" }}>
               {task.description}
             </p>
           )}
 
           {task.completionNote && isDone && (
-            <p
-              className="mt-1.5 text-xs italic"
-              style={{ color: "var(--color-text-tertiary)" }}
-            >
+            <p className="mt-1.5 text-xs italic" style={{ color: "var(--color-text-tertiary)" }}>
               "{task.completionNote}"
             </p>
           )}
         </div>
 
+        {/* Action buttons */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* In-progress toggle */}
+          {isPending && !isDone && (
+            <button
+              onClick={() => onStatusChange(task, "in_progress")}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: "#f59e0b" }}
+              aria-label="Mark in progress"
+              title="Mark in progress"
+            >
+              <Play className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {isInProgress && (
+            <button
+              onClick={() => onStatusChange(task, "pending")}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: "var(--color-text-tertiary)" }}
+              aria-label="Back to pending"
+              title="Back to pending"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           <button
             onClick={() => onEdit(task)}
             className="p-1.5 rounded-lg transition-colors"
@@ -241,10 +304,7 @@ export default function TaskCard({ task, onToggleDone, onEdit, onDelete }: TaskC
             <button
               onClick={handleConfirmDone}
               className="text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{
-                backgroundColor: "var(--color-primary)",
-                color: "white",
-              }}
+              style={{ backgroundColor: "var(--color-primary)", color: "white" }}
             >
               Mark done
             </button>

@@ -17,6 +17,7 @@ import {
   DocumentTextIcon,
   CreditCardIcon,
   ClipboardDocumentListIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 
 interface SidebarProps {
@@ -33,6 +34,7 @@ export default function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const showChat = featureLimits.allowAIChat || isLocalEnv;
 
   const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: Squares2X2Icon },
     { name: "Journal", href: "/journal", icon: BookOpenIcon },
     { name: "Planner", href: "/planner", icon: ClipboardDocumentListIcon },
     { name: "Goals", href: "/goals", icon: ChartBarIcon },

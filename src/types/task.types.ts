@@ -21,6 +21,9 @@ export interface Task {
     linkedGoalId?: string;
     linkedGoal?: { _id: string; title: string; category: string };
     recurrence?: TaskRecurrence;
+    isTemplate?: boolean;
+    isOccurrence?: boolean;
+    parentTaskId?: string;
     completedAt?: string;
     completionNote?: string;
     tags?: string[];

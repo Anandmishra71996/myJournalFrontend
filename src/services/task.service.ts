@@ -65,4 +65,9 @@ export const taskService = {
     async deleteTask(id: string): Promise<void> {
         await api.delete(`/tasks/${id}`);
     },
+
+    async populateRecurring(): Promise<{ populated: number }> {
+        const response = await api.post('/tasks/populate-recurring');
+        return response.data.data;
+    },
 };

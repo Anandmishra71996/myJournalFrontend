@@ -157,7 +157,12 @@ export default function TaskForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium mb-1" style={labelStyle}>
-            Due date
+            {showRecurrence ? "Last date" : "Due date"}
+            {showRecurrence && (
+              <span className="ml-1 font-normal" style={{ color: "var(--color-text-tertiary)" }}>
+                (optional)
+              </span>
+            )}
           </label>
           <input
             type="date"
@@ -166,6 +171,11 @@ export default function TaskForm({
             className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
             style={inputStyle}
           />
+          {showRecurrence && (
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--color-text-tertiary)" }}>
+              Leave empty to repeat indefinitely (max 40 days loaded at a time)
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-xs font-medium mb-1" style={labelStyle}>
