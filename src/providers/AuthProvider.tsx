@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 /**
  * AuthProvider - Checks authentication status on app mount
@@ -36,6 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initAuth = async () => {
       try {
         await useAuthStore.getState().checkAuth();
+        if (useAuthStore.getState().isAuthenticated) {
+          await useSubscriptionStore.getState().fetchSubscription();
+        }
       } catch (error) {
         console.error("Auth check failed:", error);
       } finally {
