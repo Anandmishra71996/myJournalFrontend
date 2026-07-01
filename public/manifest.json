@@ -1,7 +1,7 @@
 {
-  "name": "Journaling App",
-  "short_name": "Journal",
-  "description": "Personal journaling app with AI-powered insights for better self-reflection",
+  "name": "AIGoalReflect — AI Journal & Mental Wellness App",
+  "short_name": "AIGoalReflect",
+  "description": "Free AI-powered journaling app. Track mood, spot emotional patterns, and get personal growth insights. Private and encrypted.",
   "theme_color": "#4f46e5",
   "background_color": "#ffffff",
   "display": "standalone",
@@ -35,7 +35,7 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
+  "categories": ["health", "productivity", "lifestyle"],
   "screenshots": [
     {
       "src": "/icons/screenshot-192x300.png",
@@ -47,5 +47,7 @@
       "sizes": "540x720",
       "type": "image/png"
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

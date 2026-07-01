@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
   Bars3Icon,
+  CalendarDaysIcon,
   ChartBarIcon,
   ChatBubbleBottomCenterTextIcon,
+  CheckCircleIcon,
+  DocumentTextIcon,
   LightBulbIcon,
   LockClosedIcon,
   ShieldCheckIcon,
@@ -30,28 +33,28 @@ export default function Home() {
 
   const features = [
     {
-      title: "AI-Powered Insights",
+      title: "AI Journal Insights",
       description:
-        "Analyze writing patterns, emotional tone, and recurring themes so your journal becomes actionable clarity.",
+        "Analyze writing patterns, emotional tone, and recurring themes so your journal becomes actionable mental wellness clarity.",
       icon: ChartBarIcon,
       className: "md:col-span-2",
     },
     {
-      title: "Conversational Journaling",
+      title: "Conversational AI Journaling",
       description:
-        "Talk through your thoughts when the page feels blank. AI prompts nudge you toward deeper reflection.",
+        "Talk through your thoughts when the page feels blank. AI journaling prompts nudge you toward deeper self-reflection.",
       icon: ChatBubbleBottomCenterTextIcon,
     },
     {
-      title: "Smart Prompts",
+      title: "Smart Daily Prompts",
       description:
-        "Context-aware prompts adapt to your mood, goals, and recent entries to keep your writing flow alive.",
+        "Context-aware journaling prompts adapt to your mood, goals, and recent entries to keep your self-improvement writing flowing.",
       icon: LightBulbIcon,
     },
     {
-      title: "Private by Default",
+      title: "Private Encrypted Journal",
       description:
-        "Your writing remains personal and encrypted. Security is foundational, not an afterthought.",
+        "Your personal journal is end-to-end encrypted. We never sell data or train AI on your writing—privacy is foundational.",
       icon: ShieldCheckIcon,
       className: "md:col-span-2",
     },
@@ -159,16 +162,16 @@ export default function Home() {
             Now in Free Beta
           </div>
           <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            Turn your daily{" "}
+            The free AI journal app for{" "}
             <span className="italic text-[color:var(--color-primary)]">
-              thoughts
+              mental wellness
             </span>{" "}
-            into clear insights with AI
+            and personal growth
           </h1>
           <p className="max-w-xl text-base leading-relaxed text-[color:var(--color-text-secondary)] sm:text-lg">
-            A private sanctuary for reflection that helps you spot emotional
-            patterns, understand what drives your energy, and turn your writing
-            into growth.
+            AIGoalReflect is an AI-powered journaling app that tracks your mood,
+            spots emotional patterns, and turns your daily reflections into
+            actionable personal growth insights—completely private and encrypted.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
@@ -263,11 +266,11 @@ export default function Home() {
       >
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
-            Deep insights. Zero friction.
+            Everything your mental wellness journal needs
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
-            Designed for the modern thinker who wants fewer distractions and
-            more meaningful reflection.
+            Designed for daily journaling, mood tracking, and self-reflection—
+            powered by AI so your writing becomes real personal growth.
           </p>
         </div>
 
@@ -288,6 +291,92 @@ export default function Home() {
               </p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section
+        id="tools"
+        className="bg-surface/70 py-16 sm:py-20"
+      >
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+              Your complete self-growth toolkit
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
+              One app. Everything you need to journal, plan, track goals, and
+              understand yourself with AI.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: ChatBubbleBottomCenterTextIcon,
+                label: "AI Journal",
+                description:
+                  "A distraction-free AI-powered journal that listens, prompts, and learns from your writing to surface deeper patterns.",
+                badge: "Core",
+              },
+              {
+                icon: SparklesIcon,
+                label: "AI Life Insights",
+                description:
+                  "Weekly AI-generated life insights synthesized from your journal entries — mood arcs, energy patterns, and growth themes.",
+                badge: "AI-Powered",
+              },
+              {
+                icon: CalendarDaysIcon,
+                label: "Smart Planner",
+                description:
+                  "AI-linked task planner with calendar and list views. Tie tasks to goals and see your productivity alongside your emotional state.",
+                badge: "Productivity",
+              },
+              {
+                icon: CheckCircleIcon,
+                label: "Goal Tracker",
+                description:
+                  "Set personal goals, break them into milestones, and let AI connect your daily journal reflections to your long-term progress.",
+                badge: "Growth",
+              },
+              {
+                icon: LightBulbIcon,
+                label: "AI Companion Chat",
+                description:
+                  "Chat with an AI that knows your journal history. Ask questions, get personalized advice, or just talk through a hard day.",
+                badge: "AI Chat",
+              },
+              {
+                icon: DocumentTextIcon,
+                label: "Journal Templates",
+                description:
+                  "Guided journaling templates for gratitude, CBT reflection, anxiety, morning pages, and goal reviews — ready to use instantly.",
+                badge: "Templates",
+              },
+            ].map(({ icon: Icon, label, description, badge }) => (
+              <article
+                key={label}
+                className="flex flex-col gap-4 rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-background p-6 transition duration-200 hover:border-[color:var(--color-primary)]/50 hover:shadow-xl sm:p-7"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[color:color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-[color:var(--color-primary)]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="mt-1 rounded-full border border-[color:color-mix(in_srgb,var(--color-secondary)_35%,transparent)] bg-[color:color-mix(in_srgb,var(--color-secondary)_12%,transparent)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-secondary-dark)] dark:text-[color:var(--color-secondary-light)]">
+                    {badge}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="mb-1.5 text-lg font-bold tracking-tight">
+                    {label}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-[color:var(--color-text-secondary)]">
+                    {description}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -376,7 +465,7 @@ export default function Home() {
               quote:
                 "Strong privacy guarantees made me trust the app. I can journal honestly without worrying about where my data goes.",
             },
-          ].map((testimonial, index) => (
+          ].map((testimonial) => (
             <article
               key={testimonial.name}
               className="flex h-full flex-col justify-between rounded-3xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface p-7"
@@ -716,6 +805,60 @@ export default function Home() {
               </button>
             </form>
           </div>
+        </div>
+      </section>
+
+      <section
+        id="faq"
+        className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
+      >
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+            Frequently asked questions
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[color:var(--color-text-secondary)]">
+            Everything you need to know about our free AI journaling app.
+          </p>
+        </div>
+
+        <div className="mx-auto max-w-3xl space-y-4">
+          {[
+            {
+              q: "Is AIGoalReflect free to use?",
+              a: "Yes, AIGoalReflect is completely free during our open beta. All features including AI insights, mood tracking, and encrypted journaling are available at no cost.",
+            },
+            {
+              q: "Is my journal private and secure?",
+              a: "Absolutely. All journal entries are end-to-end encrypted. We never sell your data or train public AI models on your writing.",
+            },
+            {
+              q: "How does the AI journaling feature work?",
+              a: "Our AI analyzes your journal entries to identify emotional patterns, mood trends, and recurring themes. It generates personalized insights and smart prompts to help you reflect more deeply and grow faster.",
+            },
+            {
+              q: "Can I use AIGoalReflect for mental health journaling?",
+              a: "Yes. AIGoalReflect supports mental wellness through structured self-reflection, mood tracking, and CBT-inspired journaling prompts designed to help with anxiety, stress, and personal growth.",
+            },
+            {
+              q: "Does it work as a mood tracker?",
+              a: "Yes. Every journal entry is analyzed for emotional tone and sentiment. Over time you'll see mood trends, energy patterns, and emotional clarity scores on your dashboard.",
+            },
+          ].map(({ q, a }) => (
+            <details
+              key={q}
+              className="group rounded-2xl border border-[color:color-mix(in_srgb,var(--color-border)_62%,transparent)] bg-surface open:border-[color:var(--color-primary)]/40"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 font-semibold">
+                {q}
+                <span className="shrink-0 text-[color:var(--color-primary)] transition group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="border-t border-[color:color-mix(in_srgb,var(--color-border)_50%,transparent)] px-6 pb-6 pt-4 text-sm leading-relaxed text-[color:var(--color-text-secondary)]">
+                {a}
+              </p>
+            </details>
+          ))}
         </div>
       </section>
 
