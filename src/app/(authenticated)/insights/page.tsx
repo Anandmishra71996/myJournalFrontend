@@ -23,12 +23,14 @@ import {
   LightBulbIcon,
   ArrowPathIcon,
   ArrowUpTrayIcon,
+  QuestionMarkCircleIcon,
   StarIcon as StarOutline,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { AiFeedback } from "@/constants/aiFeedback.constants";
 import { journalService } from "@/services/journal.service";
 import AiFeedbackModal from "@/components/feedback/AiFeedbackModal";
+import MetricsGlossaryModal from "@/components/insights/MetricsGlossaryModal";
 import { exportInsightAsPdf } from "@/utils/exportInsightPdf";
 
 export default function InsightsPage() {
@@ -44,6 +46,7 @@ export default function InsightsPage() {
   const [quickRatingPending, setQuickRatingPending] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [glossaryOpen, setGlossaryOpen] = useState(false);
 
   useEffect(() => {
     const { weekStart: currentWeekStart } = getCurrentWeek();
@@ -205,20 +208,31 @@ export default function InsightsPage() {
               </p>
             </div>
             {!loading && insight && (
-              <button
-                type="button"
-                onClick={handleExportPdf}
-                disabled={exporting}
-                title="Export insight as PDF"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-surface-high)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] transition-colors hover:bg-[var(--color-surface-bright)] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {exporting ? (
-                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowUpTrayIcon className="h-4 w-4" />
-                )}
-                {exporting ? "Exporting..." : "Export Report"}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGlossaryOpen(true)}
+                  title="What do these numbers mean?"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-surface-high)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] transition-colors hover:bg-[var(--color-surface-bright)]"
+                >
+                  <QuestionMarkCircleIcon className="h-4 w-4" />
+                  What do these numbers mean?
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={exporting}
+                  title="Export insight as PDF"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-surface-high)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-primary)] outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] transition-colors hover:bg-[var(--color-surface-bright)] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {exporting ? (
+                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ArrowUpTrayIcon className="h-4 w-4" />
+                  )}
+                  {exporting ? "Exporting..." : "Export Report"}
+                </button>
+              </div>
             )}
           </div>
 
@@ -634,6 +648,14 @@ export default function InsightsPage() {
           contextDate={insight.weekStart}
           initialFeedback={feedback}
           onFeedbackSaved={(saved) => setFeedback(saved)}
+        />
+      )}
+
+      {insight && (
+        <MetricsGlossaryModal
+          isOpen={glossaryOpen}
+          onClose={() => setGlossaryOpen(false)}
+          metrics={insight.metricsSnapshot}
         />
       )}
     </div>

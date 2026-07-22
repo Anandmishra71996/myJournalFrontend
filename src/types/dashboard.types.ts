@@ -21,6 +21,14 @@ export interface TaskStats {
   completedToday: number;
 }
 
+export interface MetricExplanation {
+  why: string;
+  dominantStates?: string[];
+  representativeQuote?: string;
+  sourceJournalCount?: number;
+  confidence?: number;
+}
+
 export interface BehavioralMetrics {
   metrics: {
     weekStart: string;
@@ -41,6 +49,7 @@ export interface BehavioralMetrics {
       emotionTrend: 'improving' | 'declining' | 'stable';
       motivationTrend: 'improving' | 'declining' | 'stable';
     };
+    metricExplanations?: Record<string, MetricExplanation | undefined>;
   } | null;
   aiProfile: {
     executionConsistencyScore?: number;
@@ -52,6 +61,26 @@ export interface BehavioralMetrics {
     contradictionFlags?: string[];
     lastProfileUpdate?: string;
   } | null;
+}
+
+export interface BehavioralHistoryPoint {
+  weekStart: string;
+  weekEnd: string;
+  totalEntriesAnalyzed: number;
+  avgActionRatio: number;
+  avgEmotionalIntensity: number;
+  growthMindsetRatio: number;
+  mixedMindsetRatio: number;
+  fixedMindsetRatio: number;
+  internalLocusRatio: number;
+  procrastinationFrequency: number;
+  burnoutFrequency: number;
+  resilienceFrequency: number;
+}
+
+export interface BehavioralHistory {
+  history: BehavioralHistoryPoint[];
+  maxWeeks: number;
 }
 
 export interface MemoryPattern {

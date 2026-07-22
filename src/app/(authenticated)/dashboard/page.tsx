@@ -16,6 +16,7 @@ import type {
   JournalStats,
   TaskStats,
   BehavioralMetrics,
+  BehavioralHistoryPoint,
   MemoryPattern,
   DashboardGoal,
   LatestInsight,
@@ -43,6 +44,8 @@ export default function DashboardPage() {
   const [goals, setGoals] = useState<DashboardGoal[]>([]);
   const [latestInsight, setLatestInsight] = useState<LatestInsight | null>(null);
   const [behavioralData, setBehavioralData] = useState<BehavioralMetrics | null>(null);
+  const [behavioralHistory, setBehavioralHistory] = useState<BehavioralHistoryPoint[]>([]);
+  const [historyMaxWeeks, setHistoryMaxWeeks] = useState(4);
   const [memories, setMemories] = useState<MemoryPattern[]>([]);
   const [taskStats, setTaskStats] = useState<TaskStats | null>(null);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
@@ -77,14 +80,18 @@ export default function DashboardPage() {
       if (taskStatsData.status === "fulfilled") setTaskStats(taskStatsData.value);
       if (todayTasksData.status === "fulfilled") setTodayTasks(todayTasksData.value);
 
-      // Load behavioral data & memory patterns separately (may fail on free tier gracefully)
-      if (hasAdvancedAccess) {
-        const [behavioralResult, memoriesResult] = await Promise.allSettled([
-          dashboardService.getBehavioralMetrics(),
-          dashboardService.getMemoryPatterns(),
-        ]);
-        if (behavioralResult.status === "fulfilled") setBehavioralData(behavioralResult.value);
-        if (memoriesResult.status === "fulfilled") setMemories(memoriesResult.value);
+      // Behavioral data loads for every tier (free tier sees a teaser);
+      // trend history is server-gated to Reflect/Thrive.
+      const [behavioralResult, memoriesResult, historyResult] = await Promise.allSettled([
+        dashboardService.getBehavioralMetrics(),
+        dashboardService.getMemoryPatterns(),
+        hasAdvancedAccess ? dashboardService.getBehavioralHistory() : Promise.resolve(null),
+      ]);
+      if (behavioralResult.status === "fulfilled") setBehavioralData(behavioralResult.value);
+      if (memoriesResult.status === "fulfilled") setMemories(memoriesResult.value);
+      if (historyResult.status === "fulfilled" && historyResult.value) {
+        setBehavioralHistory(historyResult.value.history);
+        setHistoryMaxWeeks(historyResult.value.maxWeeks);
       }
     } finally {
       setLoading(false);
@@ -139,6 +146,8 @@ export default function DashboardPage() {
             <BehavioralIntelligence
               data={behavioralData}
               memories={memories}
+              history={behavioralHistory}
+              maxWeeks={historyMaxWeeks}
               hasAccess={hasAdvancedAccess}
             />
           </div>

@@ -4,6 +4,7 @@ import type {
   JournalStats,
   TaskStats,
   BehavioralMetrics,
+  BehavioralHistory,
   MemoryPattern,
   DashboardGoal,
   LatestInsight,
@@ -52,6 +53,15 @@ export const dashboardService = {
   getBehavioralMetrics: async (): Promise<BehavioralMetrics> => {
     const res = await api.get('/users/me/behavioral-metrics');
     return res.data.data;
+  },
+
+  getBehavioralHistory: async (weeks = 26): Promise<BehavioralHistory | null> => {
+    try {
+      const res = await api.get(`/users/me/behavioral-metrics/history?weeks=${weeks}`);
+      return res.data.data;
+    } catch {
+      return null;
+    }
   },
 
   getMemoryPatterns: async (): Promise<MemoryPattern[]> => {

@@ -15,9 +15,9 @@ export default function PrivacySection() {
         </h2>
         <p className="text-body-md text-on-surface-variant/70 max-w-2xl mx-auto">
           We take your privacy seriously. Your journal entries, goals, and
-          personal reflections are encrypted end-to-end. We will never read,
-          share, or sell your data to third parties. Your thoughts are yours
-          alone.
+          personal reflections are encrypted at rest and in transit, and are
+          never used to train AI models. We will never share or sell your data
+          to third parties. Your thoughts are yours alone.
         </p>
       </div>
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Check, Sparkles } from "lucide-react";
+import { Camera, Check, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
@@ -41,6 +41,8 @@ export default function ProfileForm({
   const router = useRouter();
   const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
     avatar: "",
@@ -119,6 +121,52 @@ export default function ProfileForm({
     });
   };
 
+  const handleAvatarFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please choose a JPEG, PNG, WebP, or GIF image");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be smaller than 5MB");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    handleInputChange("avatar", previewUrl);
+
+    setAvatarUploading(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append("avatar", file);
+
+      const response = await api.post("/users/avatar", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        handleInputChange("avatar", response.data.data.avatar);
+        setUser(response.data.data);
+        toast.success("Profile picture updated");
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error || "Failed to upload profile picture";
+      toast.error(errorMessage);
+      handleInputChange("avatar", user ? (user as any).avatar || "" : "");
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setAvatarUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -180,9 +228,27 @@ export default function ProfileForm({
             {avatarFallback}
           </div>
         )}
-        <div className="absolute bottom-2 right-2 rounded-full bg-[color:var(--color-primary)] p-2 text-[color:var(--color-text-primary)] shadow-[0_8px_20px_rgba(126,81,255,0.35)]">
+        {avatarUploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <Loader2 className="h-6 w-6 animate-spin text-white" />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => avatarInputRef.current?.click()}
+          disabled={avatarUploading}
+          aria-label="Change profile picture"
+          className="absolute bottom-2 right-2 rounded-full bg-[color:var(--color-primary)] p-2 text-[color:var(--color-text-primary)] shadow-[0_8px_20px_rgba(126,81,255,0.35)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        >
           <Camera className="h-4 w-4" />
-        </div>
+        </button>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          onChange={handleAvatarFileChange}
+          className="hidden"
+        />
       </div>
 
       <div className="flex-1">
@@ -198,7 +264,7 @@ export default function ProfileForm({
           placeholder="https://example.com/avatar.jpg"
         />
         <p className="mt-2 text-xs text-[color:var(--color-text-secondary)]">
-          Add an image link for your profile portrait.
+          Click the camera icon to upload a photo, or paste an image link here.
         </p>
       </div>
     </div>

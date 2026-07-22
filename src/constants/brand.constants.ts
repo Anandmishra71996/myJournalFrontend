@@ -6,7 +6,7 @@
 export const BRAND_NAME = "AIGoalReflect";
 export const BRAND_TAGLINE = "Reflect, Grow, Thrive";
 export const BRAND_DESCRIPTION =
-    "AIGoalReflect is a free AI-powered journaling app that helps you track mood, spot emotional patterns, and gain personal insights. Private, encrypted, and built for mental wellness and self-growth.";
+    "AIGoalReflect analyzes your journal to detect your behavioral patterns — procrastination triggers, mindset trends, burnout signals — with evidence quoted from your own entries. Private, encrypted, free to start.";
 export const SUPPORT_EMAIL = "hello@aigoalreflect.online";
 export const COMPANY_NAME = "AIGoalReflect";
 export const COMPANY_FOUNDED = "2026";

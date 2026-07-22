@@ -5,6 +5,22 @@ export interface GoalSummary {
     explanation: string;
 }
 
+export interface MetricsSnapshot {
+    avgActionRatio?: number;
+    avgEmotionalIntensity?: number;
+    growthMindsetRatio?: number;
+    internalLocusRatio?: number;
+    procrastinationFrequency?: number;
+    burnoutFrequency?: number;
+    resilienceFrequency?: number;
+    executionConsistencyScore?: number;
+    resilienceIndex?: number;
+    agencyScore?: number;
+    volatilityIndex?: number;
+    dominantMindset?: string;
+    dominantLocus?: string;
+}
+
 export interface WeeklyInsight {
     _id: string;
     userId: string;
@@ -22,6 +38,7 @@ export interface WeeklyInsight {
         solutions: string[];
     }>;
     suggestion?: string;
+    metricsSnapshot?: MetricsSnapshot;
     generatedAt: string;
     sourceVersion: number;
 }
