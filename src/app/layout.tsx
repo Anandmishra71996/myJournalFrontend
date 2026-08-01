@@ -6,6 +6,7 @@ import InstallButton from "@/components/InstallButton";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import PWARegister from "@/components/PWARegister";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { PostHogProvider } from "@/providers/PostHogProvider";
 import {
   BRAND_NAME,
   BRAND_DESCRIPTION,
@@ -262,14 +263,16 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider>
-          <AuthProvider>
-            <PWARegister />
-            {children}
-            <InstallButton />
-            <Toaster position="top-right" richColors />
-          </AuthProvider>
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <PWARegister />
+              {children}
+              <InstallButton />
+              <Toaster position="top-right" richColors />
+            </AuthProvider>
+          </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

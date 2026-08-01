@@ -3,11 +3,24 @@
 import { useState, useEffect } from 'react';
 import {
     GoalFormData,
+    GoalMilestone,
     GOAL_TYPES_OPTIONS,
     GOAL_CATEGORIES_OPTIONS,
     TRACKING_METHODS_OPTIONS,
     JOURNAL_SIGNALS_OPTIONS,
 } from '@/constants/goal.constants';
+
+const MAX_MILESTONES = 5;
+
+const emptyMilestone = (): GoalMilestone => ({
+    title: '',
+    description: '',
+    targetDate: '',
+    status: 'pending',
+});
+
+const toDateInputValue = (value?: string) =>
+    value ? value.slice(0, 10) : '';
 
 interface GoalFormProps {
     initialData?: Partial<GoalFormData>;
@@ -31,8 +44,12 @@ export default function GoalForm({
         journalSignals: initialData?.journalSignals || [],
         successDefinition: initialData?.successDefinition || '',
         isRepetitive: initialData?.isRepetitive !== undefined ? initialData.isRepetitive : true,
-        startDate: initialData?.startDate || '',
-        endDate: initialData?.endDate || '',
+        startDate: toDateInputValue(initialData?.startDate),
+        endDate: toDateInputValue(initialData?.endDate),
+        milestones: (initialData?.milestones || []).map((m) => ({
+            ...m,
+            targetDate: toDateInputValue(m.targetDate),
+        })),
     });
 
     const [loading, setLoading] = useState(false);
@@ -80,6 +97,21 @@ export default function GoalForm({
             }
         }
 
+        const milestones = formData.milestones || [];
+        if (milestones.length > MAX_MILESTONES) {
+            newErrors.milestones = `You can have a maximum of ${MAX_MILESTONES} milestones`;
+        }
+        milestones.forEach((milestone, index) => {
+            if (!milestone.title.trim()) {
+                newErrors[`milestone-${index}-title`] = 'Milestone title is required';
+            } else if (milestone.title.length > 120) {
+                newErrors[`milestone-${index}-title`] = 'Title must be 120 characters or less';
+            }
+            if (milestone.description && milestone.description.length > 300) {
+                newErrors[`milestone-${index}-description`] = 'Description must be 300 characters or less';
+            }
+        });
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -104,7 +136,16 @@ export default function GoalForm({
 
         setLoading(true);
         try {
-            await onSubmit(formData);
+            const payload: GoalFormData = {
+                ...formData,
+                startDate: formData.startDate || undefined,
+                endDate: formData.endDate || undefined,
+                milestones: (formData.milestones || []).map((milestone) => ({
+                    ...milestone,
+                    targetDate: milestone.targetDate || undefined,
+                })),
+            };
+            await onSubmit(payload);
         } catch (error) {
             console.error('Form submission error:', error);
         } finally {
@@ -127,6 +168,30 @@ export default function GoalForm({
             : [...currentArray, value];
 
         setFormData({ ...formData, [field]: newArray });
+    };
+
+    const addMilestone = () => {
+        if ((formData.milestones || []).length >= MAX_MILESTONES) return;
+        setFormData({
+            ...formData,
+            milestones: [...(formData.milestones || []), emptyMilestone()],
+        });
+    };
+
+    const updateMilestone = (
+        index: number,
+        updates: Partial<GoalMilestone>
+    ) => {
+        const milestones = [...(formData.milestones || [])];
+        milestones[index] = { ...milestones[index], ...updates };
+        setFormData({ ...formData, milestones });
+    };
+
+    const removeMilestone = (index: number) => {
+        const milestones = (formData.milestones || []).filter(
+            (_, i) => i !== index
+        );
+        setFormData({ ...formData, milestones });
     };
 
     return (
@@ -398,6 +463,120 @@ export default function GoalForm({
                     </div>
                 </div>
             )}
+
+            {/* Milestones */}
+            <div>
+                <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                        Milestones
+                    </label>
+                    <span className="text-xs text-gray-500">
+                        {(formData.milestones || []).length}/{MAX_MILESTONES}
+                    </span>
+                </div>
+                <p className="text-xs text-gray-500 mb-3">
+                    Break your goal down into smaller checkpoints
+                </p>
+
+                <div className="space-y-3">
+                    {(formData.milestones || []).map((milestone, index) => (
+                        <div
+                            key={milestone._id || index}
+                            className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                        >
+                            <div className="flex items-start gap-2">
+                                <div className="flex-1">
+                                    <input
+                                        type="text"
+                                        value={milestone.title}
+                                        onChange={(e) =>
+                                            updateMilestone(index, { title: e.target.value })
+                                        }
+                                        placeholder="Milestone title"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                    />
+                                    {errors[`milestone-${index}-title`] && (
+                                        <p className="text-sm text-red-600 mt-1">
+                                            {errors[`milestone-${index}-title`]}
+                                        </p>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => removeMilestone(index)}
+                                    className="px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                    aria-label="Remove milestone"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+
+                            <div>
+                                <textarea
+                                    value={milestone.description || ''}
+                                    onChange={(e) =>
+                                        updateMilestone(index, { description: e.target.value })
+                                    }
+                                    rows={2}
+                                    placeholder="Description (optional)"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"
+                                />
+                                {errors[`milestone-${index}-description`] && (
+                                    <p className="text-sm text-red-600 mt-1">
+                                        {errors[`milestone-${index}-description`]}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Target Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={milestone.targetDate || ''}
+                                        onChange={(e) =>
+                                            updateMilestone(index, { targetDate: e.target.value })
+                                        }
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Status
+                                    </label>
+                                    <select
+                                        value={milestone.status}
+                                        onChange={(e) =>
+                                            updateMilestone(index, {
+                                                status: e.target.value as 'pending' | 'completed',
+                                            })
+                                        }
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {errors.milestones && (
+                    <p className="text-sm text-red-600 mt-2">{errors.milestones}</p>
+                )}
+
+                <button
+                    type="button"
+                    onClick={addMilestone}
+                    disabled={(formData.milestones || []).length >= MAX_MILESTONES}
+                    className="mt-3 w-full px-4 py-2 rounded-lg text-sm font-medium border border-dashed border-indigo-300 text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    + Add Milestone
+                </button>
+            </div>
 
             {/* Submit Button */}
             <div className="flex gap-4 pt-4">

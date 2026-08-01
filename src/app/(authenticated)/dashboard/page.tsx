@@ -40,6 +40,7 @@ export default function DashboardPage() {
   });
 
   const [activity, setActivity] = useState<ActivityDay[]>([]);
+  const [streakActivity, setStreakActivity] = useState<ActivityDay[]>([]);
   const [journalStats, setJournalStats] = useState<JournalStats | null>(null);
   const [goals, setGoals] = useState<DashboardGoal[]>([]);
   const [latestInsight, setLatestInsight] = useState<LatestInsight | null>(null);
@@ -59,6 +60,7 @@ export default function DashboardPage() {
     try {
       const [
         activityData,
+        streakActivityData,
         statsData,
         goalsData,
         insightData,
@@ -66,14 +68,20 @@ export default function DashboardPage() {
         todayTasksData,
       ] = await Promise.allSettled([
         dashboardService.getActivity(days, filters.journalType),
+        // Streak must look back further than the period filter, and ignore the
+        // journal-type filter — otherwise switching to "7 days" or "Morning" would
+        // truncate the real streak.
+        dashboardService.getActivity(365),
         dashboardService.getJournalStats(days),
         dashboardService.getGoals(filters.goalCategory),
         dashboardService.getLatestInsight(),
         dashboardService.getTaskStats(),
         dashboardService.getTodayTasks(),
+        fetchSubscription(),
       ]);
 
       if (activityData.status === "fulfilled") setActivity(activityData.value);
+      if (streakActivityData.status === "fulfilled") setStreakActivity(streakActivityData.value);
       if (statsData.status === "fulfilled") setJournalStats(statsData.value);
       if (goalsData.status === "fulfilled") setGoals(goalsData.value);
       if (insightData.status === "fulfilled") setLatestInsight(insightData.value);
@@ -96,11 +104,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [days, filters.journalType, filters.goalCategory, hasAdvancedAccess]);
-
-  useEffect(() => {
-    fetchSubscription().catch(() => {});
-  }, [fetchSubscription]);
+  }, [days, filters.journalType, filters.goalCategory, hasAdvancedAccess, fetchSubscription]);
 
   useEffect(() => {
     loadAll();
@@ -134,7 +138,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl space-y-5">
-        <HeroStrip activity={activity} />
+        <HeroStrip activity={streakActivity} />
 
         <GlobalFilters filters={filters} onChange={handleFilterChange} />
 

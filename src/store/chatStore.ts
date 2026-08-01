@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import posthog from '@/lib/posthog';
 
 interface Message {
     role: 'user' | 'assistant' | 'system';
@@ -95,6 +96,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     ? { ...state.currentConversation!, _id: response.data.data.conversationId }
                     : state.currentConversation,
             }));
+            posthog.capture('chat_message_sent', { streamed: false });
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
@@ -161,6 +163,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
                     }
                 }
             }
+            posthog.capture('chat_message_sent', { streamed: true });
         } catch (error) {
             console.error('Error streaming message:', error);
             throw error;

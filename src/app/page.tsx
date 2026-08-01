@@ -149,6 +149,12 @@ export default function Home() {
               Pricing
             </a>
             <Link
+              href="/tools"
+              className="transition hover:text-[color:var(--color-text-primary)]"
+            >
+              Free Tools
+            </Link>
+            <Link
               href="/blog"
               className="transition hover:text-[color:var(--color-text-primary)]"
             >
@@ -202,6 +208,7 @@ export default function Home() {
                 { href: "#features", label: "Features" },
                 { href: "#how-it-works", label: "How It Works" },
                 { href: "#pricing", label: "Pricing" },
+                { href: "/tools", label: "Free Tools" },
                 { href: "/blog", label: "Blog" },
                 { href: "#about", label: "About" },
                 { href: "#contact", label: "Contact" },
@@ -394,6 +401,42 @@ export default function Home() {
                 "{question}"
               </span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <div className="overflow-hidden rounded-[2rem] border border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_10%,var(--color-surface-elevated)),color-mix(in_srgb,var(--color-secondary)_8%,var(--color-surface-elevated)))] p-8 sm:p-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color:color-mix(in_srgb,var(--color-secondary)_35%,transparent)] bg-[color:color-mix(in_srgb,var(--color-secondary)_16%,transparent)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-secondary-dark)] dark:text-[color:var(--color-secondary-light)]">
+              <SparklesIcon className="h-4 w-4" />
+              Free — No Login Required
+            </div>
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+              Try it first. No account needed.
+            </h2>
+            <p className="mx-auto mt-4 text-[color:var(--color-text-secondary)]">
+              Paste anything you've written and get a free AI personality
+              read — the same evidence-backed analysis engine behind{" "}
+              {BRAND_NAME}, in a single free tool.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 flex max-w-lg flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/tools/personality-from-writing"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[color:var(--color-primary-dark)] to-[color:var(--color-primary)] px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] transition hover:scale-[1.02] sm:w-auto"
+            >
+              Get My Free Personality Read
+              <SparklesIcon className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/tools"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[color:var(--color-border)] px-7 py-3.5 text-sm font-semibold transition hover:bg-surface sm:w-auto"
+            >
+              See All Free Tools
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -1039,6 +1082,12 @@ export default function Home() {
               className="transition hover:text-[color:var(--color-primary)]"
             >
               Pricing
+            </Link>
+            <Link
+              href="/tools"
+              className="transition hover:text-[color:var(--color-primary)]"
+            >
+              Free Tools
             </Link>
             <Link
               href="/blog"

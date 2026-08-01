@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import posthog from '@/lib/posthog';
 import { Journal, JournalData } from '@/types/journal.types';
 import { WeeklyInsight } from '@/constants/insight.constants';
 import { AiFeedback, ContentType, SectionFeedback } from '@/constants/aiFeedback.constants';
@@ -42,11 +43,13 @@ export const journalService = {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            posthog.capture('journal_entry_created', { has_audio: true });
             return response.data;
         }
 
         // No audio files, send as regular JSON
         const response = await api.post('/journals', data);
+        posthog.capture('journal_entry_created', { has_audio: false });
         return response.data;
     },
 

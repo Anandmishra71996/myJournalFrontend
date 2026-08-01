@@ -60,7 +60,7 @@ export default function TaskSnapshot({ stats, todayTasks, onTaskDone }: Props) {
             </Link>
           )}
           {(["P1", "P2", "P3", "P4"] as const).map((p) => {
-            const count = (stats as any)[p.toLowerCase()] ?? 0;
+            const count = stats[p.toLowerCase() as "p1" | "p2" | "p3" | "p4"] ?? 0;
             if (count === 0) return null;
             return (
               <span key={p} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${PRIORITY_COLORS[p]}`}>

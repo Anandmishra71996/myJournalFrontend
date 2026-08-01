@@ -102,6 +102,7 @@ export interface GoalFormData {
     endDate?: string;
     existingGoalId?: string;
     parentGoalId?: string;
+    milestones?: GoalMilestone[];
 }
 
 export interface Goal extends GoalFormData {
@@ -113,7 +114,6 @@ export interface Goal extends GoalFormData {
     endDate?: string;
     generatedBy?: 'user' | 'agent';
     parentGoalId?: string;
-    milestones?: GoalMilestone[];
     weeklyPlan?: GoalWeeklyPlan[];
     actionSteps?: GoalActionStep[];
     progress?: GoalProgress;

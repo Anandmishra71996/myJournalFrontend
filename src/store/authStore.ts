@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import posthog from '@/lib/posthog';
 
 interface User {
     id: string;
@@ -32,6 +33,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
             // Token is now set in httpOnly cookie by backend
             set({ user, isAuthenticated: true });
+            posthog.identify(user.id, { email: user.email, name: user.name });
+            posthog.capture('user_logged_in');
         } catch (error: any) {
             const errorMessage = error.response?.data?.error || error.message || 'Login failed';
             throw new Error(errorMessage);
@@ -49,6 +52,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
             // Token is now set in httpOnly cookie by backend
             set({ user, isAuthenticated: true });
+            posthog.identify(user.id, { email: user.email, name: user.name });
+            posthog.capture('user_signed_up');
         } catch (error: any) {
             const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
             throw new Error(errorMessage);
@@ -64,6 +69,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         } finally {
             // Always clear local state, even if API call fails
             set({ user: null, isAuthenticated: false });
+            posthog.reset();
         }
     },
 
@@ -92,6 +98,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await api.get('/users/profile');
             const user = response.data.data;
             set({ user, isAuthenticated: true });
+            posthog.identify(user.id, { email: user.email, name: user.name });
         } catch (error) {
             // 401 = not authenticated (expected on public pages) — clear state silently.
             // The axios interceptor in api.ts is responsible for redirecting to /login

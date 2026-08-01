@@ -24,6 +24,13 @@ function TrendIcon({ trend }: { trend: "improving" | "declining" | "stable" }) {
   return <MinusIcon className="h-4 w-4 text-[var(--color-text-tertiary)]" />;
 }
 
+const SCORE_TILE_BAR_COLORS: Record<string, string> = {
+  Execution: "bg-emerald-400",
+  Resilience: "bg-rose-400",
+  Agency: "bg-indigo-400",
+  Volatility: "bg-amber-400",
+};
+
 function ScoreTile({
   label,
   value,
@@ -38,6 +45,7 @@ function ScoreTile({
   trend?: "improving" | "declining" | "stable";
 }) {
   const pct = value !== undefined ? Math.min(100, Math.max(0, ((value + max) / (2 * max)) * 100)) : null;
+  const barColor = SCORE_TILE_BAR_COLORS[label] ?? "bg-[var(--color-primary)]";
   return (
     <div className="rounded-xl bg-[var(--color-surface-low)] p-4 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)]">
       <div className="flex items-start justify-between">
@@ -50,7 +58,7 @@ function ScoreTile({
       {pct !== null && (
         <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--color-surface-highest)]">
           <div
-            className="h-full rounded-full bg-[var(--color-primary)] transition-all"
+            className={`h-full rounded-full transition-all ${barColor}`}
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -59,39 +67,54 @@ function ScoreTile({
   );
 }
 
+function trendLabel(delta: number | undefined) {
+  if (delta === undefined) return null;
+  const pp = Math.round(delta * 100);
+  if (pp === 0) return "stable";
+  return `${pp > 0 ? "↑" : "↓"} ${Math.abs(pp)}pp`;
+}
+
 function FreqMeter({
   label,
   value,
+  delta,
   explanation,
 }: {
   label: string;
   value: number;
+  delta?: number;
   explanation?: MetricExplanation;
 }) {
   const level = value < 0.3 ? "Low" : value < 0.6 ? "Moderate" : "High";
-  const color = level === "High" ? "bg-red-400" : level === "Moderate" ? "bg-amber-400" : "bg-emerald-400";
-  const row = (
-    <div className="flex items-center justify-between gap-3">
-      <span className="flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
-        {label}
+  const barColor = level === "High" ? "bg-red-400" : level === "Moderate" ? "bg-amber-400" : "bg-emerald-400";
+  const delta_ = trendLabel(delta);
+
+  const body = (
+    <div className="rounded-xl bg-[var(--color-surface-low)] p-4 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)]">
+      <div className="flex items-center gap-1.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-tertiary)]">{label}</p>
         {explanation && (
           <span className="text-[10px] font-semibold text-[var(--color-primary)] group-open:hidden">why?</span>
         )}
-      </span>
-      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--color-background)] ${color}`}>
-        {level}
-      </span>
+      </div>
+      <p className="mt-1 text-2xl font-extrabold text-[var(--color-text-primary)]">{Math.round(value * 100)}%</p>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--color-surface-highest)]">
+        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${Math.min(100, value * 100)}%` }} />
+      </div>
+      {delta_ && (
+        <p className="mt-1.5 text-[10px] text-[var(--color-text-tertiary)]">
+          vs last week <span className="font-semibold">{delta_}</span>
+        </p>
+      )}
     </div>
   );
 
-  if (!explanation) {
-    return <div className="rounded-lg bg-[var(--color-surface-high)] px-3 py-2">{row}</div>;
-  }
+  if (!explanation) return body;
 
   return (
-    <details className="group rounded-lg bg-[var(--color-surface-high)] px-3 py-2">
-      <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">{row}</summary>
-      <div className="mt-2 space-y-1.5 border-t border-[color:color-mix(in_srgb,var(--color-outline-variant)_20%,transparent)] pt-2">
+    <details className="group">
+      <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">{body}</summary>
+      <div className="mt-1.5 space-y-1.5 rounded-xl bg-[var(--color-surface-high)] px-3 py-2">
         <p className="text-xs text-[var(--color-text-secondary)]">{explanation.why}</p>
         {explanation.representativeQuote && (
           <blockquote className="border-l-2 border-[var(--color-primary)] pl-2 text-xs italic text-[var(--color-text-tertiary)]">
@@ -169,6 +192,17 @@ export default function BehavioralIntelligence({ data, memories, history, maxWee
   const { metrics, aiProfile } = data ?? { metrics: null, aiProfile: null };
   const trend = metrics?.trend;
   const explanations = metrics?.metricExplanations;
+
+  const weekDelta = (() => {
+    if (history.length < 2) return null;
+    const latest = history[history.length - 1];
+    const prev = history[history.length - 2];
+    return {
+      procrastinationFrequency: latest.procrastinationFrequency - prev.procrastinationFrequency,
+      burnoutFrequency: latest.burnoutFrequency - prev.burnoutFrequency,
+      resilienceFrequency: latest.resilienceFrequency - prev.resilienceFrequency,
+    };
+  })();
 
   // Free tier: show a real taste (mindset + top pattern), lock the depth.
   if (!hasAccess) {
@@ -251,21 +285,26 @@ export default function BehavioralIntelligence({ data, memories, history, maxWee
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-tertiary)]">
               Behavioral Signals
             </p>
-            <FreqMeter
-              label="Procrastination"
-              value={metrics.procrastinationFrequency}
-              explanation={explanations?.procrastinationFrequency}
-            />
-            <FreqMeter
-              label="Burnout signals"
-              value={metrics.burnoutFrequency}
-              explanation={explanations?.burnoutFrequency}
-            />
-            <FreqMeter
-              label="Resilience moments"
-              value={metrics.resilienceFrequency}
-              explanation={explanations?.resilienceFrequency}
-            />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <FreqMeter
+                label="Procrastination"
+                value={metrics.procrastinationFrequency}
+                delta={weekDelta?.procrastinationFrequency}
+                explanation={explanations?.procrastinationFrequency}
+              />
+              <FreqMeter
+                label="Burnout signals"
+                value={metrics.burnoutFrequency}
+                delta={weekDelta?.burnoutFrequency}
+                explanation={explanations?.burnoutFrequency}
+              />
+              <FreqMeter
+                label="Resilience moments"
+                value={metrics.resilienceFrequency}
+                delta={weekDelta?.resilienceFrequency}
+                explanation={explanations?.resilienceFrequency}
+              />
+            </div>
           </div>
         </>
       )}

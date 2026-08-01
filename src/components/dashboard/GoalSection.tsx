@@ -10,8 +10,8 @@ interface Props {
 
 const ALIGNMENT_STYLES: Record<string, string> = {
   aligned: "bg-emerald-500/15 text-emerald-400",
-  partially_aligned: "bg-amber-500/15 text-amber-400",
-  needs_adjustment: "bg-red-500/15 text-red-400",
+  partially_aligned: "bg-red-500/15 text-red-400",
+  needs_adjustment: "bg-amber-500/15 text-amber-400",
 };
 
 const ALIGNMENT_LABELS: Record<string, string> = {
@@ -21,12 +21,12 @@ const ALIGNMENT_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Health: "bg-green-500/15 text-green-400",
-  Career: "bg-blue-500/15 text-blue-400",
-  Learning: "bg-purple-500/15 text-purple-400",
-  Mindset: "bg-indigo-500/15 text-indigo-400",
-  Relationships: "bg-pink-500/15 text-pink-400",
-  Personal: "bg-orange-500/15 text-orange-400",
+  Health: "text-green-400",
+  Career: "text-blue-400",
+  Learning: "text-purple-400",
+  Mindset: "text-indigo-400",
+  Relationships: "text-pink-400",
+  Personal: "text-orange-400",
 };
 
 export default function GoalSection({ goals, latestInsight }: Props) {
@@ -71,7 +71,7 @@ export default function GoalSection({ goals, latestInsight }: Props) {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${CATEGORY_COLORS[goal.category] ?? "bg-[var(--color-surface-high)] text-[var(--color-text-secondary)]"}`}
+                    className={`text-[10px] font-semibold uppercase tracking-wide ${CATEGORY_COLORS[goal.category] ?? "text-[var(--color-text-secondary)]"}`}
                   >
                     {goal.category}
                   </span>

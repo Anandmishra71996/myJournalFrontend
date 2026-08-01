@@ -31,8 +31,8 @@ function Heatmap({ activity, days }: { activity: ActivityDay[]; days: number }) 
   const intensity = (count: number) => {
     if (count === 0) return "bg-[var(--color-surface-high)]";
     const r = count / max;
-    if (r < 0.34) return "bg-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)]";
-    if (r < 0.67) return "bg-[color:color-mix(in_srgb,var(--color-primary)_60%,transparent)]";
+    if (r < 0.34) return "bg-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)]";
+    if (r < 0.67) return "bg-[color:color-mix(in_srgb,var(--color-primary)_65%,transparent)]";
     return "bg-[var(--color-primary)]";
   };
 
@@ -41,14 +41,14 @@ function Heatmap({ activity, days }: { activity: ActivityDay[]; days: number }) 
   return (
     <div className="overflow-x-auto">
       <div
-        className="grid gap-1"
+        className="grid gap-1.5"
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: "repeat(7, minmax(0, 1fr))" }}
       >
         {cells.map((cell) => (
           <div
             key={cell.date}
             title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
-            className={`h-3 w-3 rounded-sm transition-colors ${intensity(cell.count)}`}
+            className={`h-2.5 w-2.5 rounded-full transition-colors ${intensity(cell.count)}`}
           />
         ))}
       </div>
@@ -72,40 +72,40 @@ export default function JournalActivity({ activity, stats, days }: Props) {
         </Link>
       </div>
 
-      <div className="rounded-xl bg-[var(--color-surface-low)] p-4 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)] sm:p-5">
-        <div className="mb-3 flex flex-wrap gap-4 text-sm">
-          <span className="text-[var(--color-text-secondary)]">
-            <span className="font-bold text-[var(--color-text-primary)]">{totalEntries}</span> entries
-          </span>
-          <span className="text-[var(--color-text-secondary)]">
-            <span className="font-bold text-[var(--color-text-primary)]">{activeDays}</span> active days
-          </span>
-        </div>
-        <Heatmap activity={activity} days={days} />
-      </div>
-
-      {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {/* By type */}
-          {(["morning", "evening", "anytime"] as const).map((t) => (
-            <div
-              key={t}
-              className="rounded-xl bg-[var(--color-surface-low)] p-3 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)]"
-            >
-              <p className="text-lg font-bold text-[var(--color-text-primary)]">{stats.byType[t]}</p>
-              <p className="text-xs capitalize text-[var(--color-text-tertiary)]">{t}</p>
-            </div>
-          ))}
-
-          {/* Voice notes */}
-          <div className="rounded-xl bg-[var(--color-surface-low)] p-3 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)]">
-            <p className="text-lg font-bold text-[var(--color-text-primary)]">{stats.voiceNoteCount}</p>
-            <p className="text-xs text-[var(--color-text-tertiary)]">
-              voice notes{stats.totalVoiceSeconds > 0 ? ` · ${formatSeconds(stats.totalVoiceSeconds)}` : ""}
-            </p>
+      <div className="rounded-2xl bg-[var(--color-surface-low)] p-4 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)] sm:p-5">
+        <div className="mb-4 flex flex-wrap gap-6">
+          <div>
+            <p className="text-2xl font-extrabold leading-none text-[var(--color-text-primary)]">{totalEntries}</p>
+            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">entries</p>
+          </div>
+          <div>
+            <p className="text-2xl font-extrabold leading-none text-[var(--color-text-primary)]">{activeDays}</p>
+            <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">active days</p>
           </div>
         </div>
-      )}
+
+        <Heatmap activity={activity} days={days} />
+
+        {stats && (
+          <div className="mt-5 grid grid-cols-2 gap-4 border-t border-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)] pt-4 sm:grid-cols-4">
+            {/* By type */}
+            {(["morning", "evening", "anytime"] as const).map((t) => (
+              <div key={t}>
+                <p className="text-lg font-bold text-[var(--color-text-primary)]">{stats.byType[t]}</p>
+                <p className="text-xs capitalize text-[var(--color-text-tertiary)]">{t}</p>
+              </div>
+            ))}
+
+            {/* Voice notes */}
+            <div>
+              <p className="text-lg font-bold text-[var(--color-text-primary)]">{stats.voiceNoteCount}</p>
+              <p className="text-xs text-[var(--color-text-tertiary)]">
+                voice{stats.totalVoiceSeconds > 0 ? ` · ${formatSeconds(stats.totalVoiceSeconds)}` : ""}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {stats && stats.topTags.length > 0 && (
         <div className="rounded-xl bg-[var(--color-surface-low)] p-4 outline outline-1 outline-[color:color-mix(in_srgb,var(--color-outline-variant)_15%,transparent)]">

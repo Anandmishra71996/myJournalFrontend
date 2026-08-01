@@ -639,6 +639,27 @@ export default function GoalsPage() {
     );
   }
 
+  const goalStatTotals = ["weekly", "monthly", "yearly"].reduce(
+    (acc, tier) => {
+      const tierStats = stats?.[tier as keyof GoalStats];
+      acc.active += tierStats?.active || 0;
+      acc.completed += tierStats?.completed || 0;
+      acc.paused += tierStats?.paused || 0;
+      return acc;
+    },
+    { active: 0, completed: 0, paused: 0 }
+  );
+  const goalStatTiles = [
+    {
+      label: "Total Goals",
+      value: goalStatTotals.active + goalStatTotals.completed + goalStatTotals.paused,
+      icon: Target,
+    },
+    { label: "Active", value: goalStatTotals.active, icon: Zap },
+    { label: "Completed", value: goalStatTotals.completed, icon: CheckCircle2 },
+    { label: "Paused", value: goalStatTotals.paused, icon: Circle },
+  ];
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] p-8 text-[var(--color-text-primary)]">
       <div className="max-w-7xl mx-auto">
@@ -684,30 +705,23 @@ export default function GoalsPage() {
               <div className="rounded-2xl bg-[var(--color-goal-chip-surface)] p-3">
                 <Sparkles className="h-8 w-8 text-[var(--color-secondary)]" />
               </div>
-              {/* <div className="flex-1">
-                <h3 className="mb-1 text-xl font-bold text-[var(--color-secondary)]">
-                  AI Goal Architect
-                </h3>
-                <p className="mb-3 text-sm text-[var(--color-text-secondary)] md:text-base">
-                  You currently have {stats?.yearly?.active || 0} active yearly
-                  goals. Generate a realistic breakdown with daily time
-                  commitment and linked weekly checkpoints.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setShowBreakdownModal(true)}
-                    className="rounded-full border border-[var(--color-goal-chip-border)] bg-[var(--color-goal-chip-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-secondary)]/18"
-                  >
-                    Break down goal
-                  </button>
-                  <button
-                    onClick={() => setShowBreakdownModal(true)}
-                    className="rounded-full border border-[var(--color-goal-chip-border)] bg-[var(--color-goal-chip-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--color-secondary)] transition-colors hover:bg-[var(--color-secondary)]/18"
-                  >
-                    Optimize timeline
-                  </button>
-                </div>
-              </div> */}
+              <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-4">
+                {goalStatTiles.map((tile) => (
+                  <div key={tile.label} className="flex items-center gap-3">
+                    <div className="rounded-xl bg-[var(--color-goal-chip-surface)] p-2">
+                      <tile.icon className="h-5 w-5 text-[var(--color-secondary)]" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold leading-tight text-[var(--color-text-primary)]">
+                        {tile.value}
+                      </p>
+                      <p className="text-xs text-[var(--color-text-secondary)]">
+                        {tile.label}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
