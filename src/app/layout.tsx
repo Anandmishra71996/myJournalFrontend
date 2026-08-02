@@ -122,9 +122,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  verification: {
-    google: "google-site-verification-placeholder",
-  },
 };
 
 const jsonLd = {

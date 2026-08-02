@@ -1096,6 +1096,18 @@ export default function Home() {
               Blog
             </Link>
             <Link
+              href="/about"
+              className="transition hover:text-[color:var(--color-primary)]"
+            >
+              About
+            </Link>
+            <Link
+              href="/contact"
+              className="transition hover:text-[color:var(--color-primary)]"
+            >
+              Contact
+            </Link>
+            <Link
               href="/privacy-policy"
               className="transition hover:text-[color:var(--color-primary)]"
             >
@@ -1107,12 +1119,6 @@ export default function Home() {
             >
               Terms
             </Link>
-            <a
-              href="#contact"
-              className="transition hover:text-[color:var(--color-primary)]"
-            >
-              Support
-            </a>
           </div>
         </div>
       </footer>
